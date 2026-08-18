@@ -1,0 +1,539 @@
+/* =========================================================================
+   saso-theme.css  —  CSPC institutional layer over AdminLTE.
+
+   Loaded AFTER adminlte.min.css. Everything here is deliberately restrained:
+   one institutional colour, neutral surfaces, hairline borders, compact
+   tables. The intent is that the prototype reads as a college administrative
+   system, not as an AdminLTE demonstration.
+   ========================================================================= */
+
+:root {
+  --cspc-navy:        #133a63;
+  --cspc-navy-dark:   #0d2a49;
+  --cspc-navy-light:  #1d5089;
+  --cspc-gold:        #d9a441;
+  --cspc-ink:         #1f2933;
+  --cspc-muted:       #64748b;
+  --cspc-surface:     #f4f6f9;
+  --cspc-line:        #e2e8f0;
+}
+
+/* ---- Base --------------------------------------------------------------- */
+
+body,
+.wrapper {
+  background-color: var(--cspc-surface);
+  color: var(--cspc-ink);
+  font-family: "Source Sans 3", "Source Sans Pro", -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 0.9375rem;
+}
+
+h1, h2, h3, h4, h5, h6,
+.page-title,
+.card-title {
+  font-family: "Source Sans 3", "Source Sans Pro", -apple-system, "Segoe UI", Roboto, sans-serif;
+  letter-spacing: -0.01em;
+  color: var(--cspc-ink);
+}
+
+.page-title {
+  font-size: 1.375rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.text-muted { color: var(--cspc-muted) !important; }
+
+a { color: var(--cspc-navy-light); }
+a:hover { color: var(--cspc-navy); }
+
+/* ---- Sidebar ------------------------------------------------------------- */
+
+.main-sidebar,
+.sidebar-dark-primary {
+  background-color: var(--cspc-navy-dark);
+}
+
+.brand-link {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 4px;
+  background: var(--cspc-gold);
+  color: var(--cspc-navy-dark);
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  flex: 0 0 auto;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.brand-text small {
+  font-size: 0.6875rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.62);
+  letter-spacing: 0.02em;
+}
+
+.sidebar .user-panel {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-left: 0.85rem;
+  padding-right: 0.85rem;
+}
+
+.user-avatar {
+  width: 2.125rem;
+  height: 2.125rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-right: 0.625rem;
+  flex: 0 0 auto;
+}
+
+.sidebar .user-panel .info a {
+  color: #fff;
+  font-size: 0.875rem;
+  padding: 0;
+}
+
+.sidebar .user-panel .info small {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.75rem;
+}
+
+.nav-sidebar .nav-link {
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.875rem;
+  padding: 0.55rem 0.85rem;
+}
+
+.nav-sidebar .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.07);
+  color: #fff;
+}
+
+.nav-sidebar .nav-link.active,
+.nav-sidebar .nav-link.active:hover {
+  background-color: var(--cspc-navy-light);
+  color: #fff;
+  box-shadow: inset 3px 0 0 var(--cspc-gold);
+}
+
+.nav-sidebar .nav-icon { width: 1.4rem; }
+
+/* Menu items scheduled for a later phase — visible but plainly not active. */
+.nav-link-pending {
+  display: flex;
+  align-items: center;
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.38);
+  font-size: 0.875rem;
+  padding: 0.55rem 0.85rem;
+  cursor: default;
+}
+
+.nav-link-pending p { margin: 0; display: flex; align-items: center; width: 100%; }
+
+.phase-tag {
+  margin-left: auto;
+  font-size: 0.625rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.32);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 3px;
+  padding: 0.05rem 0.3rem;
+}
+
+/* ---- Navbar --------------------------------------------------------------- */
+
+.main-header.navbar {
+  border-bottom: 1px solid var(--cspc-line);
+  box-shadow: none;
+}
+
+.navbar-context {
+  font-size: 0.8125rem;
+  color: var(--cspc-muted);
+  padding: 0.5rem 0.75rem;
+}
+
+.prototype-flag {
+  display: inline-block;
+  margin: 0.55rem 0.5rem 0 0;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--cspc-gold);
+  border-radius: 3px;
+  color: #8a6217;
+  background: #fdf6e6;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.notif-item { white-space: normal; }
+.notif-item .notif-text { display: block; font-size: 0.8125rem; padding-right: 0.5rem; }
+.notif-unread { background-color: #f2f7fd; font-weight: 600; }
+
+/* ---- Cards ---------------------------------------------------------------- */
+
+.card {
+  border: 1px solid var(--cspc-line);
+  border-radius: 5px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+.card-header {
+  border-bottom: 1px solid var(--cspc-line);
+  background: #fff;
+  padding: 0.75rem 1.15rem;
+}
+
+.card-header .card-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.card-tools .card-subtitle {
+  font-size: 0.8125rem;
+  color: var(--cspc-muted);
+}
+
+/* ---- Summary tiles --------------------------------------------------------
+   AdminLTE's small-box is loud by default. This variant is a quiet white
+   tile with a coloured rule, which suits an administrative office better.
+   --------------------------------------------------------------------------- */
+
+.stat-tile {
+  display: block;
+  background: #fff;
+  border: 1px solid var(--cspc-line);
+  border-left: 3px solid var(--cspc-navy);
+  border-radius: 5px;
+  padding: 0.9rem 1rem;
+  margin-bottom: 1rem;
+  text-decoration: none;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.stat-tile:hover {
+  box-shadow: 0 3px 10px rgba(16, 24, 40, 0.08);
+  transform: translateY(-1px);
+  text-decoration: none;
+}
+
+.stat-tile .stat-value {
+  display: block;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--cspc-ink);
+}
+
+.stat-tile .stat-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--cspc-muted);
+  margin-top: 0.25rem;
+}
+
+.stat-tile .stat-icon {
+  float: right;
+  font-size: 1.25rem;
+  color: var(--cspc-line);
+}
+
+.stat-tile.is-attention  { border-left-color: var(--cspc-gold); }
+.stat-tile.is-overdue    { border-left-color: #c0392b; }
+.stat-tile.is-complete   { border-left-color: #2f855a; }
+.stat-tile.is-overdue .stat-value { color: #c0392b; }
+
+/* ---- Urgent actions ------------------------------------------------------- */
+
+.urgent-panel {
+  background: #fff;
+  border: 1px solid var(--cspc-line);
+  border-top: 3px solid var(--cspc-gold);
+  border-radius: 5px;
+  margin-bottom: 1rem;
+}
+
+.urgent-panel .urgent-head {
+  padding: 0.7rem 1.15rem;
+  border-bottom: 1px solid var(--cspc-line);
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.urgent-list { display: flex; flex-wrap: wrap; margin: 0; padding: 0; list-style: none; }
+
+.urgent-list li {
+  flex: 1 1 200px;
+  padding: 0.85rem 1.15rem;
+  border-right: 1px solid var(--cspc-line);
+}
+
+.urgent-list li:last-child { border-right: 0; }
+
+.urgent-list .urgent-count {
+  font-size: 1.375rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.urgent-list .urgent-label {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--cspc-muted);
+  margin-top: 0.2rem;
+}
+
+.urgent-list .is-critical .urgent-count { color: #c0392b; }
+.urgent-list .is-warning .urgent-count { color: #b7791f; }
+.urgent-list .is-clear .urgent-count { color: #2f855a; }
+
+/* ---- Tables ---------------------------------------------------------------- */
+
+.table {
+  font-size: 0.875rem;
+  margin-bottom: 0;
+}
+
+.table thead th {
+  border-bottom: 1px solid var(--cspc-line);
+  border-top: 0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cspc-muted);
+  padding: 0.6rem 0.75rem;
+  white-space: nowrap;
+}
+
+.table tbody td {
+  padding: 0.65rem 0.75rem;
+  vertical-align: middle;
+  border-top: 1px solid var(--cspc-line);
+}
+
+.table-hover tbody tr:hover { background-color: #f8fafc; }
+
+.table .row-stale { box-shadow: inset 3px 0 0 var(--cspc-gold); }
+.table .row-overdue { box-shadow: inset 3px 0 0 #c0392b; }
+
+.cell-primary { font-weight: 600; }
+.cell-sub { display: block; font-size: 0.75rem; color: var(--cspc-muted); }
+
+/* ---- Badges ---------------------------------------------------------------- */
+
+.status-badge {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 0.3em 0.6em;
+  border-radius: 3px;
+}
+
+.badge-secondary { background-color: #e2e8f0; color: #475569; }
+.badge-info      { background-color: #dbeafe; color: #1e40af; }
+.badge-primary   { background-color: var(--cspc-navy); color: #fff; }
+.badge-warning   { background-color: #fdf0d5; color: #8a5a00; }
+.badge-danger    { background-color: #fde0dd; color: #a52a1a; }
+.badge-success   { background-color: #d8f3e3; color: #22633f; }
+
+/* ---- Requirement progress --------------------------------------------------- */
+
+.req-progress { display: flex; align-items: center; gap: 0.5rem; min-width: 100px; }
+.req-progress .progress { height: 6px; flex: 1 1 auto; margin: 0; background: #edf2f7; }
+.req-progress .progress-bar { background-color: var(--cspc-navy-light); }
+.req-progress.is-complete .progress-bar { background-color: #2f855a; }
+.req-progress .req-count { font-size: 0.75rem; color: var(--cspc-muted); white-space: nowrap; }
+
+/* ---- Timeline ----------------------------------------------------------------- */
+
+.timeline::before { background: var(--cspc-line); }
+.timeline > div > .timeline-item {
+  border: 1px solid var(--cspc-line);
+  box-shadow: none;
+  border-radius: 4px;
+}
+.timeline > div > .timeline-item > .timeline-header { border-bottom: 1px solid var(--cspc-line); font-size: 0.875rem; }
+.timeline > div > .timeline-item > .timeline-body { font-size: 0.8125rem; }
+
+/* ---- Buttons -------------------------------------------------------------------- */
+
+.btn { font-size: 0.875rem; border-radius: 4px; }
+.btn-primary { background-color: var(--cspc-navy); border-color: var(--cspc-navy); }
+.btn-primary:hover, .btn-primary:focus { background-color: var(--cspc-navy-dark); border-color: var(--cspc-navy-dark); }
+.btn-outline-primary { color: var(--cspc-navy); border-color: var(--cspc-navy); }
+.btn-outline-primary:hover { background-color: var(--cspc-navy); border-color: var(--cspc-navy); }
+
+:focus-visible { outline: 2px solid var(--cspc-gold); outline-offset: 2px; }
+
+/* ---- Empty states ---------------------------------------------------------------- */
+
+.empty-state { text-align: center; padding: 2.5rem 1rem; }
+.empty-state i { font-size: 2rem; color: #cbd5e1; margin-bottom: 0.75rem; }
+.empty-state h6 { font-weight: 600; margin-bottom: 0.25rem; }
+.empty-state p { color: var(--cspc-muted); font-size: 0.875rem; margin-bottom: 1rem; }
+
+/* ---- Toasts ------------------------------------------------------------------------ */
+
+.saso-toast-host {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.saso-toast {
+  background: #fff;
+  border: 1px solid var(--cspc-line);
+  border-left: 3px solid #2f855a;
+  border-radius: 4px;
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.12);
+  padding: 0.7rem 1rem;
+  font-size: 0.875rem;
+  max-width: 22rem;
+  animation: sasoToastIn 0.18s ease-out;
+}
+
+.saso-toast-warning { border-left-color: var(--cspc-gold); }
+.saso-toast-danger  { border-left-color: #c0392b; }
+.saso-toast.is-leaving { opacity: 0; transition: opacity 0.35s ease; }
+
+@keyframes sasoToastIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---- Login ---------------------------------------------------------------------------- */
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #f4f6f9 0%, #e8edf3 100%);
+  padding: 1.5rem;
+}
+
+.login-shell {
+  width: 100%;
+  max-width: 26rem;
+}
+
+.login-brand { text-align: center; margin-bottom: 1.25rem; }
+
+.login-brand .login-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 6px;
+  background: var(--cspc-navy);
+  color: var(--cspc-gold);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.65rem;
+}
+
+.login-brand h1 { font-size: 1.125rem; font-weight: 700; margin: 0; }
+.login-brand p { font-size: 0.8125rem; color: var(--cspc-muted); margin: 0.2rem 0 0; }
+
+.login-card {
+  background: #fff;
+  border: 1px solid var(--cspc-line);
+  border-top: 3px solid var(--cspc-navy);
+  border-radius: 6px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(16, 24, 40, 0.05);
+}
+
+.login-card label { font-size: 0.8125rem; font-weight: 600; }
+
+.login-accounts {
+  margin-top: 1rem;
+  border-top: 1px dashed var(--cspc-line);
+  padding-top: 0.9rem;
+}
+
+.login-accounts h6 {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cspc-muted);
+}
+
+.account-chip {
+  display: inline-block;
+  border: 1px solid var(--cspc-line);
+  border-radius: 4px;
+  background: #f8fafc;
+  padding: 0.25rem 0.55rem;
+  margin: 0.2rem 0.25rem 0 0;
+  font-size: 0.75rem;
+  color: var(--cspc-ink);
+  cursor: pointer;
+}
+
+.account-chip:hover { border-color: var(--cspc-navy-light); background: #eef4fb; }
+.account-chip code { color: var(--cspc-navy); background: none; padding: 0; }
+
+.login-note {
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  color: var(--cspc-muted);
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* ---- Print ---------------------------------------------------------------------------- */
+
+@media print {
+  .main-sidebar, .main-header, .content-header, .no-print, .saso-toast-host { display: none !important; }
+  .content-wrapper { margin-left: 0 !important; background: #fff !important; }
+  .card { border: 0; box-shadow: none; }
+}
+
+/* ---- Motion preference ------------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}

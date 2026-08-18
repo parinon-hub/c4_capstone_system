@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Module in progress — CSPC SASO</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/css/adminlte.min.css">
+  <link rel="stylesheet" href="../assets/css/saso-theme.css">
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+
+<div class="wrapper" id="appWrapper">
+  <div class="content-wrapper">
+    <div id="pageHeader"></div>
+
+    <section class="content">
+      <div class="container-fluid">
+        <div class="card">
+          <div class="card-body">
+            <div class="empty-state">
+              <i class="fa-solid fa-screwdriver-wrench"></i>
+              <h6 id="moduleName">Module in progress</h6>
+              <p id="modulePhase" class="mb-3"></p>
+              <a href="#" id="btnBack" class="btn btn-primary btn-sm">Back to dashboard</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer class="main-footer text-sm">
+    <strong>CSPC SASO Student Organization Activity Monitoring</strong> — front-end prototype.
+    <span class="float-right text-muted">Simulated data. Not an operational system.</span>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/js/adminlte.min.js"></script>
+
+<script>window.SASO_BASE = '../';</script>
+<script src="../assets/js/core/config.js"></script>
+<script src="../data/seed.js"></script>
+<script src="../assets/js/core/storage.js"></script>
+<script src="../assets/js/core/model.js"></script>
+<script src="../assets/js/core/events.js"></script>
+<script src="../assets/js/core/auth.js"></script>
+<script src="../assets/js/core/layout.js"></script>
+<script>
+(function () {
+  'use strict';
+  var params = new URLSearchParams(window.location.search);
+  var moduleName = params.get('m') || 'This module';
+  var phase = params.get('p') || '3';
+
+  var session = SASO.layout.init({
+    page: null,
+    title: moduleName,
+    breadcrumb: [{ label: moduleName }]
+  });
+  if (!session) { return; }
+
+  document.getElementById('moduleName').textContent = moduleName + ' is not built yet';
+  document.getElementById('modulePhase').textContent =
+    'This module is scheduled for phase ' + phase + ' of the development plan. ' +
+    'The dashboard, simulated login and data foundation it depends on are already in place.';
+  document.getElementById('btnBack').href = SASO.auth.homeFor(session, '../');
+})();
+</script>
+</body>
+</html>

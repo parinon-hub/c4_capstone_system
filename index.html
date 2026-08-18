@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in — CSPC SASO Activity Monitoring</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/css/adminlte.min.css">
+  <link rel="stylesheet" href="assets/css/saso-theme.css">
+</head>
+<body class="login-page">
+
+  <main class="login-shell">
+
+    <div class="login-brand">
+      <span class="login-mark">CSPC</span>
+      <h1>Student Organization Activity Monitoring</h1>
+      <p>Student Affairs and Services Office</p>
+    </div>
+
+    <div class="login-card">
+      <div id="loginError" class="alert alert-danger py-2 px-3 d-none" role="alert"></div>
+
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" class="form-control" id="username" autocomplete="off" placeholder="e.g. admin">
+        <div class="invalid-feedback" id="usernameError">Enter your username.</div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" class="form-control" id="password" autocomplete="off" placeholder="Enter your password">
+        <div class="invalid-feedback" id="passwordError">Enter your password.</div>
+      </div>
+
+      <button type="button" class="btn btn-primary btn-block" id="btnSignIn">Sign in</button>
+
+      <div class="login-accounts">
+        <h6>Demonstration accounts — click to fill</h6>
+        <div id="accountChips"></div>
+      </div>
+    </div>
+
+    <p class="login-note">
+      Prototype authentication. Accounts and passwords are stored in the browser
+      for demonstration only — no real security is implemented.
+    </p>
+
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/js/adminlte.min.js"></script>
+
+  <script>window.SASO_BASE = './';</script>
+  <script src="assets/js/core/config.js"></script>
+  <script src="data/seed.js"></script>
+  <script src="assets/js/core/storage.js"></script>
+  <script src="assets/js/core/model.js"></script>
+  <script src="assets/js/core/events.js"></script>
+  <script src="assets/js/core/auth.js"></script>
+  <script src="assets/js/pages/login.js"></script>
+</body>
+</html>

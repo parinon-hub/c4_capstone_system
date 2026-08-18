@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard — SASO Activity Monitoring</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/css/adminlte.min.css">
+  <link rel="stylesheet" href="../../assets/css/saso-theme.css">
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+
+<div class="wrapper" id="appWrapper">
+  <!-- navbar and sidebar are injected here by layout.js -->
+
+  <div class="content-wrapper">
+    <div id="pageHeader"></div>
+
+    <section class="content">
+      <div class="container-fluid">
+
+        <!-- Urgent actions -->
+        <div id="urgentPanel"></div>
+
+        <!-- Summary tiles -->
+        <div class="row" id="statTiles"></div>
+
+        <div class="row">
+          <div class="col-lg-5">
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">Activities by stage</h3></div>
+              <div class="card-body">
+                <canvas id="stageChart" height="220"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-7">
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">Activities per organization</h3></div>
+              <div class="card-body">
+                <canvas id="orgChart" height="220"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-lg-7">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Terminal reports pending</h3>
+                <div class="card-tools">
+                  <span class="card-subtitle">Finished activities that are not yet completed</span>
+                </div>
+              </div>
+              <div class="card-body p-0" id="nonComplianceTable"></div>
+            </div>
+          </div>
+
+          <div class="col-lg-5">
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">Recent activity</h3></div>
+              <div class="card-body" id="recentFeed"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </div>
+
+  <footer class="main-footer text-sm">
+    <strong>CSPC SASO Student Organization Activity Monitoring</strong> — front-end prototype.
+    <span class="float-right text-muted">Simulated data. Not an operational system.</span>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/js/adminlte.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+
+<script>window.SASO_BASE = '../../';</script>
+<script src="../../assets/js/core/config.js"></script>
+<script src="../../data/seed.js"></script>
+<script src="../../assets/js/core/storage.js"></script>
+<script src="../../assets/js/core/model.js"></script>
+<script src="../../assets/js/core/events.js"></script>
+<script src="../../assets/js/core/auth.js"></script>
+<script src="../../assets/js/core/layout.js"></script>
+<script src="../../assets/js/pages/saso-dashboard.js"></script>
+</body>
+</html>
