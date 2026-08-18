@@ -1,10 +1,5 @@
 /* =========================================================================
    saso-theme.css  —  CSPC institutional layer over AdminLTE.
-
-   Loaded AFTER adminlte.min.css. Everything here is deliberately restrained:
-   one institutional colour, neutral surfaces, hairline borders, compact
-   tables. The intent is that the prototype reads as a college administrative
-   system, not as an AdminLTE demonstration.
    ========================================================================= */
 
 :root {
