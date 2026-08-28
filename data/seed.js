@@ -39,17 +39,45 @@ SASO.buildSeed = function () {
   }
 
   /* ---- Organizations --------------------------------------------------- */
+  /* ---- Organizations -----------------------------------------------------
+     DATA PROVENANCE. Organization names, acronyms and accreditation levels
+     are taken from the list of recognized and accredited student
+     organizations published by CSPC for academic year 2025-2026. Everything
+     else in this file — advisers, officers, activities, requirements,
+     comments, terminal reports and compliance records — is fictional and
+     created for demonstration only. No real person is named anywhere in this
+     prototype, and no real organization's compliance record is represented.
+     -------------------------------------------------------------------------- */
   var organizations = [
-    { id: 'org-1', name: 'Junior Philippine Computer Society – CSPC Chapter', acronym: 'JPCS',
-      college: 'College of Computer Studies', adviser: 'Prof. R. Almeda', status: 'Active' },
+    { id: 'org-1', name: 'Junior Philippine Computer Society – CSPC Chapter', acronym: 'JPCS – CSPC',
+      college: 'College of Computer Studies', adviser: 'Prof. R. Almeda', status: 'Active',
+      accreditationLevel: C.ACCREDITATION_LEVEL.LEVEL_II,
+      accreditationType: C.ACCREDITATION_TYPE.RE_ACCREDITED,
+      accreditationAY: '2025-2026', accreditationExpires: dateOnly(175) },
+
     { id: 'org-2', name: 'College of Computer Studies – Student Council', acronym: 'CCS-SC',
-      college: 'College of Computer Studies', adviser: 'Prof. M. Bernales', status: 'Active' },
+      college: 'College of Computer Studies', adviser: 'Prof. M. Bernales', status: 'Active',
+      accreditationLevel: C.ACCREDITATION_LEVEL.LEVEL_II,
+      accreditationType: C.ACCREDITATION_TYPE.RE_ACCREDITED,
+      accreditationAY: '2025-2026', accreditationExpires: dateOnly(160) },
+
     { id: 'org-3', name: 'College of Health Sciences – Student Council', acronym: 'CHS-SC',
-      college: 'College of Health Sciences', adviser: 'Dr. L. Sarmiento', status: 'Active' },
-    { id: 'org-4', name: 'CSPC – Supreme Student Council', acronym: 'SSC',
-      college: 'Institution-wide', adviser: 'Prof. J. Ocampo', status: 'Active' },
-    { id: 'org-5', name: 'College of Arts and Sciences – Student Council', acronym: 'CAS-SC',
-      college: 'College of Arts and Sciences', adviser: 'Prof. D. Villanueva', status: 'Active' }
+      college: 'College of Health Sciences', adviser: 'Dr. L. Sarmiento', status: 'Active',
+      accreditationLevel: C.ACCREDITATION_LEVEL.LEVEL_III,
+      accreditationType: C.ACCREDITATION_TYPE.ACCREDITED,
+      accreditationAY: '2025-2026', accreditationExpires: dateOnly(25) },
+
+    { id: 'org-4', name: 'CSPC – Supreme Student Council', acronym: 'CSPC-SSC',
+      college: 'Institution-wide', adviser: 'Prof. J. Ocampo', status: 'Active',
+      accreditationLevel: C.ACCREDITATION_LEVEL.RECOGNIZED,
+      accreditationType: C.ACCREDITATION_TYPE.NOT_APPLICABLE,
+      accreditationAY: '2025-2026', accreditationExpires: dateOnly(185) },
+
+    { id: 'org-5', name: 'College of Arts and Sciences – College Student Council', acronym: 'CAS-CSC',
+      college: 'College of Arts and Sciences', adviser: 'Prof. D. Villanueva', status: 'Active',
+      accreditationLevel: C.ACCREDITATION_LEVEL.LEVEL_I,
+      accreditationType: C.ACCREDITATION_TYPE.RE_ACCREDITED,
+      accreditationAY: '2025-2026', accreditationExpires: dateOnly(320) }
   ];
 
   /* ---- Users (prototype accounts, no real authentication) --------------- */
@@ -58,6 +86,10 @@ SASO.buildSeed = function () {
       position: 'Head, Student Affairs and Services Office', role: C.ROLE.SASO, organizationId: null },
     { id: 'usr-2', username: 'aide', password: 'aide123', name: 'Carlo Bermudo',
       position: 'Administrative Aide, SASO', role: C.ROLE.SASO, organizationId: null },
+    { id: 'usr-8', username: 'coord', password: 'coord123', name: 'Gerald Peñaflor',
+      position: 'Student Activities Coordinator, SASO', role: C.ROLE.SASO, organizationId: null },
+    { id: 'usr-9', username: 'records', password: 'records123', name: 'Anna Liza Cordial',
+      position: 'Records Officer, SASO', role: C.ROLE.SASO, organizationId: null },
     { id: 'usr-3', username: 'jpcs', password: 'jpcs123', name: 'Kyla Mercado',
       position: 'President, JPCS', role: C.ROLE.ORG, organizationId: 'org-1' },
     { id: 'usr-4', username: 'ccs', password: 'ccs123', name: 'Neil Ramos',

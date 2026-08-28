@@ -62,9 +62,30 @@ SASO.config = (function () {
     UNDER_APPROVAL: 'UNDER_APPROVAL',
     APPROVED: 'APPROVED',
     ONGOING: 'ONGOING',
+    POSTPONED: 'POSTPONED',
     AWAITING_TERMINAL_REPORT: 'AWAITING_TERMINAL_REPORT',
     COMPLETED: 'COMPLETED',
     CLOSED: 'CLOSED'
+  };
+
+  /* ---- F. Organization accreditation -------------------------------------
+     CSPC publishes a ladder, not a flag: organizations are Recognized, then
+     accredited at Levels I through IV, and each level distinguishes a newly
+     Accredited organization from one that has been Re-Accredited. The
+     re-accreditation is the renewal the panel asked us to surface.
+     -------------------------------------------------------------------------- */
+  var ACCREDITATION_LEVEL = {
+    RECOGNIZED: 'RECOGNIZED',
+    LEVEL_I: 'LEVEL_I',
+    LEVEL_II: 'LEVEL_II',
+    LEVEL_III: 'LEVEL_III',
+    LEVEL_IV: 'LEVEL_IV'
+  };
+
+  var ACCREDITATION_TYPE = {
+    NOT_APPLICABLE: 'NOT_APPLICABLE',   /* Recognized only — not yet accredited */
+    ACCREDITED: 'NEW_ACCREDITED',
+    RE_ACCREDITED: 'RE_ACCREDITED'
   };
 
   /* ---- Human labels ----------------------------------------------------- */
@@ -92,6 +113,15 @@ SASO.config = (function () {
     REQUIRED: 'Terminal Report Required',
     OVERDUE: 'Terminal Report Overdue',
     ACCEPTED: 'Accepted',
+    // accreditation level
+    RECOGNIZED: 'Recognized',
+    LEVEL_I: 'Level I',
+    LEVEL_II: 'Level II',
+    LEVEL_III: 'Level III',
+    LEVEL_IV: 'Level IV',
+    // accreditation type
+    NEW_ACCREDITED: 'Accredited',
+    RE_ACCREDITED: 'Re-Accredited',
     // stage
     UNDER_APPROVAL: 'Under Approval',
     AWAITING_TERMINAL_REPORT: 'Awaiting Terminal Report',
@@ -127,6 +157,14 @@ SASO.config = (function () {
     REQUIRED: 'warning',
     OVERDUE: 'danger',
     ACCEPTED: 'success',
+
+    RECOGNIZED: 'secondary',
+    LEVEL_I: 'info',
+    LEVEL_II: 'info',
+    LEVEL_III: 'primary',
+    LEVEL_IV: 'success',
+    NEW_ACCREDITED: 'info',
+    RE_ACCREDITED: 'success',
 
     UNDER_APPROVAL: 'info',
     AWAITING_TERMINAL_REPORT: 'warning',
@@ -216,6 +254,8 @@ SASO.config = (function () {
     EVENT: EVENT,
     TERMINAL: TERMINAL,
     STAGE: STAGE,
+    ACCREDITATION_LEVEL: ACCREDITATION_LEVEL,
+    ACCREDITATION_TYPE: ACCREDITATION_TYPE,
     LABEL: LABEL,
     BADGE: BADGE,
     NOTIF: NOTIF,

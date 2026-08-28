@@ -32,6 +32,9 @@
         '<div class="cell-primary">' + M.escapeHtml(org.name) + '</div>' +
         '<span class="cell-sub">Adviser: ' + M.escapeHtml(org.adviser) +
           ' · Signed in as ' + M.escapeHtml(session.position) + '</span>' +
+        '<div class="mt-1">' + M.accreditationBadge(org) +
+          '<span class="cell-sub d-inline ml-2">AY ' + M.escapeHtml(org.accreditationAY) +
+          ' · valid until ' + M.formatDate(org.accreditationExpires) + '</span></div>' +
       '</div>' +
     '</div>';
 
@@ -41,21 +44,21 @@
     var s = M.orgStats(org.id);
 
     var tiles = [
-      { value: s.active,            label: 'Active Activities',   icon: 'fa-calendar-check' },
-      { value: s.pendingProposals,  label: 'Pending Proposals',   icon: 'fa-file-pen' },
-      { value: s.approved,          label: 'Approved',            icon: 'fa-stamp' },
-      { value: s.requirementsNeeded,label: 'Requirements Needed', icon: 'fa-list-check', mod: s.requirementsNeeded ? 'is-attention' : '' },
-      { value: s.terminalPending,   label: 'Terminal Reports Pending', icon: 'fa-hourglass-half', mod: s.terminalPending ? 'is-overdue' : '' },
-      { value: s.completed,         label: 'Completed',           icon: 'fa-circle-check', mod: 'is-complete' }
+      { value: s.active,            label: 'Active Activities',   icon: 'fa-calendar-check', href: 'pages/org/activities.html' },
+      { value: s.pendingProposals,  label: 'Pending Proposals',   icon: 'fa-file-pen', href: 'pages/org/activities.html' },
+      { value: s.postponed,         label: 'Postponed',           icon: 'fa-calendar-xmark', href: 'pages/org/activities.html', mod: s.postponed ? 'is-attention' : '' },
+      { value: s.requirementsNeeded,label: 'Requirements Needed', icon: 'fa-list-check', href: 'pages/org/requirements.html', mod: s.requirementsNeeded ? 'is-attention' : '' },
+      { value: s.terminalPending,   label: 'Terminal Reports Pending', icon: 'fa-hourglass-half', href: 'pages/org/terminal-reports.html', mod: s.terminalPending ? 'is-overdue' : '' },
+      { value: s.completed,         label: 'Completed',           icon: 'fa-circle-check', href: 'pages/org/activities.html', mod: 'is-complete' }
     ];
 
     document.getElementById('statTiles').innerHTML = tiles.map(function (t) {
       return '<div class="col-6 col-md-4 col-xl-2">' +
-        '<div class="stat-tile ' + (t.mod || '') + '">' +
+        '<a class="stat-tile ' + (t.mod || '') + '" href="' + SASO.layout.href(t.href, t.label) + '">' +
           '<i class="fa-solid ' + t.icon + ' stat-icon"></i>' +
           '<span class="stat-value">' + t.value + '</span>' +
           '<span class="stat-label">' + t.label + '</span>' +
-        '</div></div>';
+        '</a></div>';
     }).join('');
   }
 

@@ -56,6 +56,7 @@
       { value: s.forReview,       label: 'For Review',          icon: 'fa-magnifying-glass',  href: 'pages/saso/proposals.html', mod: s.forReview ? 'is-attention' : '' },
       { value: s.approved,        label: 'Approved Activities', icon: 'fa-stamp',             href: 'pages/saso/activities.html' },
       { value: s.ongoing,         label: 'Ongoing',             icon: 'fa-play',              href: 'pages/saso/activities.html' },
+      { value: s.postponed,       label: 'Postponed',           icon: 'fa-calendar-xmark',    href: 'pages/saso/activities.html', mod: s.postponed ? 'is-attention' : '' },
       { value: s.finished,        label: 'Finished Events',     icon: 'fa-flag-checkered',    href: 'pages/saso/activities.html' },
       { value: s.terminalPending, label: 'Terminal Reports Pending', icon: 'fa-hourglass-half', href: 'pages/saso/terminal-reports.html', mod: s.terminalPending ? 'is-overdue' : '' },
       { value: s.completed,       label: 'Completed',           icon: 'fa-circle-check',      href: 'pages/saso/activities.html', mod: 'is-complete' }
@@ -78,6 +79,7 @@
     UNDER_APPROVAL: '#60a5fa',
     APPROVED: '#1d5089',
     ONGOING: '#38bdf8',
+    POSTPONED: '#b7791f',
     AWAITING_TERMINAL_REPORT: '#d9a441',
     COMPLETED: '#2f855a',
     CLOSED: '#94a3b8'
@@ -253,7 +255,38 @@
 
   /* ---- go ------------------------------------------------------------------------ */
 
+  /* RSC: SASO must see at a glance which organizations are accredited and
+     which have renewed. Levels and the new/re-accredited distinction are
+     CSPC's own vocabulary, taken from the published roster. */
+  function renderAccreditation() {
+    var a = M.accreditationSummary();
+    var orgs = M.db().organizations;
+
+    var chips = orgs.map(function (o) {
+      return '<span class="mr-1 mb-1 d-inline-block">' + M.accreditationBadge(o) +
+        ' <span class="cell-sub d-inline">' + M.escapeHtml(o.acronym) + '</span></span>';
+    }).join('');
+
+    document.getElementById('accreditationStrip').innerHTML =
+      '<div class="card mb-3"><div class="card-body py-2">' +
+        '<div class="d-flex flex-wrap align-items-center">' +
+          '<span class="text-muted mr-3 text-sm">Accreditation</span>' +
+          '<span class="mr-3 text-sm"><strong>' + a.accredited + '</strong> of ' + a.total +
+            ' accredited</span>' +
+          '<span class="mr-3 text-sm"><strong>' + a.reAccredited + '</strong> re-accredited</span>' +
+          '<span class="mr-3 text-sm"><strong>' + a.recognizedOnly + '</strong> recognized only</span>' +
+          (a.dueSoon.length
+            ? '<span class="ml-auto text-sm"><i class="fa-solid fa-clock text-warning mr-1"></i>' +
+              a.dueSoon.map(function (o) { return M.escapeHtml(o.acronym); }).join(', ') +
+              ' due within 60 days</span>'
+            : '') +
+        '</div>' +
+        '<div class="mt-2">' + chips + '</div>' +
+      '</div></div>';
+  }
+
   renderUrgent();
+  renderAccreditation();
   renderTiles();
   renderStageChart();
   renderOrgChart();

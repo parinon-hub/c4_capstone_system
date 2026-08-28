@@ -27,6 +27,64 @@ SASO.model = (function () {
     return o ? o.acronym : '—';
   }
 
+  /* ---- accreditation -----------------------------------------------------
+     RSC: SASO must be able to see which organizations are accredited and
+     which have renewed. CSPC records this as a level plus a new/re-accredited
+     distinction, so both are read together for display.
+     -------------------------------------------------------------------------- */
+
+  function accreditationLabel(org) {
+    if (!org) { return '—'; }
+    if (org.accreditationLevel === C.ACCREDITATION_LEVEL.RECOGNIZED) {
+      return C.LABEL.RECOGNIZED;
+    }
+    return C.LABEL[org.accreditationLevel] + ' ' + C.LABEL[org.accreditationType];
+  }
+
+  function accreditationBadge(org) {
+    if (!org) { return ''; }
+    return badge(org.accreditationLevel, accreditationLabel(org));
+  }
+
+  function isAccredited(org) {
+    return !!org && org.accreditationLevel !== C.ACCREDITATION_LEVEL.RECOGNIZED;
+  }
+
+  function hasRenewed(org) {
+    return !!org && org.accreditationType === C.ACCREDITATION_TYPE.RE_ACCREDITED;
+  }
+
+  function accreditationDaysLeft(org) {
+    if (!org || !org.accreditationExpires) { return null; }
+    return daysBetween(new Date(), org.accreditationExpires);
+  }
+
+  function organizationsByLevel(level) {
+    return db().organizations.filter(function (o) {
+      return o.accreditationLevel === level;
+    });
+  }
+
+  /* Counts for the SASO dashboard strip. */
+  function accreditationSummary() {
+    var orgs = db().organizations;
+    var byLevel = {};
+    Object.keys(C.ACCREDITATION_LEVEL).forEach(function (k) { byLevel[k] = 0; });
+    orgs.forEach(function (o) { byLevel[o.accreditationLevel] += 1; });
+
+    return {
+      total: orgs.length,
+      byLevel: byLevel,
+      accredited: orgs.filter(isAccredited).length,
+      recognizedOnly: orgs.filter(function (o) { return !isAccredited(o); }).length,
+      reAccredited: orgs.filter(hasRenewed).length,
+      dueSoon: orgs.filter(function (o) {
+        var left = accreditationDaysLeft(o);
+        return left !== null && left <= 60;
+      })
+    };
+  }
+
   function activityById(id) {
     return db().activities.filter(function (a) { return a.id === id; })[0] || null;
   }
@@ -115,6 +173,13 @@ SASO.model = (function () {
     if (activity.eventStatus === C.EVENT.ONGOING) {
       return C.STAGE.ONGOING;
     }
+    if (activity.eventStatus === C.EVENT.POSTPONED) {
+      /* BR-14 — approval and requirements are retained; only the date moved.
+         Surfaced as its own stage so a postponed activity is never mistaken
+         for one that is simply waiting to happen. Chapter 1 names Postponed
+         as a monitored status, so it must remain visible. */
+      return C.STAGE.POSTPONED;
+    }
     return C.STAGE.APPROVED;
   }
 
@@ -178,6 +243,7 @@ SASO.model = (function () {
       }).length,
       approved: stages.APPROVED,
       ongoing: stages.ONGOING,
+      postponed: stages.POSTPONED,
       finished: acts.filter(function (a) {
         return a.eventStatus === C.EVENT.FINISHED;
       }).length,
@@ -193,6 +259,7 @@ SASO.model = (function () {
 
     return {
       active: stages.APPROVED + stages.ONGOING,
+      postponed: stages.POSTPONED,
       pendingProposals: acts.filter(function (a) {
         return a.proposalStatus === C.PROPOSAL.SUBMITTED ||
                a.proposalStatus === C.PROPOSAL.FOR_REVIEW;
@@ -359,6 +426,13 @@ SASO.model = (function () {
     db: db,
     orgById: orgById,
     orgAcronym: orgAcronym,
+    accreditationLabel: accreditationLabel,
+    accreditationBadge: accreditationBadge,
+    accreditationDaysLeft: accreditationDaysLeft,
+    accreditationSummary: accreditationSummary,
+    isAccredited: isAccredited,
+    hasRenewed: hasRenewed,
+    organizationsByLevel: organizationsByLevel,
     activityById: activityById,
     activitiesFor: activitiesFor,
     allActivities: allActivities,

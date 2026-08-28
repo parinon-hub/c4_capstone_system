@@ -18,29 +18,26 @@ SASO.layout = (function () {
 
   /* ---- menu definitions -------------------------------------------------- */
 
-  /* `built: false` marks a page scheduled for a later phase. It renders as a
-     disabled item rather than a dead link, so nothing in the navigation is a
-     button that does nothing. Flip the flag as each phase lands. */
   var MENUS = {
     SASO: [
-      { key: 'dashboard',    label: 'Dashboard',          icon: 'fa-gauge-high',        href: 'pages/saso/dashboard.html', built: true },
-      { key: 'organizations',label: 'Organizations',      icon: 'fa-people-group',      href: 'pages/saso/organizations.html', phase: 6 },
-      { key: 'proposals',    label: 'Activity Proposals', icon: 'fa-file-circle-plus',  href: 'pages/saso/proposals.html',  badge: 'proposals', phase: 6 },
-      { key: 'activities',   label: 'Activities',         icon: 'fa-calendar-check',    href: 'pages/saso/activities.html', phase: 6 },
-      { key: 'requirements', label: 'Requirements',       icon: 'fa-list-check',        href: 'pages/saso/requirements.html', badge: 'requirements', phase: 5 },
-      { key: 'terminal',     label: 'Terminal Reports',   icon: 'fa-file-circle-check', href: 'pages/saso/terminal-reports.html', badge: 'terminal', phase: 9 },
-      { key: 'reports',      label: 'Reports',            icon: 'fa-chart-column',      href: 'pages/saso/reports.html', phase: 10 },
-      { key: 'notifications',label: 'Notifications',      icon: 'fa-bell',              href: 'pages/saso/notifications.html', badge: 'notifications', phase: 7 },
-      { key: 'settings',     label: 'Settings',           icon: 'fa-gear',              href: 'pages/saso/settings.html', phase: 13 }
+      { key: 'dashboard',    label: 'Dashboard',          icon: 'fa-gauge-high',        href: 'pages/saso/dashboard.html' },
+      { key: 'organizations',label: 'Organizations',      icon: 'fa-people-group',      href: 'pages/saso/organizations.html' },
+      { key: 'proposals',    label: 'Activity Proposals', icon: 'fa-file-circle-plus',  href: 'pages/saso/proposals.html',  badge: 'proposals' },
+      { key: 'activities',   label: 'Activities',         icon: 'fa-calendar-check',    href: 'pages/saso/activities.html' },
+      { key: 'requirements', label: 'Requirements',       icon: 'fa-list-check',        href: 'pages/saso/requirements.html', badge: 'requirements' },
+      { key: 'terminal',     label: 'Terminal Reports',   icon: 'fa-file-circle-check', href: 'pages/saso/terminal-reports.html', badge: 'terminal' },
+      { key: 'reports',      label: 'Reports',            icon: 'fa-chart-column',      href: 'pages/saso/reports.html' },
+      { key: 'notifications',label: 'Notifications',      icon: 'fa-bell',              href: 'pages/saso/notifications.html', badge: 'notifications' },
+      { key: 'settings',     label: 'Settings',           icon: 'fa-gear',              href: 'pages/saso/settings.html' }
     ],
     ORG: [
-      { key: 'dashboard',    label: 'Dashboard',        icon: 'fa-gauge-high',        href: 'pages/org/dashboard.html', built: true },
-      { key: 'activities',   label: 'My Activities',    icon: 'fa-calendar-check',    href: 'pages/org/activities.html', phase: 3 },
-      { key: 'submit',       label: 'Submit Activity',  icon: 'fa-circle-plus',       href: 'pages/org/submit-activity.html', phase: 3 },
-      { key: 'requirements', label: 'Requirements',     icon: 'fa-list-check',        href: 'pages/org/requirements.html', badge: 'requirements', phase: 5 },
-      { key: 'terminal',     label: 'Terminal Reports', icon: 'fa-file-circle-check', href: 'pages/org/terminal-reports.html', badge: 'terminal', phase: 9 },
-      { key: 'notifications',label: 'Notifications',    icon: 'fa-bell',              href: 'pages/org/notifications.html', badge: 'notifications', phase: 7 },
-      { key: 'profile',      label: 'Profile',          icon: 'fa-id-badge',          href: 'pages/org/profile.html', phase: 13 }
+      { key: 'dashboard',    label: 'Dashboard',        icon: 'fa-gauge-high',        href: 'pages/org/dashboard.html' },
+      { key: 'activities',   label: 'My Activities',    icon: 'fa-calendar-check',    href: 'pages/org/activities.html' },
+      { key: 'submit',       label: 'Submit Activity',  icon: 'fa-circle-plus',       href: 'pages/org/submit-activity.html' },
+      { key: 'requirements', label: 'Requirements',     icon: 'fa-list-check',        href: 'pages/org/requirements.html', badge: 'requirements' },
+      { key: 'terminal',     label: 'Terminal Reports', icon: 'fa-file-circle-check', href: 'pages/org/terminal-reports.html', badge: 'terminal' },
+      { key: 'notifications',label: 'Notifications',    icon: 'fa-bell',              href: 'pages/org/notifications.html', badge: 'notifications' },
+      { key: 'profile',      label: 'Profile',          icon: 'fa-id-badge',          href: 'pages/org/profile.html' }
     ]
   };
 
@@ -50,13 +47,15 @@ SASO.layout = (function () {
      Add each page to BUILT as its phase lands.
      --------------------------------------------------------------------------- */
 
-  var BUILT = {
-    'index.html': true,
-    'pages/saso/dashboard.html': true,
-    'pages/org/dashboard.html': true
-  };
+  /* One map, one truth: 0 means the page exists, any other number is the
+     phase it is scheduled for. Sidebar rendering and link resolution both
+     read from here, so they can never drift apart. Set a page to 0 as its
+     phase lands. */
+  var PAGES = {
+    'index.html': 0,
+    'pages/saso/dashboard.html': 0,
+    'pages/org/dashboard.html': 0,
 
-  var PHASE_OF = {
     'pages/org/submit-activity.html': 3,
     'pages/org/activities.html': 3,
     'pages/org/activity-details.html': 4,
@@ -75,13 +74,18 @@ SASO.layout = (function () {
     'pages/org/profile.html': 13
   };
 
+  function phaseOf(path) {
+    var clean = path.split('?')[0];
+    return PAGES[clean] === undefined ? 3 : PAGES[clean];
+  }
+
+  function isBuilt(path) { return phaseOf(path) === 0; }
+
   /* path is always project-root relative, e.g. 'pages/saso/proposals.html' */
   function href(path, moduleLabel) {
-    var clean = path.split('?')[0];
-    if (BUILT[clean]) { return base + path; }
-    var phase = PHASE_OF[clean] || 3;
+    if (isBuilt(path)) { return base + path; }
     return base + 'pages/coming-soon.html?m=' +
-      encodeURIComponent(moduleLabel || clean) + '&p=' + phase;
+      encodeURIComponent(moduleLabel || path.split('?')[0]) + '&p=' + phaseOf(path);
   }
 
   /* ---- badge counts ------------------------------------------------------- */
@@ -127,13 +131,14 @@ SASO.layout = (function () {
           ' right">' + count + '</span>'
         : '';
 
-      if (!m.built) {
+      if (!isBuilt(m.href)) {
+        var phase = phaseOf(m.href);
         return '' +
           '<li class="nav-item">' +
-            '<span class="nav-link nav-link-pending" title="Scheduled for phase ' + m.phase + '">' +
+            '<span class="nav-link nav-link-pending" title="Scheduled for phase ' + phase + '">' +
               '<i class="nav-icon fa-solid ' + m.icon + '"></i>' +
               '<p>' + m.label + badgeHtml +
-                '<span class="phase-tag">Phase ' + m.phase + '</span></p>' +
+                '<span class="phase-tag">Phase ' + phase + '</span></p>' +
             '</span>' +
           '</li>';
       }
