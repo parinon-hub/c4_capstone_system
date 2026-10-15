@@ -1434,12 +1434,13 @@ a.notif-message:hover { color: var(--cspc-navy); text-decoration: underline; }
    ------------------------------------------------------------------------------------- */
 
 .login-hero {
-  background: #0a2044
+  background-color: #0a2044;
+  background-image:
     linear-gradient(180deg, rgba(10, 32, 68, 0.70) 0%, rgba(10, 32, 68, 0.84) 100%),
     url('../img/login-bg.jpg');
-  background-size: cover, cover;
-  background-position: center, center;
-  background-repeat: no-repeat, no-repeat;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .login-hero .login-brand h1 {
