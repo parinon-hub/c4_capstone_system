@@ -22,6 +22,7 @@ SASO.layout = (function () {
     SASO: [
       { key: 'dashboard',    label: 'Dashboard',          icon: 'fa-gauge-high',        href: 'pages/saso/dashboard.html' },
       { key: 'organizations',label: 'Organizations',      icon: 'fa-people-group',      href: 'pages/saso/organizations.html' },
+      { key: 'accounts',     label: 'Account Requests',   icon: 'fa-user-plus',         href: 'pages/saso/account-requests.html', badge: 'accounts' },
       { key: 'proposals',    label: 'Activity Proposals', icon: 'fa-file-circle-plus',  href: 'pages/saso/proposals.html',  badge: 'proposals' },
       { key: 'activities',   label: 'Activities',         icon: 'fa-calendar-check',    href: 'pages/saso/activities.html' },
       { key: 'requirements', label: 'Requirements',       icon: 'fa-list-check',        href: 'pages/saso/requirements.html', badge: 'requirements' },
@@ -56,22 +57,27 @@ SASO.layout = (function () {
     'pages/saso/dashboard.html': 0,
     'pages/org/dashboard.html': 0,
 
-    'pages/org/submit-activity.html': 3,
-    'pages/org/activities.html': 3,
-    'pages/org/activity-details.html': 4,
-    'pages/saso/activity-details.html': 4,
-    'pages/org/requirements.html': 5,
-    'pages/saso/requirements.html': 5,
-    'pages/saso/proposals.html': 6,
-    'pages/saso/activities.html': 6,
-    'pages/saso/organizations.html': 6,
-    'pages/saso/notifications.html': 7,
-    'pages/org/notifications.html': 7,
-    'pages/saso/terminal-reports.html': 9,
-    'pages/org/terminal-reports.html': 9,
-    'pages/saso/reports.html': 10,
-    'pages/saso/settings.html': 13,
-    'pages/org/profile.html': 13
+    'pages/org/submit-activity.html': 0,
+    'pages/org/activities.html': 0,
+    'pages/org/activity-details.html': 0,
+    'pages/saso/activity-details.html': 0,
+    'pages/org/requirements.html': 0,
+    'pages/saso/requirements.html': 0,
+    'pages/saso/proposals.html': 0,
+    'pages/saso/activities.html': 0,
+    'pages/saso/organizations.html': 0,
+    'pages/saso/notifications.html': 0,
+    'pages/org/notifications.html': 0,
+    'pages/saso/terminal-reports.html': 0,
+    'pages/org/terminal-reports.html': 0,
+    'pages/saso/reports.html': 0,
+    'pages/documents/print.html': 0,
+    'pages/saso/settings.html': 0,
+    'pages/org/profile.html': 0,
+    'pages/saso/trash.html': 0,
+    'pages/org/trash.html': 0,
+    'pages/saso/account-requests.html': 0,
+    'request-account.html': 0
   };
 
   function phaseOf(path) {
@@ -92,10 +98,11 @@ SASO.layout = (function () {
 
   function badgeCounts() {
     var M = SASO.model;
-    var counts = { proposals: 0, requirements: 0, terminal: 0, notifications: 0 };
+    var counts = { proposals: 0, requirements: 0, terminal: 0, notifications: 0, accounts: 0 };
     counts.notifications = M.unreadCount(session);
 
     if (session.role === C.ROLE.SASO) {
+      counts.accounts = M.pendingAccountRequests().length;
       counts.proposals = M.allActivities().filter(function (a) {
         return a.proposalStatus === C.PROPOSAL.SUBMITTED ||
                a.proposalStatus === C.PROPOSAL.FOR_REVIEW;
@@ -127,7 +134,7 @@ SASO.layout = (function () {
     var items = MENUS[session.role].map(function (m) {
       var count = m.badge ? counts[m.badge] : 0;
       var badgeHtml = count > 0
-        ? ' <span class="badge badge-' + (m.badge === 'terminal' ? 'warning' : 'info') +
+        ? ' <span class="badge badge-' + (m.badge === 'terminal' || m.badge === 'accounts' ? 'warning' : 'info') +
           ' right">' + count + '</span>'
         : '';
 
@@ -155,7 +162,7 @@ SASO.layout = (function () {
     return '' +
       '<aside class="main-sidebar sidebar-dark-primary elevation-2">' +
         '<a href="' + SASO.auth.homeFor(session, base) + '" class="brand-link">' +
-          '<span class="brand-mark">CSPC</span>' +
+          '<img src="' + base + 'assets/img/saso-logo-sm.png" class="brand-seal" alt="">' +
           '<span class="brand-text">SASO<small>Activity Monitoring</small></span>' +
         '</a>' +
         '<div class="sidebar">' +
@@ -303,10 +310,12 @@ SASO.layout = (function () {
               '<p>' + SASO.model.escapeHtml(opts.body) + '</p>' +
               (opts.remarks || needsRemarks
                 ? '<div class="form-group mb-0">' +
-                    '<label for="confirmRemarks">Remarks' + (needsRemarks ? ' <span class="text-danger">*</span>' : ' (optional)') + '</label>' +
+                    '<label for="confirmRemarks">' + SASO.model.escapeHtml(opts.remarksLabel || 'Remarks') + (needsRemarks ? ' <span class="text-danger">*</span>' : ' (optional)') + '</label>' +
                     '<textarea class="form-control" id="confirmRemarks" rows="3" placeholder="' +
                       SASO.model.escapeHtml(opts.remarksPlaceholder || 'Tell the organization what to do next') + '"></textarea>' +
-                    '<div class="invalid-feedback" id="confirmRemarksError">Remarks are required so the organization knows what to fix.</div>' +
+                    '<div class="invalid-feedback" id="confirmRemarksError">' +
+                      SASO.model.escapeHtml(opts.remarksError ||
+                        'Remarks are required so the organization knows what to fix.') + '</div>' +
                   '</div>'
                 : '') +
             '</div>' +
@@ -337,6 +346,92 @@ SASO.layout = (function () {
     $modal.on('hidden.bs.modal', function () { $modal.remove(); });
   }
 
+  /* ---- horizontal scrollbar on top ------------------------------------------
+     A wide table normally shows its horizontal scrollbar at the bottom, so on
+     a long list the user has to scroll all the way down just to reach it.
+     Every wide-table container in the system — any `.table-responsive`, plus
+     anything given the class `top-scroll` — gets a mirrored scrollbar directly
+     above it, kept in sync both ways and shown only when the table is actually
+     wider than the screen. Content rendered later is picked up automatically,
+     so page controllers need do nothing. Both bars share one design, defined
+     with every other scrollbar under "Scrollbars" in saso-theme.css.
+     --------------------------------------------------------------------------- */
+
+  var TOP_SCROLL_SELECTOR = '.top-scroll, .table-responsive';
+
+  /* Marks the container's parent with whether there is more content to the
+     left or right, so a strip can fade its edges as a hint (see .stat-strip). */
+  /* Overflow smaller than this is treated as fitting: a bar for a few pixels
+     of hidden padding only looks broken. */
+  var OVERFLOW_TOLERANCE = 6;
+
+  function markEdges(el) {
+    var host = el.parentNode;
+    if (!host || !host.classList) { return; }
+    var max = el.scrollWidth - el.clientWidth;
+    host.classList.toggle('can-scroll-left', max > OVERFLOW_TOLERANCE && el.scrollLeft > 2);
+    host.classList.toggle('can-scroll-right', max > OVERFLOW_TOLERANCE && el.scrollLeft < max - 2);
+  }
+
+  function sizeTopScroll(el) {
+    var bar = el.previousElementSibling;
+    if (!bar || !bar.classList.contains('top-scrollbar')) { return; }
+    bar.firstChild.style.width = el.scrollWidth + 'px';
+    bar.style.display = el.scrollWidth - el.clientWidth > OVERFLOW_TOLERANCE ? 'block' : 'none';
+    bar.scrollLeft = el.scrollLeft;
+    markEdges(el);
+  }
+
+  function attachTopScroll(el) {
+    if (el.getAttribute('data-top-scroll')) { return; }
+    el.setAttribute('data-top-scroll', '1');
+
+    var bar = document.createElement('div');
+    bar.className = 'top-scrollbar';
+    bar.setAttribute('aria-hidden', 'true');
+    bar.appendChild(document.createElement('div'));
+    el.parentNode.insertBefore(bar, el);
+
+    bar.addEventListener('scroll', function () {
+      if (el.scrollLeft !== bar.scrollLeft) { el.scrollLeft = bar.scrollLeft; }
+    });
+    el.addEventListener('scroll', function () {
+      if (bar.scrollLeft !== el.scrollLeft) { bar.scrollLeft = el.scrollLeft; }
+      markEdges(el);
+    });
+
+    /* Re-measure when the table changes width without the DOM changing —
+       web fonts finishing, the sidebar collapsing, a column wrapping. */
+    if (window.ResizeObserver) {
+      var ro = new ResizeObserver(function () { sizeTopScroll(el); });
+      ro.observe(el);
+      if (el.firstElementChild) { ro.observe(el.firstElementChild); }
+    }
+    sizeTopScroll(el);
+  }
+
+  function enhanceTopScroll(root) {
+    (root || document).querySelectorAll(TOP_SCROLL_SELECTOR).forEach(function (el) {
+      attachTopScroll(el);
+      sizeTopScroll(el);
+    });
+  }
+
+  function watchTopScroll() {
+    enhanceTopScroll(document);
+    if (window.MutationObserver) {
+      new MutationObserver(function () { enhanceTopScroll(document); })
+        .observe(document.body, { childList: true, subtree: true });
+    }
+    window.addEventListener('resize', function () { enhanceTopScroll(document); });
+    /* The sidebar toggle changes the content width without a resize event. */
+    document.addEventListener('click', function (e) {
+      if (e.target.closest && e.target.closest('[data-widget="pushmenu"]')) {
+        window.setTimeout(function () { enhanceTopScroll(document); }, 350);
+      }
+    });
+  }
+
   /* ---- init ---------------------------------------------------------------- */
 
   function init(opts) {
@@ -345,6 +440,9 @@ SASO.layout = (function () {
     if (!session) { return null; }
 
     SASO.model.refreshOverdue();
+    /* Anything left in the trash bin past the retention period is removed
+       for good before the page is drawn. */
+    SASO.events.purgeExpiredTrash();
 
     var wrapper = document.getElementById('appWrapper') || document.body;
     wrapper.insertAdjacentHTML('afterbegin', renderNavbar() + renderSidebar(opts.page));
@@ -378,11 +476,14 @@ SASO.layout = (function () {
       });
     }
 
+    watchTopScroll();
+
     return session;
   }
 
   return {
     init: init,
+    enhanceTopScroll: enhanceTopScroll,
     href: href,
     toast: toast,
     confirmDialog: confirmDialog,

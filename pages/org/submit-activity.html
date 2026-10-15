@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Submit Activity — Organization Portal</title>
+  <link rel="icon" type="image/png" href="../../assets/img/favicon.png">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/css/adminlte.min.css">
+  <link rel="stylesheet" href="../../assets/css/saso-theme.css">
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+
+<div class="wrapper" id="appWrapper">
+  <div class="content-wrapper">
+    <div id="pageHeader"></div>
+
+    <section class="content">
+      <div class="container-fluid">
+
+        <div class="row">
+          <div class="col-lg-9">
+            <div class="card">
+              <div class="card-header p-0">
+                <ul class="nav nav-tabs wizard-tabs" id="wizardTabs">
+                  <li class="nav-item"><a class="nav-link active" data-step="1">
+                    <span class="step-no">1</span> Activity Information</a></li>
+                  <li class="nav-item"><a class="nav-link" data-step="2">
+                    <span class="step-no">2</span> Justification</a></li>
+                  <li class="nav-item"><a class="nav-link" data-step="3">
+                    <span class="step-no">3</span> Requirements</a></li>
+                </ul>
+              </div>
+
+              <div class="card-body">
+
+                <!-- STEP 1 -->
+                <div class="wizard-step" data-step="1">
+                  <div class="form-row">
+                    <div class="form-group col-md-8">
+                      <label for="fTitle">Activity title <span class="req-mark">*</span></label>
+                      <input type="text" class="form-control" id="fTitle" placeholder="e.g. JPCS Leadership Seminar">
+                      <div class="invalid-feedback">Enter the activity title.</div>
+                    </div>
+                    <div class="form-group col-md-4">
+                      <label for="fCategory">Category <span class="req-mark">*</span></label>
+                      <select class="form-control" id="fCategory"></select>
+                      <div class="invalid-feedback">Choose a category.</div>
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group col-md-4">
+                      <label for="fVenueType">Venue type <span class="req-mark">*</span></label>
+                      <select class="form-control" id="fVenueType"></select>
+                      <small class="form-text text-muted" id="venueHint"></small>
+                    </div>
+                    <div class="form-group col-md-8">
+                      <label for="fVenue">Venue <span class="req-mark">*</span></label>
+                      <input type="text" class="form-control" id="fVenue" placeholder="e.g. CSPC Auditorium">
+                      <div class="invalid-feedback">Enter the venue.</div>
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group col-md-3">
+                      <label for="fDateStart">Start date <span class="req-mark">*</span></label>
+                      <input type="date" class="form-control" id="fDateStart">
+                      <div class="invalid-feedback" id="dateStartError">Enter the start date.</div>
+                    </div>
+                    <div class="form-group col-md-3">
+                      <label for="fDateEnd">End date</label>
+                      <input type="date" class="form-control" id="fDateEnd">
+                      <div class="invalid-feedback">The end date cannot be before the start date.</div>
+                    </div>
+                    <div class="form-group col-md-3">
+                      <label for="fTimeStart">Time started <span class="req-mark">*</span></label>
+                      <input type="time" class="form-control" id="fTimeStart" value="08:00">
+                      <div class="invalid-feedback">Enter the start time.</div>
+                    </div>
+                    <div class="form-group col-md-3">
+                      <label for="fTimeEnd">Time ended</label>
+                      <input type="time" class="form-control" id="fTimeEnd" value="17:00">
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group col-md-3">
+                      <label for="fParticipants">Expected participants <span class="req-mark">*</span></label>
+                      <input type="number" class="form-control" id="fParticipants" min="1" placeholder="120">
+                      <div class="invalid-feedback">Enter a number greater than zero.</div>
+                    </div>
+                    <div class="form-group col-md-9">
+                      <label for="fParticipantDesc">Who will participate <span class="req-mark">*</span></label>
+                      <input type="text" class="form-control" id="fParticipantDesc"
+                             placeholder="e.g. Third and fourth year CCS students">
+                      <div class="invalid-feedback">Describe the participants.</div>
+                      <small class="form-text text-muted">The full list with year level and section is
+                        attached as a requirement in step 3.</small>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- STEP 2 -->
+                <div class="wizard-step d-none" data-step="2">
+                  <div class="form-group">
+                    <label for="fRationale">Rationale <span class="req-mark">*</span></label>
+                    <textarea class="form-control" id="fRationale" rows="4"
+                      placeholder="Why does this activity need to be conducted?"></textarea>
+                    <div class="invalid-feedback">Enter the rationale.</div>
+                  </div>
+
+                  <div class="form-group">
+                    <label>Objectives <span class="req-mark">*</span></label>
+                    <div id="objectiveList"></div>
+                    <button type="button" class="btn btn-sm btn-outline-primary mt-1" id="btnAddObjective">
+                      <i class="fa-solid fa-plus mr-1"></i>Add objective</button>
+                    <div class="text-danger small d-none mt-1" id="objectiveError">
+                      Enter at least one objective.</div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="fDescription">Description <span class="req-mark">*</span></label>
+                    <textarea class="form-control" id="fDescription" rows="3"
+                      placeholder="What will happen during the activity?"></textarea>
+                    <div class="invalid-feedback">Enter a description.</div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group col-md-4">
+                      <label for="fBudget">Budgetary requirement</label>
+                      <input type="text" class="form-control" id="fBudget" placeholder="e.g. 8,500">
+                    </div>
+                    <div class="form-group col-md-8">
+                      <label for="fFundSource">Source of fund</label>
+                      <input type="text" class="form-control" id="fFundSource"
+                             placeholder="e.g. Organization fund, participant share">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- STEP 3 -->
+                <div class="wizard-step d-none" data-step="3">
+                  <p class="text-muted text-sm">
+                    Attach each requirement below. Uploading is simulated in this prototype —
+                    choosing a file records its name and marks the requirement as submitted
+                    for SASO to review.
+                  </p>
+                  <div id="requirementList"></div>
+                  <div class="text-danger small d-none mt-2" id="requirementError">
+                    All required documents must be attached before submitting.</div>
+                </div>
+
+              </div>
+
+              <div class="card-footer d-flex align-items-center">
+                <button type="button" class="btn btn-light" id="btnBack">
+                  <i class="fa-solid fa-arrow-left mr-1"></i>Back</button>
+                <span class="text-muted text-sm ml-3" id="saveState"></span>
+                <div class="ml-auto">
+                  <button type="button" class="btn btn-outline-primary" id="btnSaveDraft">Save as draft</button>
+                  <button type="button" class="btn btn-primary" id="btnNext">
+                    Next<i class="fa-solid fa-arrow-right ml-1"></i></button>
+                  <button type="button" class="btn btn-primary d-none" id="btnSubmit">
+                    <i class="fa-solid fa-paper-plane mr-1"></i>Submit proposal</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-3">
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">What happens next</h3></div>
+              <div class="card-body p-0">
+                <ul class="route-preview" id="routePreview"></ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </div>
+
+  <footer class="main-footer text-sm">
+    <strong>CSPC SASO Student Organization Activity Monitoring</strong> — front-end prototype.
+    <span class="float-right text-muted">Organization names and accreditation levels follow the published CSPC roster; officers, advisers and all activity records are simulated.</span>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/js/adminlte.min.js"></script>
+
+<script>window.SASO_BASE = '../../';</script>
+<script src="../../assets/js/core/config.js"></script>
+<script src="../../data/seed.js"></script>
+<script src="../../assets/js/core/storage.js"></script>
+<script src="../../assets/js/core/model.js"></script>
+<script src="../../assets/js/core/events.js"></script>
+<script src="../../assets/js/core/auth.js"></script>
+<script src="../../assets/js/core/layout.js"></script>
+<script src="../../assets/js/pages/org-submit-activity.js"></script>
+</body>
+</html>

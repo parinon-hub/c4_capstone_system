@@ -62,19 +62,14 @@ a:hover { color: var(--cspc-navy); }
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.brand-mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 4px;
-  background: var(--cspc-gold);
-  color: var(--cspc-navy-dark);
-  font-weight: 700;
-  font-size: 0.75rem;
-  letter-spacing: 0.02em;
+.brand-seal {
+  width: 2.35rem;
+  height: 2.35rem;
+  object-fit: contain;
   flex: 0 0 auto;
+  background: #fff;
+  border-radius: 50%;
+  padding: 1px;
 }
 
 .brand-text {
@@ -391,6 +386,62 @@ a:hover { color: var(--cspc-navy); }
 .timeline > div > .timeline-item > .timeline-header { border-bottom: 1px solid var(--cspc-line); font-size: 0.875rem; }
 .timeline > div > .timeline-item > .timeline-body { font-size: 0.8125rem; }
 
+/* ---- Scrollable panels ---------------------------------------------------
+   Feeds that grow without bound get a fixed height and their own scrollbar,
+   so a long history never pushes the rest of the dashboard off screen.
+   ---------------------------------------------------------------------------- */
+
+.scroll-panel,
+.scroll-pane {
+  max-height: 22rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.scroll-pane-sm { max-height: 16rem; }
+
+
+/* ---- Wizard ---------------------------------------------------------------- */
+
+.wizard-steps { display: flex; border-bottom: 1px solid var(--cspc-line); margin-bottom: 1.25rem; }
+
+.wizard-step {
+  flex: 1 1 0;
+  padding: 0.65rem 0.5rem;
+  text-align: center;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--cspc-muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.wizard-step .step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem; height: 1.4rem;
+  border-radius: 50%;
+  background: #e6ebf1;
+  color: var(--cspc-muted);
+  font-size: 0.75rem;
+  margin-right: 0.4rem;
+}
+
+.wizard-step.is-active { color: var(--cspc-navy); border-bottom-color: var(--cspc-navy); }
+.wizard-step.is-active .step-num { background: var(--cspc-navy); color: #fff; }
+.wizard-step.is-done .step-num { background: #2f855a; color: #fff; }
+
+.objective-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+.objective-row .form-control { flex: 1 1 auto; }
+
+.req-row {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.6rem 0; border-bottom: 1px solid var(--cspc-line);
+}
+.req-row:last-child { border-bottom: 0; }
+.req-row .req-name { flex: 1 1 auto; font-size: 0.875rem; }
+.req-row .req-file { font-size: 0.75rem; color: #22633f; }
+
 /* ---- Buttons -------------------------------------------------------------------- */
 
 .btn { font-size: 0.875rem; border-radius: 4px; }
@@ -400,6 +451,406 @@ a:hover { color: var(--cspc-navy); }
 .btn-outline-primary:hover { background-color: var(--cspc-navy); border-color: var(--cspc-navy); }
 
 :focus-visible { outline: 2px solid var(--cspc-gold); outline-offset: 2px; }
+
+/* ---- Wizard ----------------------------------------------------------------- */
+
+.wizard-tabs { border-bottom: 0; padding: 0 0.5rem; }
+
+.wizard-tabs .nav-link {
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: var(--cspc-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.85rem 1rem;
+}
+
+.wizard-tabs .nav-link:hover { border-color: transparent; color: var(--cspc-ink); }
+
+.wizard-tabs .nav-link.active {
+  color: var(--cspc-navy);
+  background: transparent;
+  border-bottom-color: var(--cspc-navy);
+}
+
+.wizard-tabs .step-no {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.375rem;
+  height: 1.375rem;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: var(--cspc-muted);
+  font-size: 0.75rem;
+  margin-right: 0.4rem;
+}
+
+.wizard-tabs .nav-link.active .step-no { background: var(--cspc-navy); color: #fff; }
+.wizard-tabs .nav-link.is-done .step-no { background: #2f855a; color: #fff; }
+
+.req-mark { color: #c0392b; }
+
+.file-chip {
+  display: inline-block;
+  background: #eef4fb;
+  border: 1px solid #d6e4f5;
+  border-radius: 3px;
+  padding: 0.15rem 0.45rem;
+  font-size: 0.75rem;
+  color: var(--cspc-navy);
+  max-width: 12rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* ---- Route preview ------------------------------------------------------------ */
+
+.route-preview { list-style: none; margin: 0; padding: 0.5rem 0; }
+
+.route-preview li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.4rem 1rem;
+  font-size: 0.8125rem;
+}
+
+.route-preview .route-no {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  background: #eef2f7;
+  color: var(--cspc-muted);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  flex: 0 0 auto;
+  margin-top: 0.1rem;
+}
+
+.route-preview .route-label { line-height: 1.35; }
+
+.route-preview .route-note {
+  border-top: 1px solid var(--cspc-line);
+  margin-top: 0.4rem;
+  padding-top: 0.6rem;
+  color: #8a5a00;
+  background: #fdf6e6;
+}
+
+/* ---- Sortable headers ---------------------------------------------------------- */
+
+.sort-link { color: inherit; text-decoration: none; white-space: nowrap; }
+.sort-link:hover { color: var(--cspc-navy); text-decoration: none; }
+.sort-link i { opacity: 0.4; margin-left: 0.15rem; }
+.sort-link.is-active { color: var(--cspc-navy); }
+.sort-link.is-active i { opacity: 1; }
+
+.pagination .page-link { color: var(--cspc-navy); }
+.pagination .page-item.active .page-link {
+  background-color: var(--cspc-navy);
+  border-color: var(--cspc-navy);
+}
+
+/* ---- Activity details -------------------------------------------------------- */
+
+.detail-head {
+  background: #fff;
+  border: 1px solid var(--cspc-line);
+  border-left: 3px solid var(--cspc-navy);
+  border-radius: 5px;
+  padding: 1rem 1.15rem;
+  margin-bottom: 0.75rem;
+}
+
+.detail-title { font-size: 1.25rem; font-weight: 600; margin: 0 0 0.15rem; }
+.detail-sub { font-size: 0.8125rem; color: var(--cspc-muted); }
+.detail-badges { display: flex; flex-wrap: wrap; gap: 0.25rem; align-items: flex-start; }
+
+.detail-actions { margin-bottom: 1rem; }
+.detail-actions .btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+.detail-table th {
+  width: 11rem;
+  font-weight: 600;
+  color: var(--cspc-muted);
+  font-size: 0.8125rem;
+  vertical-align: top;
+  border-top: 1px solid var(--cspc-line);
+}
+.detail-table td { font-size: 0.8125rem; }
+
+.req-remarks {
+  display: block;
+  margin-top: 0.25rem;
+  padding: 0.35rem 0.5rem;
+  background: #fdf6e6;
+  border-left: 2px solid var(--cspc-gold);
+  border-radius: 2px;
+  font-size: 0.75rem;
+  color: #8a5a00;
+}
+
+/* ---- Workflow timeline --------------------------------------------------------- */
+
+.wf-timeline { list-style: none; margin: 0; padding: 0; position: relative; }
+
+.wf-timeline::before {
+  content: '';
+  position: absolute;
+  left: 0.6875rem;
+  top: 0.75rem;
+  bottom: 0.75rem;
+  width: 2px;
+  background: var(--cspc-line);
+}
+
+.wf-timeline li {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.35rem 0;
+  font-size: 0.875rem;
+}
+
+.wf-dot {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.375rem;
+  height: 1.375rem;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--cspc-line);
+  color: #cbd5e1;
+  font-size: 0.5rem;
+  flex: 0 0 auto;
+}
+
+.wf-timeline .is-done .wf-dot { background: #2f855a; border-color: #2f855a; color: #fff; }
+.wf-timeline .is-current .wf-dot { background: #fff; border-color: var(--cspc-gold); color: var(--cspc-gold); }
+.wf-timeline .is-done .wf-label { color: var(--cspc-ink); }
+.wf-timeline .is-current .wf-label { color: var(--cspc-ink); font-weight: 600; }
+.wf-timeline .is-pending .wf-label { color: var(--cspc-muted); }
+
+/* ---- Comment thread ------------------------------------------------------------- */
+
+.cmt {
+  border: 1px solid var(--cspc-line);
+  border-radius: 5px;
+  padding: 0.6rem 0.75rem;
+  margin-bottom: 0.6rem;
+  background: #fff;
+}
+
+.cmt.is-mine { background: #f6f9fd; border-color: #dbe6f4; }
+
+.cmt-head { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.3rem; }
+.cmt-who { font-weight: 600; font-size: 0.8125rem; }
+.cmt-time { margin-left: auto; font-size: 0.75rem; color: var(--cspc-muted); }
+.cmt-body { font-size: 0.875rem; line-height: 1.5; white-space: pre-wrap; }
+
+/* ---- Requirements module ------------------------------------------------------- */
+
+.req-group { border-bottom: 1px solid var(--cspc-line); }
+.req-group:last-child { border-bottom: 0; }
+
+.req-group-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.75rem 1.15rem;
+  background: #f8fafc;
+  border-bottom: 1px solid var(--cspc-line);
+}
+
+.req-group-head .cell-primary { font-size: 0.9375rem; }
+.req-group-head a.cell-primary { color: var(--cspc-ink); text-decoration: none; }
+.req-group-head a.cell-primary:hover { color: var(--cspc-navy); text-decoration: underline; }
+
+.review-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.75rem;
+  padding-bottom: 0.9rem;
+  margin-bottom: 0.9rem;
+  border-bottom: 1px solid var(--cspc-line);
+  font-size: 0.875rem;
+}
+
+.review-meta .cell-sub { display: block; }
+
+.doc-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 2rem 1rem;
+  margin-bottom: 1rem;
+  background: #f8fafc;
+  border: 1px dashed var(--cspc-line);
+  border-radius: 5px;
+  text-align: center;
+}
+
+.doc-preview i { font-size: 2rem; color: #cbd5e1; }
+.doc-preview .doc-name { font-size: 0.875rem; font-weight: 600; }
+
+/* ---- Outcome block ------------------------------------------------------------ */
+
+.outcome-block { border-top: 1px solid var(--cspc-line); background: #fbfcfe; }
+
+.outcome-toggle {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  border: 0;
+  background: none;
+  padding: 0.6rem 1.15rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--cspc-ink);
+  text-align: left;
+}
+
+.outcome-toggle:hover { color: var(--cspc-navy); }
+.outcome-toggle i { color: var(--cspc-muted); font-size: 0.75rem; }
+.outcome-body { padding: 0 1.15rem 0.9rem; }
+.outcome-body label { margin-bottom: 0.15rem; font-weight: 600; }
+
+/* ---- Callouts ------------------------------------------------------------------- */
+
+.callout {
+  border-radius: 5px;
+  border-left: 3px solid var(--cspc-gold);
+  background: #fff;
+  border-top: 1px solid var(--cspc-line);
+  border-right: 1px solid var(--cspc-line);
+  border-bottom: 1px solid var(--cspc-line);
+  padding: 0.85rem 1.15rem;
+  box-shadow: none;
+}
+
+.callout h5 { font-size: 0.9375rem; font-weight: 600; }
+.callout-danger { border-left-color: #c0392b; }
+
+/* ---- Notification centre ------------------------------------------------------- */
+
+.notif-bucket { border-bottom: 1px solid var(--cspc-line); }
+.notif-bucket:last-child { border-bottom: 0; }
+
+.notif-bucket-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.15rem;
+  background: #f8fafc;
+  border-bottom: 1px solid var(--cspc-line);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cspc-muted);
+}
+
+.notif-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.7rem 1.15rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.notif-row:last-child { border-bottom: 0; }
+.notif-row:hover { background: #fbfcfe; }
+.notif-row.is-unread { background: #f5f9fe; box-shadow: inset 3px 0 0 var(--cspc-navy-light); }
+.notif-row.is-unread.is-urgent { box-shadow: inset 3px 0 0 #c0392b; }
+
+.notif-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: #eef2f7;
+  color: var(--cspc-muted);
+  font-size: 0.75rem;
+  flex: 0 0 auto;
+}
+
+.notif-row.is-unread .notif-icon { background: #dbe9fa; color: var(--cspc-navy); }
+.notif-row.is-urgent .notif-icon { background: #fde0dd; color: #a52a1a; }
+
+.notif-main { flex: 1 1 auto; min-width: 0; }
+
+.notif-message {
+  display: block;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--cspc-ink);
+  text-decoration: none;
+}
+
+a.notif-message:hover { color: var(--cspc-navy); text-decoration: underline; }
+.notif-row.is-unread .notif-message { font-weight: 600; }
+
+.notif-time {
+  font-size: 0.75rem;
+  color: var(--cspc-muted);
+  white-space: nowrap;
+  flex: 0 0 auto;
+  padding-top: 0.1rem;
+}
+
+.notif-actions { flex: 0 0 auto; white-space: nowrap; }
+.notif-actions .btn-link { padding: 0 0.25rem; }
+
+#groupTabs .badge-light { background: rgba(0, 0, 0, 0.08); }
+#groupTabs .btn.active .badge-light { background: rgba(255, 255, 255, 0.25); color: #fff; }
+
+/* ---- Profile ------------------------------------------------------------------- */
+
+.accred-badge { margin-bottom: 0.75rem; }
+.accred-badge .status-badge { font-size: 0.875rem; padding: 0.4em 0.8em; }
+
+/* ---- Responsive pass ------------------------------------------------------------ */
+
+@media (max-width: 767.98px) {
+  .stat-tile { padding: 0.7rem 0.8rem; }
+  .stat-tile .stat-value { font-size: 1.375rem; }
+  .stat-tile .stat-label { font-size: 0.6875rem; }
+  .stat-tile .stat-icon { display: none; }
+
+  .urgent-list li { flex: 1 1 100%; border-right: 0; border-bottom: 1px solid var(--cspc-line); }
+  .urgent-list li:last-child { border-bottom: 0; }
+
+  .page-title { font-size: 1.125rem; }
+  .detail-title { font-size: 1.0625rem; }
+  .detail-table th { width: 8rem; }
+
+  .req-group-head { flex-direction: column; gap: 0.35rem; }
+  .req-group-head .ml-auto { margin-left: 0 !important; text-align: left !important; }
+
+  .review-meta { grid-template-columns: repeat(2, 1fr); }
+  .sig-grid, .sig-grid-2, .sig-grid-3 { grid-template-columns: 1fr; gap: 1.75rem; }
+
+  .notif-time { display: none; }
+  .wizard-tabs .nav-link { padding: 0.6rem 0.55rem; font-size: 0.8125rem; }
+  .wizard-tabs .step-no { margin-right: 0.25rem; }
+
+  .card-header .card-tools { position: static; float: none; margin-top: 0.4rem; }
+  .card-header { display: flex; flex-wrap: wrap; align-items: center; }
+}
 
 /* ---- Empty states ---------------------------------------------------------------- */
 
@@ -441,6 +892,83 @@ a:hover { color: var(--cspc-navy); }
   to   { opacity: 1; transform: none; }
 }
 
+/* ---- SASO seal: 3D coin spin ---------------------------------------------------
+   Two faces are stacked back to back and the whole assembly rotated on its Y
+   axis. The reverse face is pre-rotated 180deg so that when it comes round it
+   reads correctly rather than mirrored, which is what a single rotating image
+   would give. Pure CSS — no script, no library.
+   --------------------------------------------------------------------------------- */
+
+.seal-stage {
+  perspective: 900px;
+  width: 8.5rem;
+  height: 8.5rem;
+  margin: 0 auto 0.9rem;
+  position: relative;
+}
+
+.seal-coin {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  animation: sealSpin 9s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  will-change: transform;
+}
+
+.seal-face {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  filter: drop-shadow(0 6px 12px rgba(16, 24, 40, 0.22));
+}
+
+.seal-back { transform: rotateY(180deg); }
+
+/* Ground shadow: narrows as the seal turns edge-on, which is what sells the
+   rotation as depth rather than a flat flip. */
+.seal-shadow {
+  position: absolute;
+  left: 50%;
+  bottom: -0.55rem;
+  width: 5.5rem;
+  height: 0.5rem;
+  margin-left: -2.75rem;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center,
+              rgba(16, 24, 40, 0.26) 0%, rgba(16, 24, 40, 0) 72%);
+  animation: sealShadow 9s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+@keyframes sealSpin {
+  0%   { transform: rotateY(0deg); }
+  /* pauses face-on so the seal is legible for most of the cycle */
+  18%  { transform: rotateY(0deg); }
+  50%  { transform: rotateY(180deg); }
+  68%  { transform: rotateY(180deg); }
+  100% { transform: rotateY(360deg); }
+}
+
+@keyframes sealShadow {
+  0%, 18%   { transform: scaleX(1);    opacity: 1; }
+  34%       { transform: scaleX(0.35); opacity: 0.45; }
+  50%, 68%  { transform: scaleX(1);    opacity: 1; }
+  84%       { transform: scaleX(0.35); opacity: 0.45; }
+  100%      { transform: scaleX(1);    opacity: 1; }
+}
+
+/* Hover gives a manual nudge for anyone who wants a closer look. */
+.seal-stage:hover .seal-coin { animation-duration: 3.5s; }
+
+@media (max-width: 575.98px) {
+  .seal-stage { width: 6.5rem; height: 6.5rem; }
+  .seal-shadow { width: 4.25rem; margin-left: -2.125rem; }
+}
+
 /* ---- Login ---------------------------------------------------------------------------- */
 
 .login-page {
@@ -458,20 +986,6 @@ a:hover { color: var(--cspc-navy); }
 }
 
 .login-brand { text-align: center; margin-bottom: 1.25rem; }
-
-.login-brand .login-mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 3rem;
-  height: 3rem;
-  border-radius: 6px;
-  background: var(--cspc-navy);
-  color: var(--cspc-gold);
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  margin-bottom: 0.65rem;
-}
 
 .login-brand h1 { font-size: 1.125rem; font-weight: 700; margin: 0; }
 .login-brand p { font-size: 0.8125rem; color: var(--cspc-muted); margin: 0.2rem 0 0; }
@@ -524,16 +1038,392 @@ a:hover { color: var(--cspc-navy); }
   line-height: 1.5;
 }
 
+/* ---- Request an account (public) -------------------------------------------------------- */
+
+.login-request {
+  margin-top: 0.85rem;
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--cspc-muted);
+}
+.login-request a { font-weight: 600; color: var(--cspc-navy); }
+
+.login-shell.is-wide { max-width: 44rem; }
+/* The request form is taller than the screen. AdminLTE lays .login-page out as a
+   vertical column, fixed to the screen height and centred top-to-bottom; for a tall
+   page that would push the top out of reach. Start it at the top instead, keep it
+   centred left-to-right, and let the page grow and scroll normally. */
+.login-page.is-tall {
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: auto;
+  min-height: 100vh;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+.login-page.is-tall .login-shell { margin: 0 auto; }
+
+.request-brand { display: flex; align-items: center; justify-content: center; gap: 0.85rem; text-align: left; }
+.request-seal { width: 3.25rem; height: 3.25rem; object-fit: contain; }
+
+.oa-section {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cspc-navy);
+  border-bottom: 1px solid var(--cspc-line);
+  padding-bottom: 0.4rem;
+  margin: 1.1rem 0 0.75rem;
+}
+#oaForm > .oa-section:first-child,
+.modal-body > .oa-section:first-child { margin-top: 0; }
+.oa-section i { color: var(--cspc-muted); }
+
+.request-done { text-align: center; }
+.request-done-icon { font-size: 2.5rem; color: #2f855a; margin-bottom: 0.5rem; }
+.request-ref {
+  display: inline-block;
+  font-family: SFMono-Regular, Consolas, monospace;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--cspc-navy);
+  background: #eef4fb;
+  border: 1px dashed var(--cspc-navy-light);
+  border-radius: 6px;
+  padding: 0.35rem 0.9rem;
+}
+
+.status-card { padding: 1rem 1.25rem; border-top-width: 1px; }
+
+/* ---- Account requests (SASO) -------------------------------------------------------------- */
+
+.review-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 0.6rem 1.25rem; }
+.review-grid > div { font-size: 0.875rem; }
+.review-grid .cell-sub { margin-bottom: 0.1rem; }
+
+/* ---- Report document ------------------------------------------------------------
+   Styled to resemble an institutional document rather than a screen table, so
+   the print output needs no separate layout. */
+
+.report-doc {
+  background: #fff;
+  color: #000;
+  font-family: "Times New Roman", Times, serif;
+  padding: 0.5rem;
+}
+
+.report-letterhead { text-align: center; line-height: 1.35; margin-bottom: 1.25rem; }
+
+.letterhead-seal {
+  width: 4.5rem;
+  height: 4.5rem;
+  object-fit: contain;
+  margin-bottom: 0.35rem;
+}
+.report-institution { font-size: 0.8125rem; }
+.report-college { font-size: 1rem; font-weight: 700; letter-spacing: 0.02em; }
+
+.report-office {
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-top: 0.4rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid #000;
+  display: inline-block;
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+.report-title {
+  text-align: center;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin: 0 0 0.2rem;
+}
+
+.report-period { text-align: center; font-size: 0.875rem; margin-bottom: 0.15rem; }
+.report-scope { text-align: center; font-size: 0.75rem; color: #444; margin-bottom: 1rem; }
+
+.report-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+
+.report-table th,
+.report-table td {
+  border: 1px solid #000;
+  padding: 0.25rem 0.35rem;
+  vertical-align: top;
+  text-align: left;
+}
+
+.report-table th { font-weight: 700; background: #f0f0f0; }
+.report-table .report-group td { background: #e6e6e6; font-weight: 700; letter-spacing: 0.03em; }
+.report-table .report-total td { font-weight: 700; background: #f0f0f0; }
+
+.report-signatures {
+  display: flex;
+  gap: 3rem;
+  margin-top: 2.5rem;
+  font-size: 0.8125rem;
+}
+
+.report-signatures .cell-sub { color: #000; margin-bottom: 2rem; display: block; }
+.report-signatures .sig-name { font-weight: 700; text-transform: uppercase; border-top: 1px solid #000; padding-top: 0.15rem; }
+.report-signatures .sig-role { font-size: 0.75rem; }
+
+.report-stamp {
+  margin-top: 1.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed #999;
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  color: #666;
+  text-align: center;
+}
+
+/* ---- Printable document sheets -------------------------------------------------- */
+
+.doc-sheet { max-width: 48rem; margin: 0 auto; }
+
+.doc-table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; margin-bottom: 1rem; }
+
+.doc-table th,
+.doc-table td {
+  border: 1px solid #000;
+  padding: 0.3rem 0.45rem;
+  vertical-align: top;
+  text-align: left;
+}
+
+.doc-table th { width: 12rem; font-weight: 700; background: #f4f4f4; }
+.doc-muted { color: #555; font-weight: 400; }
+.doc-list { margin: 0; padding-left: 1.1rem; }
+
+.doc-body { font-size: 0.8125rem; text-align: justify; margin-bottom: 1rem; line-height: 1.6; }
+
+.doc-note {
+  font-size: 0.75rem;
+  border: 1px solid #000;
+  padding: 0.4rem 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.doc-subhead {
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  margin: 1.25rem 0 0.4rem;
+}
+
+.doc-status-line {
+  font-size: 0.75rem;
+  margin-top: 0.75rem;
+  padding: 0.4rem 0.6rem;
+  background: #f4f4f4;
+  border: 1px solid #ccc;
+}
+
+.sig-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.sig-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.sig-grid-3 { grid-template-columns: repeat(3, 1fr); }
+
+.sig-block { font-size: 0.75rem; }
+.sig-caption { display: block; margin-bottom: 2.25rem; }
+
+.sig-block .sig-name {
+  font-weight: 700;
+  text-transform: uppercase;
+  border-top: 1px solid #000;
+  padding-top: 0.15rem;
+  min-height: 1.2rem;
+}
+
+.sig-block .sig-role { font-size: 0.6875rem; }
+.sig-block .sig-date { font-size: 0.6875rem; margin-top: 0.35rem; }
+
+
+/* ---- Scrollbars ------------------------------------------------------------------------------
+   ONE design for every scrollbar in the system — the page itself, wide tables (top and
+   bottom), the scrolling panels (activity feed, comment thread, status history), modals
+   and report previews — so none of them looks out of place next to another.
+
+   Chrome / Edge / Safari use the ::-webkit-scrollbar rules. Firefox cannot draw rounded
+   thumbs and gets the closest equivalent through scrollbar-color. The standard properties
+   are kept out of Chromium on purpose: when they are set there they switch the
+   ::-webkit-scrollbar styling off. */
+
+:root {
+  --sb-size:        10px;
+  --sb-track:       #eef2f6;
+  --sb-thumb:       #b9c5d3;
+  --sb-thumb-hover: #8597ad;
+  --sb-thumb-active: var(--cspc-navy-light);
+}
+
+::-webkit-scrollbar { width: var(--sb-size); height: var(--sb-size); }
+::-webkit-scrollbar-track { background: var(--sb-track); border-radius: 999px; }
+::-webkit-scrollbar-thumb {
+  background-color: var(--sb-thumb);
+  border-radius: 999px;
+  border: 2px solid var(--sb-track);      /* inset look: thumb floats inside the track */
+  background-clip: padding-box;
+  min-height: 32px;
+  min-width: 32px;
+}
+::-webkit-scrollbar-thumb:hover  { background-color: var(--sb-thumb-hover); }
+::-webkit-scrollbar-thumb:active { background-color: var(--sb-thumb-active); }
+::-webkit-scrollbar-corner { background: transparent; }
+::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+
+/* Same shape on the navy sidebar, recoloured so a light track does not glare. */
+.main-sidebar {
+  --sb-track:        rgba(255, 255, 255, 0.06);
+  --sb-thumb:        rgba(255, 255, 255, 0.26);
+  --sb-thumb-hover:  rgba(255, 255, 255, 0.42);
+  --sb-thumb-active: var(--cspc-gold);
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  * { scrollbar-width: thin; scrollbar-color: var(--sb-thumb) var(--sb-track); }
+}
+
+/* ---- Horizontal scrollbar on top of wide tables -------------------------------------------
+   layout.js inserts .top-scrollbar above every .table-responsive (and any .top-scroll
+   container) and keeps the two in sync, so a wide table can be scrolled sideways without
+   first scrolling down to its end. It is shown only when the table overflows. */
+
+.top-scrollbar {
+  display: none;
+  box-sizing: border-box;
+  overflow-x: auto;
+  overflow-y: hidden;
+  height: calc(var(--sb-size) + 5px);
+  padding-top: 4px;
+  background: #fff;
+  border-bottom: 1px solid var(--cspc-line);
+}
+.top-scrollbar > div { height: 1px; }
+
+/* Inset the track a little at both ends, top bar and bottom bar alike. */
+.top-scrollbar::-webkit-scrollbar-track,
+.table-responsive::-webkit-scrollbar-track,
+.top-scroll::-webkit-scrollbar-track { margin: 0 2px; }
+
+.report-scroll { overflow-x: auto; }
+
+/* ---- Scrollable summary strip (dashboards) ------------------------------------------------
+   The summary tiles sit in one row that scrolls sideways instead of wrapping onto three
+   rows. Its scrollbar is the shared top bar (layout.js), drawn in the shared design, on the
+   page background rather than inside a card. The strip's own bottom bar is hidden — at this
+   height one bar is enough. Edges fade while more tiles are hidden on that side. */
+
+.stat-strip-wrap { position: relative; margin-bottom: 0.5rem; }
+
+.stat-strip-wrap > .top-scrollbar {
+  background: transparent;
+  border-bottom: 0;
+  padding-top: 0;
+  height: var(--sb-size);
+  margin: 0 0 0.6rem;
+}
+
+.stat-strip {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 3px 0 10px;              /* room for the tile hover lift and shadow */
+  outline: none;
+}
+.stat-strip::-webkit-scrollbar { display: none; }
+@supports not selector(::-webkit-scrollbar) { .stat-strip { scrollbar-width: none; } }
+
+.stat-strip-wrap { --tile-min: 12.5rem; }
+.stat-strip-wrap.is-compact { --tile-min: 10.25rem; }   /* org dashboard: six tiles */
+
+/* Tiles stretch to fill the row when they fit, and keep a minimum width — scrolling
+   only — when they do not. */
+.stat-strip-item {
+  flex: 1 0 var(--tile-min);
+}
+.stat-strip-item .stat-tile { margin-bottom: 0; height: 100%; }
+
+.stat-strip:focus-visible { box-shadow: 0 0 0 2px rgba(29, 80, 137, 0.35); border-radius: 6px; }
+
+.stat-strip-wrap::before,
+.stat-strip-wrap::after {
+  content: '';
+  position: absolute;
+  top: calc(var(--sb-size) + 0.6rem);   /* below the scrollbar, over the tiles only */
+  bottom: 0;
+  width: 2.5rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 1;
+}
+.stat-strip-wrap::before { left: 0;  background: linear-gradient(to right, var(--cspc-surface), rgba(244, 246, 249, 0)); }
+.stat-strip-wrap::after  { right: 0; background: linear-gradient(to left,  var(--cspc-surface), rgba(244, 246, 249, 0)); }
+.stat-strip-wrap.can-scroll-left::before,
+.stat-strip-wrap.can-scroll-right::after { opacity: 1; }
+
+@media (max-width: 767.98px) {
+  .stat-strip { gap: 0.75rem; }
+  .stat-strip-wrap,
+  .stat-strip-wrap.is-compact { --tile-min: 9.75rem; }
+}
+
+/* ---- Proposal edits and the trash bin ------------------------------------------------------ */
+
+.detail-edited { font-size: 0.75rem; color: var(--cspc-muted); margin-top: 0.25rem; }
+
+.trash-note { font-size: 0.875rem; }
+.trash-table td { vertical-align: middle; }
+.trash-reason { min-width: 180px; max-width: 280px; font-size: 0.8125rem; white-space: normal; }
+
+.trash-countdown { min-width: 130px; }
+.trash-countdown .trash-days { font-weight: 600; font-size: 0.8125rem; }
+.trash-countdown .progress { height: 5px; margin: 0.2rem 0; background: #edf2f7; }
+.trash-countdown .progress-bar { background: var(--cspc-navy-light); }
+.trash-countdown.is-soon .trash-days { color: #c0392b; }
+.trash-countdown.is-soon .progress-bar { background: #c0392b; }
+
 /* ---- Print ---------------------------------------------------------------------------- */
 
 @media print {
-  .main-sidebar, .main-header, .content-header, .no-print, .saso-toast-host { display: none !important; }
+  .main-sidebar, .main-header, .content-header, .no-print,
+  .saso-toast-host, .main-footer, .breadcrumb, .top-scrollbar { display: none !important; }
+  .report-scroll, .table-responsive, .scroll-panel, .scroll-pane {
+    overflow: visible !important; max-height: none !important;
+  }
   .content-wrapper { margin-left: 0 !important; background: #fff !important; }
   .card { border: 0; box-shadow: none; }
+  .card-body { padding: 0 !important; }
+  .col-lg-9 { max-width: 100% !important; flex: 0 0 100% !important; }
+  .report-doc { padding: 0; }
+  .report-table { font-size: 8.5pt; }
+  .report-table thead { display: table-header-group; }
+  .report-table tr { page-break-inside: avoid; }
+  .doc-table tr, .sig-grid { page-break-inside: avoid; }
+  .doc-sheet { max-width: none; }
+  .letterhead-seal { width: 22mm; height: 22mm; }
+  @page { margin: 12mm; }
 }
 
 /* ---- Motion preference ------------------------------------------------------------------ */
 
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  /* Hold the seal face-on rather than freezing it mid-turn. */
+  .seal-coin { animation: none !important; transform: rotateY(0deg) !important; }
+  .seal-shadow { animation: none !important; transform: scaleX(1) !important; }
 }

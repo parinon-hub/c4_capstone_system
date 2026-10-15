@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Sign in — CSPC SASO Activity Monitoring</title>
+  <link rel="icon" type="image/png" href="assets/img/favicon.png">
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/css/adminlte.min.css">
@@ -14,7 +15,16 @@
   <main class="login-shell">
 
     <div class="login-brand">
-      <span class="login-mark">CSPC</span>
+      <!-- Two faces back to back so the reverse of the spin shows the seal the
+           right way round rather than mirrored. -->
+      <div class="seal-stage">
+        <div class="seal-coin">
+          <img class="seal-face seal-front" src="assets/img/saso-logo.png"
+               alt="Student Affairs and Services Office, Camarines Sur Polytechnic Colleges">
+          <img class="seal-face seal-back" src="assets/img/saso-logo.png" alt="" aria-hidden="true">
+        </div>
+        <div class="seal-shadow"></div>
+      </div>
       <h1>Student Organization Activity Monitoring</h1>
       <p>Student Affairs and Services Office</p>
     </div>
@@ -35,6 +45,11 @@
       </div>
 
       <button type="button" class="btn btn-primary btn-block" id="btnSignIn">Sign in</button>
+
+      <div class="login-request">
+        New recognized organization?
+        <a href="request-account.html">Request an account</a>
+      </div>
 
       <div class="login-accounts">
         <h6>Demonstration accounts — click to fill</h6>

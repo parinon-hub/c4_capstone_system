@@ -45,15 +45,15 @@
 
     var tiles = [
       { value: s.active,            label: 'Active Activities',   icon: 'fa-calendar-check', href: 'pages/org/activities.html' },
-      { value: s.pendingProposals,  label: 'Pending Proposals',   icon: 'fa-file-pen', href: 'pages/org/activities.html' },
-      { value: s.postponed,         label: 'Postponed',           icon: 'fa-calendar-xmark', href: 'pages/org/activities.html', mod: s.postponed ? 'is-attention' : '' },
+      { value: s.pendingProposals,  label: 'With SASO',           icon: 'fa-file-pen', href: 'pages/org/activities.html' },
+      { value: s.inRoute,           label: 'In Approval Route',   icon: 'fa-arrow-right-arrow-left', href: 'pages/org/activities.html' },
       { value: s.requirementsNeeded,label: 'Requirements Needed', icon: 'fa-list-check', href: 'pages/org/requirements.html', mod: s.requirementsNeeded ? 'is-attention' : '' },
-      { value: s.terminalPending,   label: 'Terminal Reports Pending', icon: 'fa-hourglass-half', href: 'pages/org/terminal-reports.html', mod: s.terminalPending ? 'is-overdue' : '' },
+      { value: s.terminalPending,   label: 'Reports Pending',     icon: 'fa-hourglass-half', href: 'pages/org/terminal-reports.html', mod: s.terminalPending ? 'is-overdue' : '' },
       { value: s.completed,         label: 'Completed',           icon: 'fa-circle-check', href: 'pages/org/activities.html', mod: 'is-complete' }
     ];
 
     document.getElementById('statTiles').innerHTML = tiles.map(function (t) {
-      return '<div class="col-6 col-md-4 col-xl-2">' +
+      return '<div class="stat-strip-item">' +
         '<a class="stat-tile ' + (t.mod || '') + '" href="' + SASO.layout.href(t.href, t.label) + '">' +
           '<i class="fa-solid ' + t.icon + ' stat-icon"></i>' +
           '<span class="stat-value">' + t.value + '</span>' +
@@ -77,25 +77,25 @@
       return { label: 'Continue submission', href: SASO.layout.href('pages/org/submit-activity.html?id=' + activity.id, 'Submit Activity'), variant: 'primary' };
     }
     if (stage === C.STAGE.AWAITING_TERMINAL_REPORT) {
-      var overdue = activity.terminalReportStatus === C.TERMINAL.OVERDUE;
-      return { label: 'Submit terminal report',
-               href: SASO.layout.href('pages/org/terminal-reports.html?id=' + activity.id, 'Terminal Reports'),
+      var overdue = M.terminalStatus(activity) === C.TERMINAL.OVERDUE;
+      return { label: 'Submit reports',
+               href: 'terminal-reports.html?id=' + activity.id,
                variant: overdue ? 'danger' : 'warning' };
     }
     if (activity.proposalStatus === C.PROPOSAL.REQUIREMENTS_NEEDED) {
-      return { label: 'Submit requirement', href: SASO.layout.href('pages/org/activity-details.html?id=' + activity.id, 'Activity Details'), variant: 'warning' };
+      return { label: 'Submit requirement', href: 'activity-details.html?id=' + activity.id, variant: 'warning' };
     }
     if (activity.proposalStatus === C.PROPOSAL.REVISION_REQUIRED) {
-      return { label: 'Revise and resubmit', href: SASO.layout.href('pages/org/activity-details.html?id=' + activity.id, 'Activity Details'), variant: 'warning' };
+      return { label: 'Revise and resubmit', href: 'activity-details.html?id=' + activity.id, variant: 'warning' };
     }
     if (unreadFromSaso) {
-      return { label: 'Respond', href: SASO.layout.href('pages/org/activity-details.html?id=' + activity.id, 'Activity Details'), variant: 'info' };
+      return { label: 'Respond', href: 'activity-details.html?id=' + activity.id, variant: 'info' };
     }
-    return { label: 'View', href: SASO.layout.href('pages/org/activity-details.html?id=' + activity.id, 'Activity Details'), variant: 'outline-primary' };
+    return { label: 'View', href: 'activity-details.html?id=' + activity.id, variant: 'outline-primary' };
   }
 
   function progressCell(activityId) {
-    var p = M.requirementProgress(activityId);
+    var p = M.requirementProgress(activityId, C.PHASE.PRE_APPROVAL);
     return '<div class="req-progress ' + (p.approved === p.mandatory ? 'is-complete' : '') + '">' +
       '<div class="progress"><div class="progress-bar" style="width:' + p.percent + '%"></div></div>' +
       '<span class="req-count">' + p.approved + '/' + p.mandatory + '</span>' +
@@ -123,7 +123,7 @@
     var body = acts.slice(0, 8).map(function (a) {
       var action = nextAction(a);
       var stage = M.stageOf(a);
-      var rowClass = a.terminalReportStatus === C.TERMINAL.OVERDUE ? 'row-overdue'
+      var rowClass = M.terminalStatus(a) === C.TERMINAL.OVERDUE ? 'row-overdue'
         : (a.proposalStatus === C.PROPOSAL.REQUIREMENTS_NEEDED ||
            a.proposalStatus === C.PROPOSAL.REVISION_REQUIRED) ? 'row-stale' : '';
 
@@ -131,7 +131,10 @@
         '<td><span class="cell-primary">' + M.escapeHtml(a.title) + '</span>' +
           '<span class="cell-sub">' + M.escapeHtml(a.type) + '</span></td>' +
         '<td class="text-nowrap">' + M.formatDateRange(a.dateStart, a.dateEnd) + '</td>' +
-        '<td>' + M.badge(a.proposalStatus) + '</td>' +
+        '<td>' + M.badge(a.proposalStatus) +
+          (M.isInApprovalRoute(a)
+            ? '<span class="cell-sub">' + M.daysWithCurrentOffice(a.id) + ' days with this office</span>'
+            : '') + '</td>' +
         '<td>' + progressCell(a.id) + '</td>' +
         '<td>' + M.badge(stage) + '</td>' +
         '<td class="text-nowrap text-muted">' + M.relativeTime(a.updatedAt) + '</td>' +
@@ -161,16 +164,16 @@
       return;
     }
 
-    host.innerHTML = '<div class="list-group list-group-flush">' +
+    host.innerHTML = '<div class="scroll-pane scroll-pane-sm"><div class="list-group list-group-flush">' +
       notes.map(function (n) {
         var icon = C.NOTIF_ICON[n.type] || 'fa-circle-info';
         return '<a class="list-group-item list-group-item-action' + (n.read ? '' : ' notif-unread') +
-          '" href="' + SASO.layout.href('pages/org/activity-details.html?id=' + n.activityId, 'Activity Details') + '">' +
+          '" href="' + 'activity-details.html?id=' + n.activityId + '">' +
           '<i class="fa-solid ' + icon + ' mr-2 text-muted"></i>' +
           M.escapeHtml(n.message) +
           '<span class="float-right text-muted text-sm">' + M.relativeTime(n.timestamp) + '</span>' +
         '</a>';
-      }).join('') + '</div>';
+      }).join('') + '</div></div>';
   }
 
   /* static call-to-action links resolved through the phase-aware router */

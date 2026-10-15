@@ -47,8 +47,11 @@
     errorEl.classList.add('d-none');
   }
 
-  function showError(message) {
+  /* A pending account request is not an error — show it as a notice. */
+  function showError(message, isNotice) {
     errorEl.textContent = message;
+    errorEl.classList.toggle('alert-danger', !isNotice);
+    errorEl.classList.toggle('alert-warning', !!isNotice);
     errorEl.classList.remove('d-none');
   }
 
@@ -62,7 +65,7 @@
 
     var result = SASO.auth.login(usernameEl.value, passwordEl.value);
     if (!result.ok) {
-      showError(result.message);
+      showError(result.message, result.pending);
       passwordEl.value = '';
       passwordEl.focus();
       return;

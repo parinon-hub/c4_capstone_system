@@ -1,7 +1,11 @@
 /* =========================================================================
    config.js  —  Single source of truth for the prototype's vocabulary.
-   Every status string, label and badge colour used anywhere in the system
-   is declared here. Nothing else in the codebase should hard-code a status.
+
+   Every status, label, badge colour, category and requirement name used
+   anywhere in the system is declared here. Values marked SASO were taken
+   from documents supplied by the Student Affairs and Services Office;
+   values marked ASSUMPTION are the researchers' own and are not claimed to
+   be official.
    ========================================================================= */
 
 window.SASO = window.SASO || {};
@@ -9,24 +13,36 @@ window.SASO = window.SASO || {};
 SASO.config = (function () {
   'use strict';
 
-  /* ---- Roles ---------------------------------------------------------- */
-  var ROLE = {
-    SASO: 'SASO',
-    ORG: 'ORG'
-  };
+  var ROLE = { SASO: 'SASO', ORG: 'ORG' };
 
-  /* ---- A. Proposal Status --------------------------------------------- */
+  /* ---- A. Proposal status ------------------------------------------------
+     Approval does NOT end at SASO. On-campus activities are endorsed by SASO
+     to the VPAA and then to the President; off-campus activities likewise
+     conclude at the President's office. SASO acts inside this system; the
+     later offices do not. The system therefore RECORDS the onward routing
+     rather than enacting it, so an organization can see where its papers are.
+     -------------------------------------------------------------------------- */
   var PROPOSAL = {
     DRAFT: 'DRAFT',
     SUBMITTED: 'SUBMITTED',
     FOR_REVIEW: 'FOR_REVIEW',
     REQUIREMENTS_NEEDED: 'REQUIREMENTS_NEEDED',
     REVISION_REQUIRED: 'REVISION_REQUIRED',
+    SASO_ENDORSED: 'SASO_ENDORSED',
+    WITH_VPAA: 'WITH_VPAA',
+    WITH_PRESIDENT: 'WITH_PRESIDENT',
     APPROVED: 'APPROVED',
     REJECTED: 'REJECTED'
   };
 
-  /* ---- B. Requirement Status (per document) --------------------------- */
+  /* Offices in the approval route. SASO is the only one that acts here. */
+  var OFFICE = {
+    SASO: 'SASO',
+    VPAA: 'VPAA',
+    PRESIDENT: 'PRESIDENT'
+  };
+
+  /* ---- B. Requirement status --------------------------------------------- */
   var REQUIREMENT = {
     NOT_SUBMITTED: 'NOT_SUBMITTED',
     UNDER_REVIEW: 'UNDER_REVIEW',
@@ -34,8 +50,14 @@ SASO.config = (function () {
     NEEDS_REVISION: 'NEEDS_REVISION'
   };
 
-  /* ---- C. Event Status ------------------------------------------------- */
-  /* UPCOMING / ONGOING / FINISHED / POSTPONED are preserved from Chapter 1 */
+  /* Requirements exist in two phases. Pre-approval requirements gate the
+     approval; post-activity requirements gate completion. */
+  var PHASE = {
+    PRE_APPROVAL: 'PRE_APPROVAL',
+    POST_ACTIVITY: 'POST_ACTIVITY'
+  };
+
+  /* ---- C. Event status ---------------------------------------------------- */
   var EVENT = {
     NOT_APPLICABLE: 'NOT_APPLICABLE',
     UPCOMING: 'UPCOMING',
@@ -45,21 +67,26 @@ SASO.config = (function () {
     CANCELLED: 'CANCELLED'
   };
 
-  /* ---- D. Terminal Report Status --------------------------------------- */
+  /* ---- D. Terminal report status ------------------------------------------
+     DERIVED from the post-activity requirement set — never stored. SASO
+     records a submission date per document, so completion is a property of
+     the documents, not a separate flag.
+     -------------------------------------------------------------------------- */
   var TERMINAL = {
     NOT_APPLICABLE: 'NOT_APPLICABLE',
     REQUIRED: 'REQUIRED',
     OVERDUE: 'OVERDUE',
-    SUBMITTED: 'SUBMITTED',
+    PARTIAL: 'PARTIAL',
     UNDER_REVIEW: 'UNDER_REVIEW',
     NEEDS_REVISION: 'NEEDS_REVISION',
     ACCEPTED: 'ACCEPTED'
   };
 
-  /* ---- E. Derived lifecycle stage (computed, never stored) -------------- */
+  /* ---- E. Derived lifecycle stage ------------------------------------------ */
   var STAGE = {
     DRAFT: 'DRAFT',
-    UNDER_APPROVAL: 'UNDER_APPROVAL',
+    UNDER_SASO_REVIEW: 'UNDER_SASO_REVIEW',
+    IN_APPROVAL_ROUTE: 'IN_APPROVAL_ROUTE',
     APPROVED: 'APPROVED',
     ONGOING: 'ONGOING',
     POSTPONED: 'POSTPONED',
@@ -68,12 +95,7 @@ SASO.config = (function () {
     CLOSED: 'CLOSED'
   };
 
-  /* ---- F. Organization accreditation -------------------------------------
-     CSPC publishes a ladder, not a flag: organizations are Recognized, then
-     accredited at Levels I through IV, and each level distinguishes a newly
-     Accredited organization from one that has been Re-Accredited. The
-     re-accreditation is the renewal the panel asked us to surface.
-     -------------------------------------------------------------------------- */
+  /* ---- F. Accreditation (SASO roster, AY 2025-2026) ------------------------ */
   var ACCREDITATION_LEVEL = {
     RECOGNIZED: 'RECOGNIZED',
     LEVEL_I: 'LEVEL_I',
@@ -83,69 +105,127 @@ SASO.config = (function () {
   };
 
   var ACCREDITATION_TYPE = {
-    NOT_APPLICABLE: 'NOT_APPLICABLE',   /* Recognized only — not yet accredited */
+    NOT_APPLICABLE: 'NOT_APPLICABLE',
     ACCREDITED: 'NEW_ACCREDITED',
     RE_ACCREDITED: 'RE_ACCREDITED'
   };
 
-  /* ---- Human labels ----------------------------------------------------- */
+  /* Entities that conduct activities. SASO records offices and class
+     sections on the same footing as student organizations. */
+  var ENTITY = {
+    STUDENT_ORG: 'STUDENT_ORG',
+    OFFICE: 'OFFICE',
+    CLASS_SECTION: 'CLASS_SECTION'
+  };
+
+  /* ---- G. Venue type — SASO records three, not two ------------------------- */
+  var VENUE = {
+    ON_CAMPUS: 'ON_CAMPUS',
+    OFF_CAMPUS: 'OFF_CAMPUS',
+    ONLINE: 'ONLINE'
+  };
+
+  /* ---- H. Activity categories (SASO) ---------------------------------------
+     SASO maintains one consolidated list plus a separate list per category. */
+  var ACTIVITY_CATEGORIES = [
+    'Environmental',
+    'IGP',
+    'Leadership',
+    'Life Skills',
+    'Multi-Faith',
+    'Socio-Civic',
+    'Sports',
+    'Student Publication',
+    'Volunteer'
+  ];
+
+  /* ---- Human labels --------------------------------------------------------- */
   var LABEL = {
-    // proposal
     DRAFT: 'Draft',
     SUBMITTED: 'Submitted',
     FOR_REVIEW: 'For Review',
     REQUIREMENTS_NEEDED: 'Requirements Needed',
     REVISION_REQUIRED: 'Revision Required',
+    SASO_ENDORSED: 'Endorsed by SASO',
+    WITH_VPAA: 'With VPAA',
+    WITH_PRESIDENT: "With President's Office",
     APPROVED: 'Approved',
     REJECTED: 'Rejected',
-    // requirement
+
+    EDITED: 'Edited',
+
+    PENDING: 'Awaiting SASO approval',
+    DECLINED: 'Declined',
+    DELETED: 'Moved to trash bin',
+    RESTORED: 'Restored from trash bin',
+
+    SASO: 'SASO',
+    VPAA: 'VPAA',
+    PRESIDENT: "President's Office",
+
     NOT_SUBMITTED: 'Not Submitted',
     UNDER_REVIEW: 'Under Review',
     NEEDS_REVISION: 'Needs Revision',
-    // event
+
+    PRE_APPROVAL: 'Pre-Approval',
+    POST_ACTIVITY: 'Post-Activity',
+
     NOT_APPLICABLE: 'Not Applicable',
     UPCOMING: 'Upcoming',
     ONGOING: 'Ongoing',
     FINISHED: 'Finished',
     POSTPONED: 'Postponed',
     CANCELLED: 'Cancelled',
-    // terminal report
-    REQUIRED: 'Terminal Report Required',
-    OVERDUE: 'Terminal Report Overdue',
+
+    REQUIRED: 'Reports Required',
+    OVERDUE: 'Reports Overdue',
+    PARTIAL: 'Partially Submitted',
     ACCEPTED: 'Accepted',
-    // accreditation level
+
     RECOGNIZED: 'Recognized',
     LEVEL_I: 'Level I',
     LEVEL_II: 'Level II',
     LEVEL_III: 'Level III',
     LEVEL_IV: 'Level IV',
-    // accreditation type
     NEW_ACCREDITED: 'Accredited',
     RE_ACCREDITED: 'Re-Accredited',
-    // stage
-    UNDER_APPROVAL: 'Under Approval',
-    AWAITING_TERMINAL_REPORT: 'Awaiting Terminal Report',
+
+    STUDENT_ORG: 'Student Organization',
+    OFFICE: 'Office',
+    CLASS_SECTION: 'Class Section',
+
+    ON_CAMPUS: 'On Campus',
+    OFF_CAMPUS: 'Off Campus',
+    ONLINE: 'Online',
+
+    UNDER_SASO_REVIEW: 'Under SASO Review',
+    IN_APPROVAL_ROUTE: 'In Approval Route',
+    AWAITING_TERMINAL_REPORT: 'Awaiting Reports',
     COMPLETED: 'Completed',
     CLOSED: 'Closed'
   };
 
-  /* ---- Badge colour map -------------------------------------------------
-     grey  = not started      blue  = in review with SASO
-     amber = org must act     red   = overdue / rejected
-     green = approved / done
-     ----------------------------------------------------------------------- */
   var BADGE = {
+    PENDING: 'warning',
+    DECLINED: 'danger',
     DRAFT: 'secondary',
     SUBMITTED: 'info',
     FOR_REVIEW: 'info',
     REQUIREMENTS_NEEDED: 'warning',
     REVISION_REQUIRED: 'warning',
+    SASO_ENDORSED: 'primary',
+    WITH_VPAA: 'primary',
+    WITH_PRESIDENT: 'primary',
     APPROVED: 'success',
     REJECTED: 'danger',
+
+    SASO: 'info', VPAA: 'primary', PRESIDENT: 'primary',
 
     NOT_SUBMITTED: 'secondary',
     UNDER_REVIEW: 'info',
     NEEDS_REVISION: 'warning',
+
+    PRE_APPROVAL: 'info', POST_ACTIVITY: 'warning',
 
     NOT_APPLICABLE: 'secondary',
     UPCOMING: 'primary',
@@ -156,55 +236,58 @@ SASO.config = (function () {
 
     REQUIRED: 'warning',
     OVERDUE: 'danger',
+    PARTIAL: 'warning',
     ACCEPTED: 'success',
 
     RECOGNIZED: 'secondary',
-    LEVEL_I: 'info',
-    LEVEL_II: 'info',
-    LEVEL_III: 'primary',
-    LEVEL_IV: 'success',
-    NEW_ACCREDITED: 'info',
-    RE_ACCREDITED: 'success',
+    LEVEL_I: 'info', LEVEL_II: 'info',
+    LEVEL_III: 'primary', LEVEL_IV: 'success',
+    NEW_ACCREDITED: 'info', RE_ACCREDITED: 'success',
 
-    UNDER_APPROVAL: 'info',
+    STUDENT_ORG: 'info', OFFICE: 'secondary', CLASS_SECTION: 'secondary',
+
+    ON_CAMPUS: 'info', OFF_CAMPUS: 'warning', ONLINE: 'secondary',
+
+    UNDER_SASO_REVIEW: 'info',
+    IN_APPROVAL_ROUTE: 'primary',
     AWAITING_TERMINAL_REPORT: 'warning',
     COMPLETED: 'success',
     CLOSED: 'secondary'
   };
 
-  /* ---- Default requirement checklist -------------------------------------
-     Sources are carried in the data so the traceability matrix in the
-     documentation can be defended item by item during the panel defense.
-     ------------------------------------------------------------------------ */
-  var REQUIREMENT_TEMPLATE = [
-    { name: 'Activity Proposal Form',            mandatory: true,  source: 'PANEL' },
-    { name: 'Rationale',                         mandatory: true,  source: 'PANEL' },
-    { name: 'Program of Activities',             mandatory: true,  source: 'ASSUMPTION' },
-    { name: 'R5 — Permission to Conduct',        mandatory: true,  source: 'PANEL' },
-    { name: 'Adviser Endorsement',               mandatory: true,  source: 'ASSUMPTION' },
-    { name: 'Budget Proposal',                   mandatory: false, source: 'ASSUMPTION' }
-  ];
+  /* ---- Requirement templates -----------------------------------------------
+     Pre-approval requirements were named by SASO. Off-campus activities add
+     the CMO 63 documentation. Post-activity requirements are the three
+     columns SASO tracks in its master workbook, plus liquidation where funds
+     were disbursed.
+     ---------------------------------------------------------------------------- */
+  var REQUIREMENT_TEMPLATES = {
+    PRE_APPROVAL_COMMON: [
+      { name: 'Permission to Conduct (PTC)',              mandatory: true,  source: 'SASO' },
+      { name: 'Activity Proposal',                        mandatory: true,  source: 'SASO' },
+      { name: 'List of Participants (year level, section)',mandatory: true, source: 'SASO' },
+      { name: 'Communication Letter',                     mandatory: true,  source: 'SASO' },
+      { name: 'Letter to Enter / Supporting Letters',     mandatory: false, source: 'SASO' },
+      { name: 'Excuse Letter',                            mandatory: false, source: 'SASO' }
+    ],
+    PRE_APPROVAL_OFF_CAMPUS_EXTRA: [
+      { name: 'CMO 63 Documentary Requirements',          mandatory: true,  source: 'SASO' }
+    ],
+    POST_ACTIVITY: [
+      { name: 'Narrative Report with Documentation',      mandatory: true,  source: 'SASO' },
+      { name: 'Evaluation',                               mandatory: true,  source: 'SASO' },
+      { name: 'Financial Report',                         mandatory: true,  source: 'SASO' },
+      { name: 'Liquidation',                              mandatory: false, source: 'SASO' }
+    ]
+  };
 
-  /* Days allowed to submit the terminal report after the event finishes.
-     PROTOTYPE ASSUMPTION — confirm the real figure with SASO. */
-  var TERMINAL_REPORT_DEADLINE_DAYS = 15;
-
-  /* A proposal sitting in the SASO queue longer than this is highlighted. */
+  /* SASO policy: post-activity reports are due five days after the event.
+     In practice submissions run late where receipts, class conflicts, or
+     off-campus learning journals intervene, so overdue is a flag, not a bar. */
+  var TERMINAL_REPORT_DEADLINE_DAYS = 5;
   var PROPOSAL_WAITING_ALERT_DAYS = 5;
 
-  /* ---- Activity categories ---------------------------------------------- */
-  var ACTIVITY_TYPES = [
-    'Seminar / Training',
-    'General Assembly',
-    'Competition',
-    'Community Extension',
-    'Sports / Recreation',
-    'Cultural / Socio-civic',
-    'Fund Raising',
-    'Others'
-  ];
-
-  /* ---- Notification types ------------------------------------------------ */
+  /* ---- Notifications --------------------------------------------------------- */
   var NOTIF = {
     PROPOSAL_SUBMITTED: 'PROPOSAL_SUBMITTED',
     PROPOSAL_UNDER_REVIEW: 'PROPOSAL_UNDER_REVIEW',
@@ -212,6 +295,8 @@ SASO.config = (function () {
     REQUIREMENT_SUBMITTED: 'REQUIREMENT_SUBMITTED',
     REQUIREMENT_APPROVED: 'REQUIREMENT_APPROVED',
     REQUIREMENT_RETURNED: 'REQUIREMENT_RETURNED',
+    ENDORSED: 'ENDORSED',
+    ROUTED: 'ROUTED',
     PROPOSAL_APPROVED: 'PROPOSAL_APPROVED',
     PROPOSAL_RETURNED: 'PROPOSAL_RETURNED',
     PROPOSAL_REJECTED: 'PROPOSAL_REJECTED',
@@ -221,7 +306,15 @@ SASO.config = (function () {
     TR_OVERDUE: 'TR_OVERDUE',
     TR_SUBMITTED: 'TR_SUBMITTED',
     TR_ACCEPTED: 'TR_ACCEPTED',
-    TR_RETURNED: 'TR_RETURNED'
+    TR_RETURNED: 'TR_RETURNED',
+    PROPOSAL_EDITED: 'PROPOSAL_EDITED',
+    PROPOSAL_DELETED: 'PROPOSAL_DELETED',
+    PROPOSAL_RESTORED: 'PROPOSAL_RESTORED',
+    PROPOSAL_PURGED: 'PROPOSAL_PURGED',
+    ACCOUNT_REQUESTED: 'ACCOUNT_REQUESTED',
+    ACCOUNT_APPROVED: 'ACCOUNT_APPROVED',
+    ACCOUNT_DECLINED: 'ACCOUNT_DECLINED',
+    ACCOUNT_CREATED: 'ACCOUNT_CREATED'
   };
 
   var NOTIF_ICON = {
@@ -231,6 +324,8 @@ SASO.config = (function () {
     REQUIREMENT_SUBMITTED: 'fa-paperclip',
     REQUIREMENT_APPROVED: 'fa-circle-check',
     REQUIREMENT_RETURNED: 'fa-rotate-left',
+    ENDORSED: 'fa-share-from-square',
+    ROUTED: 'fa-arrow-right-arrow-left',
     PROPOSAL_APPROVED: 'fa-stamp',
     PROPOSAL_RETURNED: 'fa-rotate-left',
     PROPOSAL_REJECTED: 'fa-circle-xmark',
@@ -240,31 +335,120 @@ SASO.config = (function () {
     TR_OVERDUE: 'fa-triangle-exclamation',
     TR_SUBMITTED: 'fa-file-arrow-up',
     TR_ACCEPTED: 'fa-award',
-    TR_RETURNED: 'fa-rotate-left'
+    TR_RETURNED: 'fa-rotate-left',
+    PROPOSAL_EDITED: 'fa-pen-to-square',
+    PROPOSAL_DELETED: 'fa-trash-can',
+    PROPOSAL_RESTORED: 'fa-trash-arrow-up',
+    PROPOSAL_PURGED: 'fa-dumpster',
+    ACCOUNT_REQUESTED: 'fa-user-plus',
+    ACCOUNT_APPROVED: 'fa-user-check',
+    ACCOUNT_DECLINED: 'fa-user-xmark',
+    ACCOUNT_CREATED: 'fa-id-card'
   };
 
-  /* ---- Storage ----------------------------------------------------------- */
-  var STORAGE_KEY = 'cspc_saso_prototype_v1';
-  var SESSION_KEY = 'cspc_saso_session_v1';
+  /* Notification types collapsed into the four things a user actually wants
+     to filter by. */
+  var NOTIF_GROUP = {
+    PROPOSAL_SUBMITTED: 'PROPOSALS',
+    PROPOSAL_UNDER_REVIEW: 'PROPOSALS',
+    PROPOSAL_APPROVED: 'PROPOSALS',
+    PROPOSAL_RETURNED: 'PROPOSALS',
+    PROPOSAL_REJECTED: 'PROPOSALS',
+    ENDORSED: 'PROPOSALS',
+    ROUTED: 'PROPOSALS',
+    REQUIREMENT_REQUESTED: 'REQUIREMENTS',
+    REQUIREMENT_SUBMITTED: 'REQUIREMENTS',
+    REQUIREMENT_APPROVED: 'REQUIREMENTS',
+    REQUIREMENT_RETURNED: 'REQUIREMENTS',
+    EVENT_FINISHED: 'REPORTS',
+    TR_DUE_SOON: 'REPORTS',
+    TR_OVERDUE: 'REPORTS',
+    TR_SUBMITTED: 'REPORTS',
+    TR_ACCEPTED: 'REPORTS',
+    TR_RETURNED: 'REPORTS',
+    COMMENT_POSTED: 'MESSAGES',
+    PROPOSAL_EDITED: 'CHANGES',
+    PROPOSAL_DELETED: 'CHANGES',
+    PROPOSAL_RESTORED: 'CHANGES',
+    PROPOSAL_PURGED: 'CHANGES',
+    ACCOUNT_REQUESTED: 'ACCOUNTS',
+    ACCOUNT_APPROVED: 'ACCOUNTS',
+    ACCOUNT_DECLINED: 'ACCOUNTS',
+    ACCOUNT_CREATED: 'ACCOUNTS'
+  };
+
+  var NOTIF_GROUP_LABEL = {
+    PROPOSALS: 'Proposals and approvals',
+    REQUIREMENTS: 'Requirements',
+    REPORTS: 'Post-activity reports',
+    MESSAGES: 'Queries and comments',
+    CHANGES: 'Proposal edits and deletions',
+    ACCOUNTS: 'Organization accounts'
+  };
+
+  /* Notifications that should read as urgent rather than informational. */
+  var NOTIF_URGENT = ['TR_OVERDUE', 'TR_DUE_SOON', 'REQUIREMENT_REQUESTED',
+                      'REQUIREMENT_RETURNED', 'PROPOSAL_RETURNED', 'PROPOSAL_REJECTED',
+                      'PROPOSAL_DELETED', 'ACCOUNT_REQUESTED'];
+
+  /* ---- Editing, deleting and the trash bin ----------------------------------
+     PROTOTYPE ASSUMPTION (researchers' design decision, not a stated SASO
+     rule). A proposal may be edited or deleted only while it is still under
+     SASO review — Submitted, For Review, Requirements Needed or Revision
+     Required. Once SASO has endorsed it, the papers are with another office
+     and the record is frozen.
+
+     Who may do it: the organization that submitted the proposal, and these
+     SASO accounts — the Head (admin), the Administrative Aide (aide) and the
+     Student Activities Coordinator (coord). The Records Officer keeps
+     view-only access to proposals.
+
+     Deleting does not destroy the record. It moves to a trash bin, where it
+     can be restored or permanently deleted, and is permanently deleted
+     automatically after TRASH_RETENTION_DAYS.
+     ---------------------------------------------------------------------------- */
+  var PROPOSAL_MANAGERS = ['admin', 'aide', 'coord'];
+  var TRASH_RETENTION_DAYS = 30;
+
+  /* ---- Organization accounts ------------------------------------------------
+     There is no open sign-up. An organization gets an account in one of two
+     ways, and SASO controls both:
+       1. it submits a "Request an account" form from the sign-in screen, and
+          SASO approves it — only then can it sign in; or
+       2. SASO creates the organization and its account directly.
+     PROTOTYPE ASSUMPTION (researchers' design decision): the same three staff
+     accounts that manage proposals — Head, Administrative Aide, Coordinator —
+     approve requests and create accounts. The Records Officer can view the
+     requests but not act on them.
+     ---------------------------------------------------------------------------- */
+  var ACCOUNT_MANAGERS = ['admin', 'aide', 'coord'];
+  var ACCOUNT_REQUEST = { PENDING: 'PENDING', APPROVED: 'APPROVED', DECLINED: 'DECLINED' };
+
+  /* v3: adds the trash bin and per-staff notifications. Bumping the key loads
+     the new sample data automatically instead of reusing an older store. */
+  /* v4: adds organization account requests. */
+  var STORAGE_KEY = 'cspc_saso_prototype_v4';
+  var SESSION_KEY = 'cspc_saso_session_v2';
 
   return {
-    ROLE: ROLE,
-    PROPOSAL: PROPOSAL,
-    REQUIREMENT: REQUIREMENT,
-    EVENT: EVENT,
-    TERMINAL: TERMINAL,
-    STAGE: STAGE,
+    ROLE: ROLE, PROPOSAL: PROPOSAL, OFFICE: OFFICE,
+    REQUIREMENT: REQUIREMENT, PHASE: PHASE,
+    EVENT: EVENT, TERMINAL: TERMINAL, STAGE: STAGE,
     ACCREDITATION_LEVEL: ACCREDITATION_LEVEL,
     ACCREDITATION_TYPE: ACCREDITATION_TYPE,
-    LABEL: LABEL,
-    BADGE: BADGE,
-    NOTIF: NOTIF,
-    NOTIF_ICON: NOTIF_ICON,
-    REQUIREMENT_TEMPLATE: REQUIREMENT_TEMPLATE,
+    ENTITY: ENTITY, VENUE: VENUE,
+    ACTIVITY_CATEGORIES: ACTIVITY_CATEGORIES,
+    LABEL: LABEL, BADGE: BADGE,
+    NOTIF: NOTIF, NOTIF_ICON: NOTIF_ICON,
+    NOTIF_GROUP: NOTIF_GROUP, NOTIF_GROUP_LABEL: NOTIF_GROUP_LABEL,
+    NOTIF_URGENT: NOTIF_URGENT,
+    REQUIREMENT_TEMPLATES: REQUIREMENT_TEMPLATES,
     TERMINAL_REPORT_DEADLINE_DAYS: TERMINAL_REPORT_DEADLINE_DAYS,
     PROPOSAL_WAITING_ALERT_DAYS: PROPOSAL_WAITING_ALERT_DAYS,
-    ACTIVITY_TYPES: ACTIVITY_TYPES,
-    STORAGE_KEY: STORAGE_KEY,
-    SESSION_KEY: SESSION_KEY
+    PROPOSAL_MANAGERS: PROPOSAL_MANAGERS,
+    TRASH_RETENTION_DAYS: TRASH_RETENTION_DAYS,
+    ACCOUNT_MANAGERS: ACCOUNT_MANAGERS,
+    ACCOUNT_REQUEST: ACCOUNT_REQUEST,
+    STORAGE_KEY: STORAGE_KEY, SESSION_KEY: SESSION_KEY
   };
 })();

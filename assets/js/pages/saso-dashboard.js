@@ -37,10 +37,11 @@
       '<div class="urgent-panel">' +
         '<div class="urgent-head"><i class="fa-solid fa-circle-exclamation mr-2 text-warning"></i>Needs your attention</div>' +
         '<ul class="urgent-list">' +
-          item(u.requirementsToReview, 'Requirements to review', 'pages/saso/requirements.html', 'is-warning') +
-          item(u.proposalsWaiting, 'Proposals awaiting a decision', 'pages/saso/proposals.html', 'is-warning') +
-          item(u.overdueTerminalReports, 'Overdue terminal reports', 'pages/saso/terminal-reports.html', 'is-critical') +
-          item(u.unansweredQueries, 'Unanswered organization queries', 'pages/saso/activities.html', 'is-warning') +
+          item(u.requirementsToReview, 'Requirements to review', 'pages/saso/requirements.html?status=UNDER_REVIEW', 'is-warning') +
+          item(u.proposalsWaiting, 'Awaiting SASO action', 'pages/saso/proposals.html', 'is-warning') +
+          item(u.longInRoute, 'Long in the approval route', 'pages/saso/proposals.html', 'is-warning') +
+          item(u.overdueTerminalReports, 'Overdue post-activity reports', 'pages/saso/terminal-reports.html', 'is-critical') +
+          item(u.unansweredQueries, 'Unanswered queries', 'pages/saso/activities.html', 'is-warning') +
         '</ul>' +
       '</div>';
   }
@@ -52,18 +53,18 @@
 
     var tiles = [
       { value: s.organizations,   label: 'Organizations',       icon: 'fa-people-group',      href: 'pages/saso/organizations.html' },
-      { value: s.pendingProposals,label: 'Pending Proposals',   icon: 'fa-file-pen',          href: 'pages/saso/proposals.html', mod: s.pendingProposals ? 'is-attention' : '' },
-      { value: s.forReview,       label: 'For Review',          icon: 'fa-magnifying-glass',  href: 'pages/saso/proposals.html', mod: s.forReview ? 'is-attention' : '' },
-      { value: s.approved,        label: 'Approved Activities', icon: 'fa-stamp',             href: 'pages/saso/activities.html' },
-      { value: s.ongoing,         label: 'Ongoing',             icon: 'fa-play',              href: 'pages/saso/activities.html' },
-      { value: s.postponed,       label: 'Postponed',           icon: 'fa-calendar-xmark',    href: 'pages/saso/activities.html', mod: s.postponed ? 'is-attention' : '' },
-      { value: s.finished,        label: 'Finished Events',     icon: 'fa-flag-checkered',    href: 'pages/saso/activities.html' },
-      { value: s.terminalPending, label: 'Terminal Reports Pending', icon: 'fa-hourglass-half', href: 'pages/saso/terminal-reports.html', mod: s.terminalPending ? 'is-overdue' : '' },
-      { value: s.completed,       label: 'Completed',           icon: 'fa-circle-check',      href: 'pages/saso/activities.html', mod: 'is-complete' }
+      { value: s.withSaso,        label: 'With SASO',           icon: 'fa-file-pen',          href: 'pages/saso/proposals.html', mod: s.withSaso ? 'is-attention' : '' },
+      { value: s.inRoute,         label: 'In Approval Route',   icon: 'fa-arrow-right-arrow-left', href: 'pages/saso/proposals.html' },
+      { value: s.approved,        label: 'Approved Activities', icon: 'fa-stamp',             href: 'pages/saso/activities.html?stage=APPROVED' },
+      { value: s.ongoing,         label: 'Ongoing',             icon: 'fa-play',              href: 'pages/saso/activities.html?stage=ONGOING' },
+      { value: s.postponed,       label: 'Postponed',           icon: 'fa-calendar-xmark',    href: 'pages/saso/activities.html?stage=POSTPONED', mod: s.postponed ? 'is-attention' : '' },
+      { value: s.finished,        label: 'Finished Events',     icon: 'fa-flag-checkered',    href: 'pages/saso/activities.html?stage=AWAITING_TERMINAL_REPORT' },
+      { value: s.terminalPending, label: 'Reports Pending',     icon: 'fa-hourglass-half',    href: 'pages/saso/terminal-reports.html', mod: s.terminalPending ? 'is-overdue' : '' },
+      { value: s.completed,       label: 'Completed',           icon: 'fa-circle-check',      href: 'pages/saso/activities.html?stage=COMPLETED', mod: 'is-complete' }
     ];
 
     document.getElementById('statTiles').innerHTML = tiles.map(function (t) {
-      return '<div class="col-6 col-md-4 col-xl-3">' +
+      return '<div class="stat-strip-item">' +
         '<a class="stat-tile ' + (t.mod || '') + '" href="' + SASO.layout.href(t.href, t.label) + '">' +
           '<i class="fa-solid ' + t.icon + ' stat-icon"></i>' +
           '<span class="stat-value">' + t.value + '</span>' +
@@ -76,7 +77,8 @@
 
   var PALETTE = {
     DRAFT: '#cbd5e1',
-    UNDER_APPROVAL: '#60a5fa',
+    UNDER_SASO_REVIEW: '#60a5fa',
+    IN_APPROVAL_ROUTE: '#7c9fd4',
     APPROVED: '#1d5089',
     ONGOING: '#38bdf8',
     POSTPONED: '#b7791f',
@@ -149,9 +151,12 @@
           },
           {
             label: 'Under approval',
-            backgroundColor: PALETTE.UNDER_APPROVAL,
+            backgroundColor: PALETTE.UNDER_SASO_REVIEW,
             data: orgs.map(function (o) {
-              return countWhere(o.id, function (a) { return M.stageOf(a) === C.STAGE.UNDER_APPROVAL; });
+              return countWhere(o.id, function (a) {
+                var st = M.stageOf(a);
+                return st === C.STAGE.UNDER_SASO_REVIEW || st === C.STAGE.IN_APPROVAL_ROUTE;
+              });
             })
           }
         ]
@@ -181,23 +186,25 @@
       host.innerHTML =
         '<div class="empty-state">' +
           '<i class="fa-solid fa-circle-check"></i>' +
-          '<h6>Every finished activity has an accepted terminal report</h6>' +
+          '<h6>Every finished activity has accepted post-activity reports</h6>' +
           '<p>Nothing to follow up right now.</p>' +
         '</div>';
       return;
     }
 
     var body = rows.map(function (r) {
-      var overdue = r.activity.terminalReportStatus === C.TERMINAL.OVERDUE;
+      var overdue = r.terminalStatus === C.TERMINAL.OVERDUE;
+      var missing = r.missing.map(function (m) { return M.escapeHtml(m.name); }).join(', ');
       return '<tr class="' + (overdue ? 'row-overdue' : '') + '">' +
         '<td><span class="cell-primary">' + M.escapeHtml(r.organization.acronym) + '</span>' +
           '<span class="cell-sub">' + M.escapeHtml(r.organization.college) + '</span></td>' +
-        '<td>' + M.escapeHtml(r.activity.title) + '</td>' +
+        '<td>' + M.escapeHtml(r.activity.title) +
+          (missing ? '<span class="cell-sub">Missing: ' + missing + '</span>' : '') + '</td>' +
         '<td class="text-nowrap">' + M.formatDate(r.activity.dateEnd) + '</td>' +
-        '<td>' + M.badge(r.activity.terminalReportStatus) + '</td>' +
+        '<td>' + M.badge(r.terminalStatus) + '</td>' +
         '<td class="text-center">' + (overdue ? r.daysPending : '—') + '</td>' +
         '<td class="text-right"><a class="btn btn-sm btn-outline-primary" href="' +
-          SASO.layout.href('pages/saso/activity-details.html?id=' + r.activity.id, 'Activity Details') +
+          'activity-details.html?id=' + r.activity.id +
           '">Open</a></td>' +
       '</tr>';
     }).join('');
@@ -216,8 +223,7 @@
 
   var FIELD_LABEL = {
     proposalStatus: 'Proposal',
-    eventStatus: 'Event',
-    terminalReportStatus: 'Terminal report'
+    eventStatus: 'Event'
   };
 
   function renderRecent() {
@@ -230,7 +236,7 @@
       return;
     }
 
-    host.innerHTML = '<div class="timeline timeline-inverse mb-0">' +
+    host.innerHTML = '<div class="scroll-panel"><div class="timeline timeline-inverse mb-0 pr-2">' +
       events.map(function (e) {
         var toneClass = e.entry.toValue === C.PROPOSAL.APPROVED ||
                         e.entry.toValue === C.TERMINAL.ACCEPTED ? 'bg-success'
@@ -250,39 +256,84 @@
               '<span class="cell-sub">by ' + M.escapeHtml(e.entry.actorName) + '</span>' +
             '</div>' +
           '</div></div>';
-      }).join('') + '</div>';
+      }).join('') + '</div></div>';
   }
 
   /* ---- go ------------------------------------------------------------------------ */
 
-  /* RSC: SASO must see at a glance which organizations are accredited and
-     which have renewed. Levels and the new/re-accredited distinction are
-     CSPC's own vocabulary, taken from the published roster. */
+  /* RSC: SASO must be able to identify accredited organizations and those
+     that have renewed. The strip carries the counts; the full roster opens in
+     a dialog so it does not crowd the dashboard. */
   function renderAccreditation() {
     var a = M.accreditationSummary();
-    var orgs = M.db().organizations;
-
-    var chips = orgs.map(function (o) {
-      return '<span class="mr-1 mb-1 d-inline-block">' + M.accreditationBadge(o) +
-        ' <span class="cell-sub d-inline">' + M.escapeHtml(o.acronym) + '</span></span>';
-    }).join('');
 
     document.getElementById('accreditationStrip').innerHTML =
-      '<div class="card mb-3"><div class="card-body py-2">' +
-        '<div class="d-flex flex-wrap align-items-center">' +
-          '<span class="text-muted mr-3 text-sm">Accreditation</span>' +
-          '<span class="mr-3 text-sm"><strong>' + a.accredited + '</strong> of ' + a.total +
-            ' accredited</span>' +
-          '<span class="mr-3 text-sm"><strong>' + a.reAccredited + '</strong> re-accredited</span>' +
-          '<span class="mr-3 text-sm"><strong>' + a.recognizedOnly + '</strong> recognized only</span>' +
-          (a.dueSoon.length
-            ? '<span class="ml-auto text-sm"><i class="fa-solid fa-clock text-warning mr-1"></i>' +
-              a.dueSoon.map(function (o) { return M.escapeHtml(o.acronym); }).join(', ') +
-              ' due within 60 days</span>'
-            : '') +
-        '</div>' +
-        '<div class="mt-2">' + chips + '</div>' +
+      '<div class="card mb-3"><div class="card-body py-2 d-flex flex-wrap align-items-center">' +
+        '<span class="text-muted mr-3 text-sm">Accreditation</span>' +
+        '<span class="mr-3 text-sm"><strong>' + a.accredited + '</strong> of ' + a.total + ' accredited</span>' +
+        '<span class="mr-3 text-sm"><strong>' + a.reAccredited + '</strong> re-accredited</span>' +
+        '<span class="mr-3 text-sm"><strong>' + a.recognizedOnly + '</strong> recognized only</span>' +
+        (a.dueSoon.length
+          ? '<span class="mr-3 text-sm"><i class="fa-solid fa-clock text-warning mr-1"></i>' +
+            a.dueSoon.length + ' due within 60 days</span>'
+          : '') +
+        '<button type="button" class="btn btn-sm btn-outline-primary ml-auto" id="btnViewRoster">' +
+          '<i class="fa-solid fa-list mr-1"></i>View organizations</button>' +
       '</div></div>';
+
+    document.getElementById('btnViewRoster').addEventListener('click', showRoster);
+  }
+
+  function showRoster() {
+    var orgs = M.db().organizations.slice().sort(function (x, y) {
+      return x.acronym.localeCompare(y.acronym);
+    });
+
+    var rows = orgs.map(function (o) {
+      var left = M.accreditationDaysLeft(o);
+      var due = left !== null && left <= 60;
+      return '<tr>' +
+        '<td><span class="cell-primary">' + M.escapeHtml(o.acronym) + '</span>' +
+          '<span class="cell-sub">' + M.escapeHtml(o.name) + '</span></td>' +
+        '<td>' + M.escapeHtml(o.college) + '</td>' +
+        '<td>' + M.escapeHtml(o.adviser) + '</td>' +
+        '<td>' + M.accreditationBadge(o) + '</td>' +
+        '<td class="text-nowrap' + (due ? ' text-danger' : '') + '">' +
+          M.formatDate(o.accreditationExpires) +
+          (due ? '<span class="cell-sub text-danger">' + left + ' days left</span>' : '') + '</td>' +
+        '<td class="text-center">' + M.activitiesFor(o.id).length + '</td>' +
+      '</tr>';
+    }).join('');
+
+    var existing = document.getElementById('rosterModal');
+    if (existing) { existing.remove(); }
+
+    document.body.insertAdjacentHTML('beforeend',
+      '<div class="modal fade" id="rosterModal" tabindex="-1">' +
+        '<div class="modal-dialog modal-xl modal-dialog-scrollable">' +
+          '<div class="modal-content">' +
+            '<div class="modal-header">' +
+              '<h5 class="modal-title">Recognized and accredited student organizations</h5>' +
+              '<button type="button" class="close" data-dismiss="modal">&times;</button>' +
+            '</div>' +
+            '<div class="modal-body p-0">' +
+              '<div class="table-responsive"><table class="table table-hover mb-0">' +
+                '<thead><tr><th>Organization</th><th>College</th><th>Adviser</th>' +
+                '<th>Accreditation</th><th>Valid Until</th><th class="text-center">Activities</th></tr></thead>' +
+                '<tbody>' + rows + '</tbody>' +
+              '</table></div>' +
+            '</div>' +
+            '<div class="modal-footer">' +
+              '<span class="text-muted text-sm mr-auto">Academic Year 2025\u20132026</span>' +
+              '<button type="button" class="btn btn-light" data-dismiss="modal">Close</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>');
+
+    var $m = window.jQuery('#rosterModal');
+    $m.modal('show');
+    $m.on('hidden.bs.modal', function () { $m.remove(); });
   }
 
   renderUrgent();

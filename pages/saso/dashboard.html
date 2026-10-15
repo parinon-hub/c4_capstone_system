@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Dashboard — SASO Activity Monitoring</title>
+  <link rel="icon" type="image/png" href="../../assets/img/favicon.png">
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/css/adminlte.min.css">
@@ -27,7 +28,10 @@
         <div id="accreditationStrip"></div>
 
         <!-- Summary tiles -->
-        <div class="row" id="statTiles"></div>
+        <!-- One scrollable row; its scrollbar sits on top (layout.js). -->
+        <div class="stat-strip-wrap">
+          <div class="stat-strip top-scroll" id="statTiles" tabindex="0" aria-label="Summary figures"></div>
+        </div>
 
         <div class="row">
           <div class="col-lg-5">
@@ -53,9 +57,9 @@
           <div class="col-lg-7">
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title">Terminal reports pending</h3>
+                <h3 class="card-title">Post-activity reports pending</h3>
                 <div class="card-tools">
-                  <span class="card-subtitle">Finished activities that are not yet completed</span>
+                  <span class="card-subtitle">Finished activities whose reports are not yet complete</span>
                 </div>
               </div>
               <div class="card-body p-0" id="nonComplianceTable"></div>

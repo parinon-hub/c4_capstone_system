@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Dashboard — Organization Portal</title>
+  <link rel="icon" type="image/png" href="../../assets/img/favicon.png">
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/css/adminlte.min.css">
@@ -27,7 +28,10 @@
           </a>
         </div>
 
-        <div class="row" id="statTiles"></div>
+        <!-- One scrollable row; its scrollbar sits on top (layout.js). -->
+        <div class="stat-strip-wrap is-compact">
+          <div class="stat-strip top-scroll" id="statTiles" tabindex="0" aria-label="Summary figures"></div>
+        </div>
 
         <div class="card">
           <div class="card-header">

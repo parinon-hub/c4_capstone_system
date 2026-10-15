@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Request an account — CSPC SASO Activity Monitoring</title>
+  <link rel="icon" type="image/png" href="assets/img/favicon.png">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/css/adminlte.min.css">
+  <link rel="stylesheet" href="assets/css/saso-theme.css">
+</head>
+<body class="login-page is-tall">
+
+  <main class="login-shell is-wide">
+
+    <div class="login-brand request-brand">
+      <img src="assets/img/saso-logo-sm.png" class="request-seal" alt="">
+      <div>
+        <h1>Request an organization account</h1>
+        <p>Student Affairs and Services Office — Student Organization Activity Monitoring</p>
+      </div>
+    </div>
+
+    <div class="login-card" id="requestCard"></div>
+
+    <div class="login-card status-card mt-3">
+      <h6 class="oa-section mb-2"><i class="fa-solid fa-magnifying-glass mr-2"></i>Already sent a request? Check its status</h6>
+      <div class="input-group input-group-sm">
+        <input type="text" class="form-control" id="statusRef" placeholder="Reference number, e.g. AR-2026-0001">
+        <div class="input-group-append">
+          <button class="btn btn-outline-primary" type="button" id="btnStatus">Check</button>
+        </div>
+      </div>
+      <div id="statusResult" class="mt-2"></div>
+    </div>
+
+    <p class="login-note">
+      <a href="index.html"><i class="fa-solid fa-arrow-left mr-1"></i>Back to sign in</a><br>
+      There is no open sign-up. Only organizations recognized by SASO can have an account,
+      and every request is reviewed by SASO before the account can be used.
+    </p>
+
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/js/adminlte.min.js"></script>
+
+  <script>window.SASO_BASE = './';</script>
+  <script src="assets/js/core/config.js"></script>
+  <script src="data/seed.js"></script>
+  <script src="assets/js/core/storage.js"></script>
+  <script src="assets/js/core/model.js"></script>
+  <script src="assets/js/core/events.js"></script>
+  <script src="assets/js/core/auth.js"></script>
+  <script src="assets/js/core/org-account-form.js"></script>
+  <script src="assets/js/pages/request-account.js"></script>
+</body>
+</html>

@@ -30,6 +30,16 @@ SASO.auth = (function () {
     })[0];
 
     if (!user) {
+      /* No open sign-up: a requester cannot sign in until SASO approves. */
+      var req = SASO.model.latestRequestForUsername(username);
+      if (req && req.status === C.ACCOUNT_REQUEST.PENDING) {
+        return { ok: false, pending: true, message: 'Your account request (' + req.ref +
+          ') is still awaiting SASO approval. You can sign in once SASO approves it.' };
+      }
+      if (req && req.status === C.ACCOUNT_REQUEST.DECLINED) {
+        return { ok: false, message: 'Your account request (' + req.ref + ') was declined by SASO' +
+          (req.remarks ? ': ' + req.remarks : '.') + ' You may submit a new request.' };
+      }
       return { ok: false, message: 'No account found with that username.' };
     }
     if (user.password !== password) {
