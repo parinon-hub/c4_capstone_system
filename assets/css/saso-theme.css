@@ -1427,3 +1427,36 @@ a.notif-message:hover { color: var(--cspc-navy); text-decoration: underline; }
   .seal-coin { animation: none !important; transform: rotateY(0deg) !important; }
   .seal-shadow { animation: none !important; transform: scaleX(1) !important; }
 }
+/* ---- Sign-in background photo (index.html only) ----------------------------------------
+   The campus photograph sits behind a navy wash so the white card and the
+   brand text stay readable. request-account.html keeps the plain gradient,
+   since it carries a long form and a photograph behind it would compete.
+   ------------------------------------------------------------------------------------- */
+
+.login-hero {
+  background: #0a2044
+    linear-gradient(180deg, rgba(10, 32, 68, 0.70) 0%, rgba(10, 32, 68, 0.84) 100%),
+    url('../img/login-bg.jpg');
+  background-size: cover, cover;
+  background-position: center, center;
+  background-repeat: no-repeat, no-repeat;
+}
+
+.login-hero .login-brand h1 {
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.login-hero .login-brand p,
+.login-hero .login-note {
+  color: rgba(255, 255, 255, 0.86);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.login-hero .login-card {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+}
+
+.login-hero .seal-shadow {
+  opacity: 0.35;
+}
