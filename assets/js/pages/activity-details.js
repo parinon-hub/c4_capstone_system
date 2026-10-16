@@ -84,7 +84,7 @@
     var stage = M.stageOf(activity);
     return '' +
       '<div class="detail-head">' +
-        '<div class="d-flex flex-wrap align-items-start">' +
+        '<div class="d-flex flex-wrap align-items-center">' +
           '<div class="mr-auto">' +
             '<h2 class="detail-title">' + M.escapeHtml(activity.title || 'Untitled draft') + '</h2>' +
             '<div class="detail-sub">' +
@@ -98,13 +98,19 @@
                 M.relativeTime(activity.lastEditedAt) + '</div>'
               : '') +
           '</div>' +
+          /* Each badge carries the same title as its column in the lists. */
           '<div class="detail-badges">' +
-            M.badge(activity.proposalStatus) + ' ' +
-            (activity.eventStatus !== C.EVENT.NOT_APPLICABLE ? M.badge(activity.eventStatus) + ' ' : '') +
-            M.badge(stage) +
+            badgeCell('Proposal', activity.proposalStatus) +
+            (activity.eventStatus !== C.EVENT.NOT_APPLICABLE ? badgeCell('Event', activity.eventStatus) : '') +
+            badgeCell('Stage', stage) +
           '</div>' +
         '</div>' +
       '</div>';
+  }
+
+  function badgeCell(title, value) {
+    return '<div class="detail-badge"><span class="detail-badge-title">' + title + '</span>' +
+      M.badge(value) + '</div>';
   }
 
   /* --------------------------------------------------------------- actions */
