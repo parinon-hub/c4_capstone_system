@@ -305,9 +305,9 @@
         return '<tr>' +
           '<td><span class="cell-primary">' + M.label(l.office) + '</span>' +
             (l.remarks ? '<span class="cell-sub">' + M.escapeHtml(l.remarks) + '</span>' : '') + '</td>' +
-          '<td class="text-sm text-muted">' +
+          '<td class="text-sm text-muted text-nowrap">' +
             (l.transmittedAt ? 'Sent ' + M.formatDate(l.transmittedAt) : '—') + '</td>' +
-          '<td class="text-right">' +
+          '<td class="text-right text-nowrap">' +
             (l.decidedAt
               ? '<span class="badge badge-success status-badge">' +
                 M.escapeHtml(l.decision) + '</span><span class="cell-sub">' +
@@ -431,7 +431,7 @@
        of the pair has nothing to show. */
     document.getElementById('detailRoot').innerHTML =
       renderHeader() + timeline() + actionBar() + infoCard() +
-      pair(preCard, route, 'col-lg-7', 'col-lg-5') +
+      pair(preCard, route, 'col-lg-8', 'col-lg-4') +
       postCard +
       pair(commentCard(), history, 'col-lg-8', 'col-lg-4');
 
@@ -440,7 +440,7 @@
 
   function pair(left, right, leftCol, rightCol) {
     if (!left || !right) { return left + right; }
-    return '<div class="row">' +
+    return '<div class="row row-even">' +
       '<div class="' + leftCol + '">' + left + '</div>' +
       '<div class="' + rightCol + '">' + right + '</div>' +
     '</div>';
