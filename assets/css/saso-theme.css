@@ -560,28 +560,29 @@ a:hover { color: var(--cspc-navy); }
 .sort-link.is-active { color: var(--cspc-navy); }
 .sort-link.is-active i { opacity: 1; }
 
-/* Start date / End date dropdown beside the Event Date header. */
+/* Start date / End date dropdown beside the Event Date header. The arrow
+   button alone carries the choice: green for start date, red for end date. */
 .date-pick { display: inline-block; margin-left: 0.3rem; vertical-align: middle; }
 .date-pick-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.1rem 0.35rem;
-  border: 1px solid var(--cspc-line);
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  padding: 0;
+  border: 1px solid;
   border-radius: 4px;
-  background: #fff;
-  color: var(--cspc-ink);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0;
-  text-transform: none;
-  line-height: 1.4;
+  font-size: 0.6rem;
+  line-height: 1;
   cursor: pointer;
+  transition: background-color 0.15s ease;
 }
-.date-pick-toggle i { font-size: 0.55rem; color: var(--cspc-muted); }
-.date-pick-toggle:hover,
-.date-pick.show .date-pick-toggle { border-color: var(--cspc-navy-light); }
-.date-pick-toggle:focus { outline: none; box-shadow: 0 0 0 2px rgba(19, 58, 99, 0.15); }
+.date-pick-toggle.is-start { background: #e3f4e8; border-color: #2f855a; color: #2f855a; }
+.date-pick-toggle.is-end   { background: #fde0dd; border-color: #c0392b; color: #c0392b; }
+.date-pick-toggle.is-start:hover, .date-pick.show .date-pick-toggle.is-start { background: #cdebd6; }
+.date-pick-toggle.is-end:hover,   .date-pick.show .date-pick-toggle.is-end   { background: #f9c9c3; }
+.date-pick-toggle:focus { outline: none; box-shadow: 0 0 0 2px rgba(19, 58, 99, 0.18); }
+.date-pick.show .date-pick-toggle i { transform: rotate(180deg); }
 .date-pick-menu {
   min-width: 7.5rem;
   margin-top: 0.25rem;
@@ -595,7 +596,8 @@ a:hover { color: var(--cspc-navy); }
 }
 .date-pick-menu .dropdown-item { padding: 0.35rem 0.75rem; color: var(--cspc-ink); font-weight: 400; }
 .date-pick-menu .dropdown-item:hover { background: #f4f7fb; }
-.date-pick-menu .dropdown-item.is-selected { background: #e3f0fb; color: var(--cspc-navy); }
+.date-pick-menu .dropdown-item.is-start.is-selected { background: #e3f4e8; color: #22663f; }
+.date-pick-menu .dropdown-item.is-end.is-selected   { background: #fde0dd; color: #a52a1a; }
 
 .pagination .page-link { color: var(--cspc-navy); }
 .pagination .page-item.active .page-link {

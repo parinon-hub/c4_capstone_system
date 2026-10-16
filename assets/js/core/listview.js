@@ -33,8 +33,8 @@ SASO.listview = (function () {
      whether each row shows the activity's start date or its end date.
      `state.dateField` holds the choice ('start' or 'end'). */
   var DATE_FIELDS = [
-    { value: 'start', label: 'Start date', short: 'Start' },
-    { value: 'end', label: 'End date', short: 'End' }
+    { value: 'start', label: 'Start date' },
+    { value: 'end', label: 'End date' }
   ];
 
   function dateHeader(state, label) {
@@ -42,12 +42,13 @@ SASO.listview = (function () {
     var current = DATE_FIELDS.filter(function (f) { return f.value === pick; })[0];
     return '<th class="text-nowrap">' + label +
       '<div class="dropdown date-pick">' +
-        '<button type="button" class="date-pick-toggle" data-toggle="dropdown" ' +
-          'aria-haspopup="true" aria-expanded="false" aria-label="Show start or end date">' +
-          current.short + ' <i class="fa-solid fa-chevron-down"></i></button>' +
+        '<button type="button" class="date-pick-toggle is-' + pick + '" data-toggle="dropdown" ' +
+          'aria-haspopup="true" aria-expanded="false" title="Showing ' + current.label.toLowerCase() + '" ' +
+          'aria-label="Showing ' + current.label.toLowerCase() + '. Choose start or end date">' +
+          '<i class="fa-solid fa-chevron-down"></i></button>' +
         '<div class="dropdown-menu date-pick-menu">' +
           DATE_FIELDS.map(function (f) {
-            return '<a href="#" class="dropdown-item' + (f.value === pick ? ' is-selected' : '') +
+            return '<a href="#" class="dropdown-item is-' + f.value + (f.value === pick ? ' is-selected' : '') +
               '" data-date-field="' + f.value + '">' + f.label + '</a>';
           }).join('') +
         '</div>' +
