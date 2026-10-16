@@ -191,12 +191,12 @@
 
     host.innerHTML = '<div class="table-responsive"><table class="table table-hover">' +
       '<thead><tr>' +
-        L.sortHeader(state, 'acronym', 'Organization') +
-        L.sortHeader(state, 'college', 'College') +
+        L.header('Organization') +
+        L.header('College') +
         '<th>Adviser</th>' +
-        L.sortHeader(state, 'level', 'Accreditation') +
-        L.sortHeader(state, 'activities', 'Activities', 'text-center') +
-        L.sortHeader(state, 'outstanding', 'Compliance') +
+        L.header('Accreditation') +
+        L.header('Activities', 'text-center') +
+        L.header('Compliance') +
         '<th></th>' +
       '</tr></thead><tbody>' +
       list.map(function (p) {
@@ -221,7 +221,6 @@
         '</tr>';
       }).join('') + '</tbody></table></div>';
 
-    L.bindSort(host, state, render);
 
     host.querySelectorAll('[data-org]').forEach(function (b) {
       b.addEventListener('click', function () { openProfile(this.getAttribute('data-org')); });

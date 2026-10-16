@@ -23,28 +23,54 @@ SASO.listview = (function () {
         ' <i class="fa-solid ' + icon + '"></i></a></th>';
   }
 
-  /* An "Event Date" header that sorts like any other and carries a small
-     Start/End picker, so each row shows one date instead of a full range.
-     `state.dateField` holds the choice ('start' or 'end'). */
-  function dateHeader(state, key, label) {
-    var active = state.sort === key;
-    var icon = !active ? 'fa-sort' : (state.dir === 'asc' ? 'fa-sort-up' : 'fa-sort-down');
-    var pick = state.dateField === 'end' ? 'end' : 'start';
-    return '<th>' +
-      '<a href="#" class="sort-link' + (active ? ' is-active' : '') +
-        '" data-sort="' + key + '">' + label +
-        ' <i class="fa-solid ' + icon + '"></i></a>' +
-      '<select class="date-pick" aria-label="Show start or end date">' +
-        '<option value="start"' + (pick === 'start' ? ' selected' : '') + '>Start</option>' +
-        '<option value="end"' + (pick === 'end' ? ' selected' : '') + '>End</option>' +
-      '</select></th>';
+  /* A plain column header. List pages keep their default order, so the
+     headers carry no sort arrows. */
+  function header(label, extraClass) {
+    return '<th' + (extraClass ? ' class="' + extraClass + '"' : '') + '>' + label + '</th>';
   }
 
-  /* The date the picker points at; one-day activities have no end date. */
+  /* An "Event Date" header with a small dropdown beside it that chooses
+     whether each row shows the activity's start date or its end date.
+     `state.dateField` holds the choice ('start' or 'end'). */
+  var DATE_FIELDS = [
+    { value: 'start', label: 'Start date', short: 'Start' },
+    { value: 'end', label: 'End date', short: 'End' }
+  ];
+
+  function dateHeader(state, label) {
+    var pick = state.dateField === 'end' ? 'end' : 'start';
+    var current = DATE_FIELDS.filter(function (f) { return f.value === pick; })[0];
+    return '<th class="text-nowrap">' + label +
+      '<div class="dropdown date-pick">' +
+        '<button type="button" class="date-pick-toggle" data-toggle="dropdown" ' +
+          'aria-haspopup="true" aria-expanded="false" aria-label="Show start or end date">' +
+          current.short + ' <i class="fa-solid fa-chevron-down"></i></button>' +
+        '<div class="dropdown-menu date-pick-menu">' +
+          DATE_FIELDS.map(function (f) {
+            return '<a href="#" class="dropdown-item' + (f.value === pick ? ' is-selected' : '') +
+              '" data-date-field="' + f.value + '">' + f.label + '</a>';
+          }).join('') +
+        '</div>' +
+      '</div></th>';
+  }
+
+  /* The date the dropdown points at; one-day activities have no end date. */
   function pickedDate(activity, state) {
     return state.dateField === 'end'
       ? (activity.dateEnd || activity.dateStart)
       : activity.dateStart;
+  }
+
+  function bindDatePick(root, state, onChange) {
+    root.querySelectorAll('[data-date-field]').forEach(function (item) {
+      item.addEventListener('click', function (e) {
+        e.preventDefault();
+        var value = this.getAttribute('data-date-field');
+        if (value === state.dateField) { return; }
+        state.dateField = value;
+        onChange();
+      });
+    });
   }
 
   /* Wires every sort header inside `root`. Numeric keys are compared as
@@ -61,12 +87,6 @@ SASO.listview = (function () {
           state.dir = 'asc';
         }
         state.page = 1;
-        onChange();
-      });
-    });
-    root.querySelectorAll('.date-pick').forEach(function (select) {
-      select.addEventListener('change', function () {
-        state.dateField = this.value;
         onChange();
       });
     });
@@ -155,8 +175,10 @@ SASO.listview = (function () {
 
   return {
     sortHeader: sortHeader,
+    header: header,
     dateHeader: dateHeader,
     pickedDate: pickedDate,
+    bindDatePick: bindDatePick,
     bindSort: bindSort,
     sort: sort,
     paginate: paginate,

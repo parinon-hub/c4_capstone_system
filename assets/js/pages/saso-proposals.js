@@ -182,14 +182,14 @@
     }
 
     /* `top-scroll` puts the horizontal scrollbar above the table (layout.js). */
-    host.innerHTML = '<div class="table-responsive top-scroll"><table class="table table-hover table-compact">' +
+    host.innerHTML = '<div class="table-responsive top-scroll"><table class="table table-hover">' +
       '<thead><tr>' +
-        L.sortHeader(state, 'org', 'Organization') +
-        L.sortHeader(state, 'title', 'Activity') +
-        L.sortHeader(state, 'submitted', 'Submitted') +
-        L.dateHeader(state, 'eventDate', 'Event Date') +
+        L.header('Organization') +
+        L.header('Activity') +
+        L.header('Submitted') +
+        L.dateHeader(state, 'Event Date') +
         '<th>Requirements</th><th>Status</th><th>Now With</th>' +
-        L.sortHeader(state, 'waiting', 'Days Waiting', 'text-center') +
+        L.header('Days Waiting', 'text-center') +
         '<th></th>' +
       '</tr></thead><tbody>' +
       paged.slice.map(function (a) {
@@ -218,7 +218,7 @@
         '</tr>';
       }).join('') + '</tbody></table></div>';
 
-    L.bindSort(host, state, render);
+    L.bindDatePick(host, state, render);
     L.renderPager('pager', list.length, paged.pages, state, PAGE_SIZE, render);
     P.bind(host, render, render);
   }

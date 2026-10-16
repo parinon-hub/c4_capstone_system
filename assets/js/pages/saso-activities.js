@@ -135,13 +135,13 @@
       return;
     }
 
-    host.innerHTML = '<div class="table-responsive"><table class="table table-hover table-compact">' +
+    host.innerHTML = '<div class="table-responsive"><table class="table table-hover">' +
       '<thead><tr>' +
-        L.sortHeader(state, 'org', 'Organization') +
-        L.sortHeader(state, 'title', 'Activity') +
-        L.sortHeader(state, 'category', 'Category') +
-        L.dateHeader(state, 'eventDate', 'Event Date') +
-        L.sortHeader(state, 'participants', 'Participants', 'text-center') +
+        L.header('Organization') +
+        L.header('Activity') +
+        L.header('Category') +
+        L.dateHeader(state, 'Event Date') +
+        L.header('Participants', 'text-center') +
         '<th>Proposal</th><th>Event</th><th>Reports</th><th>Stage</th><th></th>' +
       '</tr></thead><tbody>' +
       paged.slice.map(function (a) {
@@ -168,7 +168,7 @@
         '</tr>';
       }).join('') + '</tbody></table></div>';
 
-    L.bindSort(host, state, render);
+    L.bindDatePick(host, state, render);
     L.renderPager('pager', list.length, paged.pages, state, PAGE_SIZE, render);
   }
 
