@@ -627,7 +627,12 @@ a:hover { color: var(--cspc-navy); }
 
 .detail-title { font-size: 1.25rem; font-weight: 600; margin: 0 0 0.15rem; }
 .detail-sub { font-size: 0.8125rem; color: var(--cspc-muted); }
-.detail-badges { display: flex; flex-wrap: wrap; gap: 0.25rem; align-items: flex-start; }
+.detail-badges { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; align-items: center; }
+.detail-badge { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; }
+.detail-badge-title {
+  font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.04em;
+  text-transform: uppercase; color: var(--cspc-muted);
+}
 
 .detail-actions { margin-bottom: 1rem; }
 
