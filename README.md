@@ -258,10 +258,16 @@ An organization gets an account in one of two ways, and SASO controls both:
    the request's status on the same page. Signing in before approval says the
    request is still pending; after a decline, it shows SASO's reason.
 2. **Add organization.** SASO creates the organization and its account
-   directly, from Organizations or Account Requests.
+   directly, from Organizations or Manage Accounts.
 
-**Account Requests** (SASO sidebar, with a badge for pending requests) is where
-the Head (`admin`), Administrative Aide (`aide`) and Coordinator (`coord`)
+**Manage Accounts** (SASO sidebar, with a badge for pending requests) lists
+every organization's sign-in account. The Head, Aide and Coordinator can edit
+an organization's details and its account (leave the password blank to keep
+it), or delete the account. Deleting only removes the sign-in: the
+organization stays on the roster with all its records, and Edit can give it a
+new account later.
+
+Below that list, the **Account requests** queue is where the Head (`admin`), Administrative Aide (`aide`) and Coordinator (`coord`)
 review each request. Approving records the organization's standing
 (Recognized, or Level I–IV and accredited/re-accredited, with its validity
 date) and creates the organization and its account in one step. Declining

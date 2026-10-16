@@ -898,12 +898,90 @@ SASO.events = (function () {
     return { ok: true, org: made.org, user: made.user };
   }
 
+  /* SASO corrects an organization's details or its sign-in account. A blank
+     password keeps the current one. When the organization has no account
+     (it was deleted), saving with a username and password creates a new one. */
+  function updateOrganizationAccount(orgId, form) {
+    var actor = SASO.auth.current();
+    if (!SASO.model.canManageAccounts(actor)) { return { ok: false, message: 'Not permitted.' }; }
+    var org = SASO.model.orgById(orgId);
+    if (!org) { return { ok: false, message: 'This organization no longer exists.' }; }
+    var user = SASO.model.accountForOrg(orgId);
+    var data = db();
+
+    var acronymKey = form.acronym.toLowerCase();
+    if (data.organizations.some(function (o) { return o.id !== org.id && o.acronym.toLowerCase() === acronymKey; }) ||
+        SASO.model.pendingAccountRequests().some(function (r) { return r.acronym.toLowerCase() === acronymKey; })) {
+      return { ok: false, message: 'Another organization already uses the acronym ' + form.acronym + '.' };
+    }
+    var userKey = form.username.toLowerCase();
+    if (data.users.some(function (u) { return u !== user && u.username.toLowerCase() === userKey; }) ||
+        SASO.model.pendingAccountRequests().some(function (r) { return r.username.toLowerCase() === userKey; })) {
+      return { ok: false, message: 'The username "' + form.username + '" is already in use.' };
+    }
+
+    ORG_FIELDS.forEach(function (k) { org[k] = form[k]; });
+    org.accreditationLevel = form.accreditationLevel || C.ACCREDITATION_LEVEL.RECOGNIZED;
+    org.accreditationType = org.accreditationLevel === C.ACCREDITATION_LEVEL.RECOGNIZED
+      ? C.ACCREDITATION_TYPE.NOT_APPLICABLE
+      : (form.accreditationType || C.ACCREDITATION_TYPE.ACCREDITED);
+    org.accreditationExpires = form.accreditationExpires || null;
+
+    var created = !user;
+    if (created) {
+      user = { id: SASO.storage.nextId('usr'), role: C.ROLE.ORG, organizationId: org.id };
+      data.users.push(user);
+    }
+    user.username = form.username;
+    if (form.password) { user.password = form.password; }
+    user.name = form.officerName;
+    user.position = form.officerPosition + ', ' + org.acronym;
+    user.email = form.email || null;
+    user.contact = form.contact || null;
+
+    notifyOrg(org.id, null, C.NOTIF.ACCOUNT_UPDATED,
+      created
+        ? 'SASO (' + actor.name + ') created a new sign-in account for your organization.'
+        : 'SASO (' + actor.name + ') updated your organization\u2019s details or sign-in account.');
+    notifyAccountManagers(C.NOTIF.ACCOUNT_UPDATED,
+      actor.name + (created ? ' created a new account for ' : ' edited the account of ') +
+        org.acronym + ' (' + user.username + ').',
+      'You ' + (created ? 'created a new account for ' : 'edited the account of ') +
+        org.acronym + ' (' + user.username + ').', actor);
+
+    SASO.storage.save();
+    return { ok: true, org: org, user: user, created: created };
+  }
+
+  /* Removes an organization's sign-in account. The organization stays on the
+     roster with all its activities and records; it simply can no longer sign
+     in until SASO gives it a new account from Edit. */
+  function deleteOrganizationAccount(orgId) {
+    var actor = SASO.auth.current();
+    if (!SASO.model.canManageAccounts(actor)) { return { ok: false, message: 'Not permitted.' }; }
+    var org = SASO.model.orgById(orgId);
+    var user = SASO.model.accountForOrg(orgId);
+    if (!org || !user) { return { ok: false, message: 'This account no longer exists.' }; }
+
+    var users = db().users;
+    users.splice(users.indexOf(user), 1);
+
+    notifyAccountManagers(C.NOTIF.ACCOUNT_DELETED,
+      actor.name + ' deleted the account of ' + org.acronym + ' (' + user.username + ').',
+      'You deleted the account of ' + org.acronym + ' (' + user.username + ').', actor);
+
+    SASO.storage.save();
+    return { ok: true, org: org, user: user };
+  }
+
   return {
     /* organization accounts */
     submitAccountRequest: submitAccountRequest,
     approveAccountRequest: approveAccountRequest,
     declineAccountRequest: declineAccountRequest,
     createOrganizationAccount: createOrganizationAccount,
+    updateOrganizationAccount: updateOrganizationAccount,
+    deleteOrganizationAccount: deleteOrganizationAccount,
     /* editing, deleting and the trash bin */
     editProposal: editProposal,
     deleteProposal: deleteProposal,

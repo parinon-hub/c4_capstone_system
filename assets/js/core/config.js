@@ -314,7 +314,9 @@ SASO.config = (function () {
     ACCOUNT_REQUESTED: 'ACCOUNT_REQUESTED',
     ACCOUNT_APPROVED: 'ACCOUNT_APPROVED',
     ACCOUNT_DECLINED: 'ACCOUNT_DECLINED',
-    ACCOUNT_CREATED: 'ACCOUNT_CREATED'
+    ACCOUNT_CREATED: 'ACCOUNT_CREATED',
+    ACCOUNT_UPDATED: 'ACCOUNT_UPDATED',
+    ACCOUNT_DELETED: 'ACCOUNT_DELETED'
   };
 
   var NOTIF_ICON = {
@@ -343,7 +345,9 @@ SASO.config = (function () {
     ACCOUNT_REQUESTED: 'fa-user-plus',
     ACCOUNT_APPROVED: 'fa-user-check',
     ACCOUNT_DECLINED: 'fa-user-xmark',
-    ACCOUNT_CREATED: 'fa-id-card'
+    ACCOUNT_CREATED: 'fa-id-card',
+    ACCOUNT_UPDATED: 'fa-user-pen',
+    ACCOUNT_DELETED: 'fa-user-slash'
   };
 
   /* Notification types collapsed into the four things a user actually wants
@@ -374,7 +378,9 @@ SASO.config = (function () {
     ACCOUNT_REQUESTED: 'ACCOUNTS',
     ACCOUNT_APPROVED: 'ACCOUNTS',
     ACCOUNT_DECLINED: 'ACCOUNTS',
-    ACCOUNT_CREATED: 'ACCOUNTS'
+    ACCOUNT_CREATED: 'ACCOUNTS',
+    ACCOUNT_UPDATED: 'ACCOUNTS',
+    ACCOUNT_DELETED: 'ACCOUNTS'
   };
 
   var NOTIF_GROUP_LABEL = {
