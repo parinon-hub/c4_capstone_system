@@ -568,8 +568,10 @@ a:hover { color: var(--cspc-navy); }
 .section-toggle[aria-expanded="true"] i { transform: rotate(180deg); }
 
 /* Start date / End date dropdown beside the Event Date header. The arrow
-   button alone carries the choice: green for start date, red for end date. */
-.date-pick { display: inline-block; margin-left: 0.3rem; vertical-align: middle; }
+   button alone carries the choice: green for start date, red for end date.
+   Negative top and bottom margins stop the button from making the header line
+   taller, so "Event Date" sits level with the other column titles. */
+.date-pick { display: inline-block; margin: -0.4rem 0 -0.4rem 0.3rem; vertical-align: middle; }
 .date-pick-toggle {
   display: inline-flex;
   align-items: center;
