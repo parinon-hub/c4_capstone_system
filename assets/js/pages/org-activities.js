@@ -1,8 +1,9 @@
 /* =========================================================================
    org-activities.js  —  The organization's own activity list.
 
-   Search, filtering and pagination all operate on the simulated data.
-   The list is always newest update first. Each row carries one contextual action: the single next thing this
+   Search, the Sort and Filter menus and pagination all operate on the
+   simulated data. The Sort menu works like a file manager's: pick what to
+   sort by, ascending or descending, and optionally group the rows. Each row carries one contextual action: the single next thing this
    organization has to do for that activity.
    ========================================================================= */
 
@@ -24,8 +25,22 @@
   var org = SASO.auth.organization();
   var P = SASO.proposalActions;
   var L = SASO.listview;
-  var state = { search: '', stage: '', category: '', page: 1,
-                dateField: 'start' };
+  var state = { search: '', stage: '', category: '', page: 1, dateField: 'start',
+                sort: 'updatedAt', dir: 'desc', group: '' };
+
+  var STAGE_ORDER = Object.keys(C.STAGE);
+  var SORTS = [
+    { key: 'title',     label: 'Activity name' },
+    { key: 'eventDate', label: 'Event date' },
+    { key: 'stage',     label: 'Stage' },
+    { key: 'category',  label: 'Category' },
+    { key: 'updatedAt', label: 'Last update' }
+  ];
+  var GROUPS = [
+    { key: '',         label: 'None' },
+    { key: 'stage',    label: 'Stage' },
+    { key: 'category', label: 'Category' }
+  ];
 
   /* Confirmation after returning from the wizard. */
   var submitted = new URLSearchParams(window.location.search).get('submitted');
@@ -55,19 +70,77 @@
     slot.innerHTML = P.trashButton('trash.html');
   }
 
-  /* ---- filter controls ------------------------------------------------------ */
+  /* ---- sort and filter menus --------------------------------------------------- */
 
-  var stageSelect = document.getElementById('fStage');
-  stageSelect.innerHTML = '<option value="">All stages</option>' +
-    Object.keys(C.STAGE).map(function (k) {
-      return '<option value="' + k + '">' + C.LABEL[k] + '</option>';
-    }).join('');
+  function menuItem(attrs, label, selected) {
+    return '<a href="#" class="dropdown-item' + (selected ? ' is-selected' : '') + '" ' + attrs + '>' +
+      label + '</a>';
+  }
 
-  var categorySelect = document.getElementById('fCategoryFilter');
-  categorySelect.innerHTML = '<option value="">All categories</option>' +
-    C.ACTIVITY_CATEGORIES.map(function (c) {
-      return '<option value="' + c + '">' + c + '</option>';
+  function renderMenus() {
+    document.getElementById('sortMenu').innerHTML =
+      '<h6 class="dropdown-header">Sort by</h6>' +
+      SORTS.map(function (o) {
+        return menuItem('data-sort="' + o.key + '"', o.label, state.sort === o.key);
+      }).join('') +
+      '<div class="dropdown-divider"></div>' +
+      menuItem('data-dir="asc"', 'Ascending', state.dir === 'asc') +
+      menuItem('data-dir="desc"', 'Descending', state.dir === 'desc') +
+      '<div class="dropdown-divider"></div>' +
+      '<h6 class="dropdown-header">Group by</h6>' +
+      GROUPS.map(function (o) {
+        return menuItem('data-group="' + o.key + '"', o.label, state.group === o.key);
+      }).join('');
+
+    document.getElementById('filterMenu').innerHTML =
+      '<div class="list-menu-cols">' +
+        '<div><h6 class="dropdown-header">Stage</h6>' +
+          menuItem('data-stage=""', 'All stages', !state.stage) +
+          STAGE_ORDER.map(function (k) {
+            return menuItem('data-stage="' + k + '"', C.LABEL[k], state.stage === k);
+          }).join('') + '</div>' +
+        '<div><h6 class="dropdown-header">Category</h6>' +
+          menuItem('data-category=""', 'All categories', !state.category) +
+          C.ACTIVITY_CATEGORIES.map(function (c) {
+            return menuItem('data-category="' + M.escapeHtml(c) + '"', M.escapeHtml(c), state.category === c);
+          }).join('') + '</div>' +
+      '</div>';
+
+    var active = (state.stage ? 1 : 0) + (state.category ? 1 : 0);
+    document.getElementById('filterCount').innerHTML = active
+      ? ' <span class="badge badge-primary ml-1">' + active + '</span>' : '';
+    document.getElementById('btnFilter').classList.toggle('is-active', !!active);
+
+    /* Active filters also show as removable chips under the toolbar. */
+    var chips = [];
+    if (state.stage) { chips.push({ key: 'stage', label: 'Stage: ' + C.LABEL[state.stage] }); }
+    if (state.category) { chips.push({ key: 'category', label: 'Category: ' + M.escapeHtml(state.category) }); }
+    document.getElementById('activeChips').innerHTML = chips.map(function (c) {
+      return '<span class="list-chip">' + c.label +
+        '<button type="button" data-unfilter="' + c.key + '" aria-label="Remove filter">' +
+        '<i class="fa-solid fa-xmark"></i></button></span>';
     }).join('');
+  }
+
+  function onMenuClick(e) {
+    var item = e.target.closest('[data-sort],[data-dir],[data-group],[data-stage],[data-category]');
+    if (!item) { return; }
+    e.preventDefault();
+    if (item.hasAttribute('data-sort')) { state.sort = item.getAttribute('data-sort'); }
+    if (item.hasAttribute('data-dir')) { state.dir = item.getAttribute('data-dir'); }
+    if (item.hasAttribute('data-group')) { state.group = item.getAttribute('data-group'); }
+    if (item.hasAttribute('data-stage')) { state.stage = item.getAttribute('data-stage'); state.page = 1; }
+    if (item.hasAttribute('data-category')) { state.category = item.getAttribute('data-category'); state.page = 1; }
+    render();
+  }
+  document.getElementById('sortMenu').addEventListener('click', onMenuClick);
+  document.getElementById('filterMenu').addEventListener('click', onMenuClick);
+  document.getElementById('activeChips').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-unfilter]');
+    if (!b) { return; }
+    state[b.getAttribute('data-unfilter')] = ''; state.page = 1;
+    render();
+  });
 
   /* ---- contextual next action ------------------------------------------------ */
 
@@ -121,10 +194,34 @@
       return true;
     });
 
-    rows.sort(function (x, y) { return new Date(y.updatedAt || 0) - new Date(x.updatedAt || 0); });
+    rows.sort(function (x, y) {
+      var g = state.group ? compare(groupValue(x), groupValue(y)) : 0;
+      if (g) { return g; }
+      var c = compare(sortValue(x, state.sort), sortValue(y, state.sort));
+      return state.dir === 'asc' ? c : -c;
+    });
 
     return rows;
   }
+
+  function sortValue(a, key) {
+    if (key === 'title') { return (a.title || '').toLowerCase(); }
+    if (key === 'eventDate') { return new Date(L.pickedDate(a, state) || 0).getTime(); }
+    if (key === 'stage') { return STAGE_ORDER.indexOf(M.stageOf(a)); }
+    if (key === 'category') { return (a.category || '').toLowerCase(); }
+    return new Date(a.updatedAt || 0).getTime();
+  }
+
+  /* Groups follow the lifecycle for stages and A–Z for categories. */
+  function groupValue(a) {
+    return state.group === 'stage' ? STAGE_ORDER.indexOf(M.stageOf(a)) : (a.category || '').toLowerCase();
+  }
+
+  function groupLabel(a) {
+    return state.group === 'stage' ? C.LABEL[M.stageOf(a)] : (a.category || 'No category');
+  }
+
+  function compare(a, b) { return a < b ? -1 : a > b ? 1 : 0; }
 
   function progressCell(activityId) {
     var p = M.requirementProgress(activityId, C.PHASE.PRE_APPROVAL);
@@ -138,6 +235,7 @@
 
   function render() {
     renderTrashButton();
+    renderMenus();
     var rows = filtered();
     var pages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
     if (state.page > pages) { state.page = pages; }
@@ -151,7 +249,7 @@
         '<i class="fa-regular fa-folder-open"></i>' +
         (filtering
           ? '<h6>No activities match these filters</h6>' +
-            '<p>Try clearing the search or choosing a different stage.</p>' +
+            '<p>Try clearing the search or choosing different filters.</p>' +
             '<button type="button" class="btn btn-sm btn-light" id="btnClearInline">Clear filters</button>'
           : '<h6>You have not submitted any activities yet</h6>' +
             '<p>Start by creating an activity request for SASO to review.</p>' +
@@ -172,14 +270,21 @@
         L.header('Last Update') +
         '<th></th>' +
       '</tr></thead><tbody>' +
-      slice.map(function (a) {
+      slice.map(function (a, i) {
+        var groupRow = '';
+        if (state.group && (i === 0 || groupLabel(slice[i - 1]) !== groupLabel(a))) {
+          var label = groupLabel(a);
+          var count = rows.filter(function (r) { return groupLabel(r) === label; }).length;
+          groupRow = '<tr class="group-row"><td colspan="7">' + M.escapeHtml(label) +
+            '<span class="group-count">' + count + '</span></td></tr>';
+        }
         var action = nextAction(a);
         var stage = M.stageOf(a);
         var rowClass = M.terminalStatus(a) === C.TERMINAL.OVERDUE ? 'row-overdue'
           : (a.proposalStatus === C.PROPOSAL.REQUIREMENTS_NEEDED ||
              a.proposalStatus === C.PROPOSAL.REVISION_REQUIRED) ? 'row-stale' : '';
 
-        return '<tr class="' + rowClass + '">' +
+        return groupRow + '<tr class="' + rowClass + '">' +
           '<td><span class="cell-primary">' + M.escapeHtml(a.title || 'Untitled draft') + '</span>' +
             '<span class="cell-sub">' + M.escapeHtml(a.category || '—') + ' · ' +
               M.label(a.venueType) + ' · ' + M.escapeHtml(a.venue || '—') + '</span></td>' +
@@ -237,19 +342,11 @@
   function clearFilters() {
     state.search = ''; state.stage = ''; state.category = ''; state.page = 1;
     document.getElementById('fSearch').value = '';
-    stageSelect.value = '';
-    categorySelect.value = '';
     render();
   }
 
   document.getElementById('fSearch').addEventListener('input', function () {
     state.search = this.value; state.page = 1; render();
-  });
-  stageSelect.addEventListener('change', function () {
-    state.stage = this.value; state.page = 1; render();
-  });
-  categorySelect.addEventListener('change', function () {
-    state.category = this.value; state.page = 1; render();
   });
   document.getElementById('btnClear').addEventListener('click', clearFilters);
 

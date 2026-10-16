@@ -29,24 +29,31 @@
           </div>
 
           <div class="card-body border-bottom py-2">
-            <div class="form-row align-items-end">
-              <div class="form-group col-md-4 mb-2">
-                <label for="fSearch" class="text-sm">Search</label>
+            <!-- Search, then Sort and Filter menus laid out like a file manager's toolbar. -->
+            <div class="list-toolbar">
+              <div class="list-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
                 <input type="search" class="form-control form-control-sm" id="fSearch"
-                       placeholder="Activity title or venue">
+                       placeholder="Search activity title or venue" aria-label="Search activities">
               </div>
-              <div class="form-group col-md-3 mb-2">
-                <label for="fStage" class="text-sm">Stage</label>
-                <select class="form-control form-control-sm" id="fStage"></select>
+              <div class="dropdown">
+                <button type="button" class="btn btn-sm btn-outline-secondary list-tool" id="btnSort"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="fa-solid fa-arrow-down-wide-short mr-1"></i>Sort
+                  <i class="fa-solid fa-chevron-down ml-1 list-tool-caret"></i></button>
+                <div class="dropdown-menu dropdown-menu-right list-menu" id="sortMenu" aria-labelledby="btnSort"></div>
               </div>
-              <div class="form-group col-md-3 mb-2">
-                <label for="fCategoryFilter" class="text-sm">Category</label>
-                <select class="form-control form-control-sm" id="fCategoryFilter"></select>
+              <div class="dropdown">
+                <button type="button" class="btn btn-sm btn-outline-secondary list-tool" id="btnFilter"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="fa-solid fa-filter mr-1"></i>Filter<span id="filterCount"></span>
+                  <i class="fa-solid fa-chevron-down ml-1 list-tool-caret"></i></button>
+                <div class="dropdown-menu dropdown-menu-right list-menu list-menu-wide" id="filterMenu"
+                     aria-labelledby="btnFilter"></div>
               </div>
-              <div class="form-group col-md-2 mb-2">
-                <button type="button" class="btn btn-sm btn-light btn-block" id="btnClear">Clear</button>
-              </div>
+              <button type="button" class="btn btn-sm btn-light list-tool" id="btnClear">Clear</button>
             </div>
+            <div class="list-chips" id="activeChips"></div>
           </div>
 
           <div class="card-body p-0" id="activitiesTable"></div>

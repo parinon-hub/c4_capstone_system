@@ -1487,3 +1487,67 @@ a.notif-message:hover { color: var(--cspc-navy); text-decoration: underline; }
 /* ---- Manage Accounts ---------------------------------------------------------- */
 
 .account-search { width: 18rem; max-width: 50vw; }
+
+/* ---- List toolbar: search with Sort and Filter menus (org Activities) -------- */
+
+.list-toolbar { display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0; }
+.list-search { position: relative; flex: 1 1 auto; max-width: 28rem; }
+.list-search > i {
+  position: absolute; left: 0.6rem; top: 50%; transform: translateY(-50%);
+  color: var(--cspc-muted); font-size: 0.75rem; pointer-events: none;
+}
+.list-search .form-control { padding-left: 1.85rem; }
+.list-tool { white-space: nowrap; }
+.list-tool-caret { font-size: 0.6rem; transition: transform 0.15s ease; }
+.dropdown.show .list-tool-caret { transform: rotate(180deg); }
+.list-tool.is-active { border-color: var(--cspc-navy); color: var(--cspc-navy); background: #eef3f9; }
+
+.list-menu {
+  min-width: 12rem;
+  padding: 0.35rem 0;
+  border: 1px solid var(--cspc-line);
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.1);
+  font-size: 0.8125rem;
+}
+.list-menu .dropdown-header {
+  padding: 0.35rem 1rem 0.2rem 1.75rem;
+  text-align: left;
+  font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.05em;
+  text-transform: uppercase; color: var(--cspc-muted);
+}
+/* A dot marks the current choice, the way a file manager's Sort menu does. */
+.list-menu .dropdown-item { position: relative; padding: 0.3rem 1rem 0.3rem 1.75rem; color: var(--cspc-ink); }
+.list-menu .dropdown-item:hover { background: #f4f7fb; }
+.list-menu .dropdown-item.is-selected { font-weight: 600; color: var(--cspc-navy); }
+.list-menu .dropdown-item.is-selected::before {
+  content: ''; position: absolute; left: 0.8rem; top: 50%;
+  width: 6px; height: 6px; margin-top: -3px; border-radius: 50%; background: var(--cspc-navy);
+}
+.list-menu-wide { min-width: 22rem; }
+.list-menu-cols { display: grid; grid-template-columns: 1fr 1fr; }
+.list-menu-cols > div + div { border-left: 1px solid var(--cspc-line); }
+
+.list-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.list-chips:not(:empty) { padding: 0.25rem 0 0.35rem; }
+.list-chip {
+  display: inline-flex; align-items: center;
+  padding: 0.15rem 0.25rem 0.15rem 0.6rem;
+  border: 1px solid #c9d6e6; border-radius: 999px;
+  background: #eef3f9; color: var(--cspc-navy); font-size: 0.75rem;
+}
+.list-chip button {
+  border: 0; background: transparent; color: inherit;
+  padding: 0 0.35rem; margin-left: 0.15rem; line-height: 1; cursor: pointer;
+}
+
+.table .group-row td {
+  background: #f6f8fb;
+  padding-top: 0.4rem; padding-bottom: 0.4rem;
+  font-size: 0.75rem; font-weight: 700; color: var(--cspc-navy);
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.group-count {
+  display: inline-block; margin-left: 0.5rem; padding: 0 0.45rem;
+  border-radius: 999px; background: #dfe7f1; font-size: 0.6875rem;
+}
