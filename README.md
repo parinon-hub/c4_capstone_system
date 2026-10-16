@@ -165,7 +165,7 @@ overdue is a flag rather than a bar.
 Built now: project structure, AdminLTE integration and CSPC theme, shared
 layout and navigation, simulated authentication with role guarding, the client
 data model with seed and reset, both dashboards, and — from phase 3 — the
-Submit Activity wizard and the organization's My Activities list.
+Submit Activity wizard and the organization's Activities list.
 
 Phase 4 adds Activity Details — one role-aware controller shared by both
 portals, carrying the workflow timeline, both requirement checklists, the
@@ -286,7 +286,7 @@ The storage key moved to `v4`, so the new sample data loads automatically.
 
 ### Scrollbars
 
-Every wide table in the system — Activities, My Activities, Activity
+Every wide table in the system — Activities (SASO and organization), Activity
 Proposals, Requirements, Terminal Reports, Organizations, the trash bin,
 Activity Details, both dashboards and the Reports preview — shows a
 **horizontal scrollbar at the top** as well as the bottom, so the user does not

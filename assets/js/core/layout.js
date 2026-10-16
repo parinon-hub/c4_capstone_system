@@ -33,7 +33,7 @@ SASO.layout = (function () {
     ],
     ORG: [
       { key: 'dashboard',    label: 'Dashboard',        icon: 'fa-gauge-high',        href: 'pages/org/dashboard.html' },
-      { key: 'activities',   label: 'My Activities',    icon: 'fa-calendar-check',    href: 'pages/org/activities.html' },
+      { key: 'activities',   label: 'Activities',       icon: 'fa-calendar-check',    href: 'pages/org/activities.html' },
       { key: 'submit',       label: 'Submit Activity',  icon: 'fa-circle-plus',       href: 'pages/org/submit-activity.html' },
       { key: 'requirements', label: 'Requirements',     icon: 'fa-list-check',        href: 'pages/org/requirements.html', badge: 'requirements' },
       { key: 'terminal',     label: 'Terminal Reports', icon: 'fa-file-circle-check', href: 'pages/org/terminal-reports.html', badge: 'terminal' },

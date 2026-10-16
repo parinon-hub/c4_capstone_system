@@ -33,7 +33,7 @@
     title: 'Trash Bin',
     breadcrumb: [
       { label: 'Dashboard', href: isSaso ? 'pages/saso/dashboard.html' : 'pages/org/dashboard.html' },
-      { label: isSaso ? 'Activity Proposals' : 'My Activities',
+      { label: isSaso ? 'Activity Proposals' : 'Activities',
         href: isSaso ? 'pages/saso/proposals.html' : 'pages/org/activities.html' },
       { label: 'Trash Bin' }
     ]
@@ -76,7 +76,7 @@
         '<div class="card-tools">' +
           '<a class="btn btn-sm btn-light" href="' + listPage + '">' +
             '<i class="fa-solid fa-arrow-left mr-1"></i>' +
-            (isSaso ? 'Back to proposals' : 'Back to my activities') + '</a>' +
+            (isSaso ? 'Back to proposals' : 'Back to activities') + '</a>' +
         '</div>' +
       '</div>' +
       '<div class="card-body border-bottom py-2">' +

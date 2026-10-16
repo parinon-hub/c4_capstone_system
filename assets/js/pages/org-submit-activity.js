@@ -349,7 +349,7 @@
       return;
     }
     persist();
-    SASO.layout.toast('Draft saved. You can continue it from My Activities.');
+    SASO.layout.toast('Draft saved. You can continue it from Activities.');
   });
 
   /* Changing the venue type rebuilds the checklist. */

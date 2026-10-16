@@ -180,7 +180,7 @@
   document.getElementById('btnSubmitActivity').href =
     SASO.layout.href('pages/org/submit-activity.html', 'Submit Activity');
   document.getElementById('linkAllActivities').href =
-    SASO.layout.href('pages/org/activities.html', 'My Activities');
+    SASO.layout.href('pages/org/activities.html', 'Activities');
 
   renderTiles();
   renderActivities();
