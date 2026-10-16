@@ -225,7 +225,7 @@
     ];
 
     return '<div class="card"><div class="card-header"><h3 class="card-title">Workflow timeline</h3></div>' +
-      '<div class="card-body"><ol class="wf-timeline">' +
+      '<div class="card-body py-3"><ol class="wf-timeline">' +
       steps.map(function (s) {
         var cls = s.done ? 'is-done' : s.current ? 'is-current' : 'is-pending';
         return '<li class="' + cls + '">' +
@@ -363,32 +363,33 @@
   /* ------------------------------------------------------------- info cards */
 
   function infoCard() {
-    function row(label, value) {
-      return '<tr><th>' + label + '</th><td>' + (value || '—') + '</td></tr>';
+    function field(label, value, wide) {
+      return '<div class="detail-field' + (wide ? ' is-wide' : '') + '"><dt>' + label + '</dt>' +
+        '<dd>' + (value || '—') + '</dd></div>';
     }
     return '<div class="card"><div class="card-header"><h3 class="card-title">Activity information</h3></div>' +
-      '<div class="card-body p-0"><table class="table table-sm detail-table mb-0"><tbody>' +
-        row('Organization', M.escapeHtml(org.name)) +
-        row('Adviser', M.escapeHtml(org.adviser)) +
-        row('Category', M.escapeHtml(activity.category)) +
-        row('Venue', M.label(activity.venueType) + ' — ' + M.escapeHtml(activity.venue)) +
-        row('Date', M.formatDateRange(activity.dateStart, activity.dateEnd)) +
-        row('Time', (activity.timeStart || '—') + ' to ' + (activity.timeEnd || '—')) +
-        row('Expected participants', activity.expectedParticipants +
+      '<div class="card-body"><dl class="detail-grid">' +
+        field('Organization', M.escapeHtml(org.name)) +
+        field('Adviser', M.escapeHtml(org.adviser)) +
+        field('Category', M.escapeHtml(activity.category)) +
+        field('Venue', M.label(activity.venueType) + ' — ' + M.escapeHtml(activity.venue)) +
+        field('Date', M.formatDateRange(activity.dateStart, activity.dateEnd)) +
+        field('Time', (activity.timeStart || '—') + ' to ' + (activity.timeEnd || '—')) +
+        field('Expected participants', activity.expectedParticipants +
             (activity.participantDescription
               ? ' <span class="cell-sub">' + M.escapeHtml(activity.participantDescription) + '</span>' : '')) +
-        row('Budget', activity.budget
+        field('Budget', activity.budget
               ? M.escapeHtml(activity.budget) +
                 (activity.fundSource ? ' <span class="cell-sub">' +
                   M.escapeHtml(activity.fundSource) + '</span>' : '')
               : null) +
-        row('Rationale', M.escapeHtml(activity.rationale)) +
-        row('Objectives', (activity.objectives || []).length
+        field('Rationale', M.escapeHtml(activity.rationale), true) +
+        field('Objectives', (activity.objectives || []).length
               ? '<ol class="mb-0 pl-3">' + activity.objectives.map(function (o) {
                   return '<li>' + M.escapeHtml(o) + '</li>'; }).join('') + '</ol>'
-              : null) +
-        row('Description', M.escapeHtml(activity.description)) +
-      '</tbody></table></div></div>';
+              : null, true) +
+        field('Description', M.escapeHtml(activity.description), true) +
+      '</dl></div></div>';
   }
 
   function historyCard() {
@@ -419,23 +420,30 @@
           '. An activity is completed only once these are accepted.'
         : null);
 
+    var preCard = requirementCard(C.PHASE.PRE_APPROVAL, 'Pre-approval requirements',
+      activity.venueType === C.VENUE.OFF_CAMPUS
+        ? 'Off-campus activity — the CMO 63 documentary requirements apply.' : null);
+    var route = routeCard();
+    var history = historyCard();
+
+    /* Top to bottom: the stepper, the actions, the activity itself, then
+       what it still needs. Paired cards fall back to full width when one
+       of the pair has nothing to show. */
     document.getElementById('detailRoot').innerHTML =
-      renderHeader() + actionBar() +
-      '<div class="row">' +
-        '<div class="col-lg-8">' +
-          timeline() +
-          requirementCard(C.PHASE.PRE_APPROVAL, 'Pre-approval requirements',
-            activity.venueType === C.VENUE.OFF_CAMPUS
-              ? 'Off-campus activity — the CMO 63 documentary requirements apply.' : null) +
-          postCard +
-          commentCard() +
-        '</div>' +
-        '<div class="col-lg-4">' +
-          infoCard() + routeCard() + historyCard() +
-        '</div>' +
-      '</div>';
+      renderHeader() + timeline() + actionBar() + infoCard() +
+      pair(preCard, route, 'col-lg-7', 'col-lg-5') +
+      postCard +
+      pair(commentCard(), history, 'col-lg-8', 'col-lg-4');
 
     bind();
+  }
+
+  function pair(left, right, leftCol, rightCol) {
+    if (!left || !right) { return left + right; }
+    return '<div class="row">' +
+      '<div class="' + leftCol + '">' + left + '</div>' +
+      '<div class="' + rightCol + '">' + right + '</div>' +
+    '</div>';
   }
 
   /* ------------------------------------------------------------------- events */
