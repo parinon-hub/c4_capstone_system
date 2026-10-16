@@ -18,27 +18,6 @@
   var passwordEl = document.getElementById('password');
   var errorEl = document.getElementById('loginError');
 
-  /* ---- demo account chips ---------------------------------------------- */
-
-  var chips = SASO.model.db().users.map(function (u) {
-    var org = u.organizationId ? SASO.model.orgById(u.organizationId) : null;
-    var caption = org ? org.acronym : 'SASO';
-    return '<button type="button" class="account-chip" data-user="' + u.username +
-      '" data-pass="' + u.password + '">' +
-      '<code>' + u.username + '</code> · ' + caption + '</button>';
-  }).join('');
-
-  document.getElementById('accountChips').innerHTML = chips;
-
-  document.getElementById('accountChips').addEventListener('click', function (e) {
-    var chip = e.target.closest('.account-chip');
-    if (!chip) { return; }
-    usernameEl.value = chip.getAttribute('data-user');
-    passwordEl.value = chip.getAttribute('data-pass');
-    clearErrors();
-    passwordEl.focus();
-  });
-
   /* ---- validation and submit -------------------------------------------- */
 
   function clearErrors() {

@@ -23,8 +23,8 @@ convert them to `type="module"` — browsers block module loading over `file://`
 ## Demonstration accounts
 
 Prototype authentication only. Passwords are stored in plain text in the seed
-data and compared in the browser. Click any chip on the login screen to fill
-the fields.
+data and compared in the browser. Type a username and password from the table
+below on the login screen.
 
 | Username | Password  | Role | Organization |
 |---|---|---|---|
