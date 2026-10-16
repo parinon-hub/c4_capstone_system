@@ -2,7 +2,7 @@
    proposal-actions.js  —  Edit and delete, shared by every screen.
 
    The same Edit and Delete controls appear on the SASO proposal queue, the
-   organization's My Activities list and Activity Details, so the dialogs
+   organization's Activities list and Activity Details, so the dialogs
    live here once. All state changes go through SASO.events, which writes the
    status history and sends the notifications.
 

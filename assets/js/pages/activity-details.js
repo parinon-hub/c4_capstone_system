@@ -27,7 +27,7 @@
     title: 'Activity Details',
     breadcrumb: [
       { label: 'Dashboard', href: isSaso ? 'pages/saso/dashboard.html' : 'pages/org/dashboard.html' },
-      { label: isSaso ? 'Activities' : 'My Activities',
+      { label: 'Activities',
         href: isSaso ? 'pages/saso/activities.html' : 'pages/org/activities.html' },
       { label: 'Details' }
     ]

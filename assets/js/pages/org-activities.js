@@ -1,8 +1,8 @@
 /* =========================================================================
    org-activities.js  —  The organization's own activity list.
 
-   Search, filtering, sorting and pagination all operate on the simulated
-   data. Each row carries one contextual action: the single next thing this
+   Search, filtering and pagination all operate on the simulated data.
+   The list is always newest update first. Each row carries one contextual action: the single next thing this
    organization has to do for that activity.
    ========================================================================= */
 
@@ -16,15 +16,15 @@
   var session = SASO.layout.init({
     role: C.ROLE.ORG,
     page: 'activities',
-    title: 'My Activities',
-    breadcrumb: [{ label: 'Dashboard', href: 'pages/org/dashboard.html' }, { label: 'My Activities' }]
+    title: 'Activities',
+    breadcrumb: [{ label: 'Dashboard', href: 'pages/org/dashboard.html' }, { label: 'Activities' }]
   });
   if (!session) { return; }
 
   var org = SASO.auth.organization();
   var P = SASO.proposalActions;
   var L = SASO.listview;
-  var state = { search: '', stage: '', category: '', sort: 'updatedAt', dir: 'desc', page: 1,
+  var state = { search: '', stage: '', category: '', page: 1,
                 dateField: 'start' };
 
   /* Confirmation after returning from the wizard. */
@@ -106,7 +106,7 @@
              variant: 'outline-primary' };
   }
 
-  /* ---- filtering and sorting -------------------------------------------------- */
+  /* ---- filtering ------------------------------------------------------------------ */
 
   function filtered() {
     var q = state.search.toLowerCase();
@@ -121,15 +121,7 @@
       return true;
     });
 
-    rows.sort(function (x, y) {
-      var a = x[state.sort], b = y[state.sort];
-      if (state.sort === 'title') {
-        a = (a || '').toLowerCase(); b = (b || '').toLowerCase();
-        return state.dir === 'asc' ? (a < b ? -1 : a > b ? 1 : 0) : (a > b ? -1 : a < b ? 1 : 0);
-      }
-      a = new Date(a || 0); b = new Date(b || 0);
-      return state.dir === 'asc' ? a - b : b - a;
-    });
+    rows.sort(function (x, y) { return new Date(y.updatedAt || 0) - new Date(x.updatedAt || 0); });
 
     return rows;
   }
@@ -140,15 +132,6 @@
       '<div class="progress"><div class="progress-bar" style="width:' + p.percent + '%"></div></div>' +
       '<span class="req-count">' + p.approved + '/' + p.mandatory + '</span>' +
     '</div>';
-  }
-
-  function sortHeader(key, label) {
-    var active = state.sort === key;
-    var icon = !active ? 'fa-sort'
-      : state.dir === 'asc' ? 'fa-sort-up' : 'fa-sort-down';
-    return '<th><a href="#" class="sort-link' + (active ? ' is-active' : '') +
-      '" data-sort="' + key + '">' + label +
-      ' <i class="fa-solid ' + icon + '"></i></a></th>';
   }
 
   /* ---- render -------------------------------------------------------------------- */
@@ -183,10 +166,10 @@
     /* `top-scroll` puts the horizontal scrollbar above the table (layout.js). */
     host.innerHTML = '<div class="table-responsive top-scroll"><table class="table table-hover">' +
       '<thead><tr>' +
-        sortHeader('title', 'Activity') +
+        L.header('Activity') +
         L.dateHeader(state, 'Event Date') +
         '<th>Proposal</th><th>Requirements</th><th>Stage</th>' +
-        sortHeader('updatedAt', 'Last Update') +
+        L.header('Last Update') +
         '<th></th>' +
       '</tr></thead><tbody>' +
       slice.map(function (a) {
@@ -212,20 +195,6 @@
             action.href + '">' + action.label + '</a>' + P.rowButtons(a) + '</td>' +
         '</tr>';
       }).join('') + '</tbody></table></div>';
-
-    host.querySelectorAll('.sort-link').forEach(function (link) {
-      link.addEventListener('click', function (e) {
-        e.preventDefault();
-        var key = this.getAttribute('data-sort');
-        if (state.sort === key) {
-          state.dir = state.dir === 'asc' ? 'desc' : 'asc';
-        } else {
-          state.sort = key;
-          state.dir = key === 'title' ? 'asc' : 'desc';
-        }
-        render();
-      });
-    });
 
     L.bindDatePick(host, state, render);
     renderPager(rows.length, pages);
