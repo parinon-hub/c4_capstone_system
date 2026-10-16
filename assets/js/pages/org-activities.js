@@ -23,7 +23,9 @@
 
   var org = SASO.auth.organization();
   var P = SASO.proposalActions;
-  var state = { search: '', stage: '', category: '', sort: 'updatedAt', dir: 'desc', page: 1 };
+  var L = SASO.listview;
+  var state = { search: '', stage: '', category: '', sort: 'updatedAt', dir: 'desc', page: 1,
+                dateField: 'start' };
 
   /* Confirmation after returning from the wizard. */
   var submitted = new URLSearchParams(window.location.search).get('submitted');
@@ -182,7 +184,7 @@
     host.innerHTML = '<div class="table-responsive top-scroll"><table class="table table-hover">' +
       '<thead><tr>' +
         sortHeader('title', 'Activity') +
-        sortHeader('dateStart', 'Date') +
+        L.dateHeader(state, 'Event Date') +
         '<th>Proposal</th><th>Requirements</th><th>Stage</th>' +
         sortHeader('updatedAt', 'Last Update') +
         '<th></th>' +
@@ -198,7 +200,7 @@
           '<td><span class="cell-primary">' + M.escapeHtml(a.title || 'Untitled draft') + '</span>' +
             '<span class="cell-sub">' + M.escapeHtml(a.category || '—') + ' · ' +
               M.label(a.venueType) + ' · ' + M.escapeHtml(a.venue || '—') + '</span></td>' +
-          '<td class="text-nowrap">' + M.formatDateRange(a.dateStart, a.dateEnd) + '</td>' +
+          '<td class="text-nowrap">' + M.formatDate(L.pickedDate(a, state)) + '</td>' +
           '<td>' + M.badge(a.proposalStatus) +
             (M.isInApprovalRoute(a)
               ? '<span class="cell-sub">' + M.daysWithCurrentOffice(a.id) + ' days with this office</span>'
@@ -225,6 +227,7 @@
       });
     });
 
+    L.bindDatePick(host, state, render);
     renderPager(rows.length, pages);
     P.bind(host, render, render);
   }
