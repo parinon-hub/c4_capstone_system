@@ -23,7 +23,7 @@
   if (!session) { return; }
 
   var state = { search: '', org: '', stage: '', category: '', venue: '',
-                from: '', to: '', sort: 'eventDate', dir: 'desc', dateField: 'start', page: 1 };
+                from: '', to: '', sort: 'eventDate', dir: 'desc', page: 1 };
 
   var qs = new URLSearchParams(window.location.search);
   var presetStage = qs.get('stage');
@@ -108,7 +108,7 @@
 
     return L.sort(list, state, function (a, key) {
       if (key === 'org') { return M.orgAcronym(a.organizationId); }
-      if (key === 'eventDate') { return new Date(L.pickedDate(a, state) || 0); }
+      if (key === 'eventDate') { return new Date(a.dateStart || 0); }
       if (key === 'updated') { return new Date(a.updatedAt || 0); }
       if (key === 'participants') { return a.expectedParticipants || 0; }
       return a[key];
@@ -135,12 +135,12 @@
       return;
     }
 
-    host.innerHTML = '<div class="table-responsive"><table class="table table-hover table-compact">' +
+    host.innerHTML = '<div class="table-responsive"><table class="table table-hover">' +
       '<thead><tr>' +
         L.sortHeader(state, 'org', 'Organization') +
         L.sortHeader(state, 'title', 'Activity') +
         L.sortHeader(state, 'category', 'Category') +
-        L.dateHeader(state, 'eventDate', 'Event Date') +
+        L.sortHeader(state, 'eventDate', 'Event Date') +
         L.sortHeader(state, 'participants', 'Participants', 'text-center') +
         '<th>Proposal</th><th>Event</th><th>Reports</th><th>Stage</th><th></th>' +
       '</tr></thead><tbody>' +
@@ -155,7 +155,7 @@
             '<span class="cell-sub">' + M.label(a.venueType) + ' · ' +
             M.escapeHtml(a.venue || '—') + '</span></td>' +
           '<td class="text-sm">' + M.escapeHtml(a.category || '—') + '</td>' +
-          '<td class="text-nowrap">' + M.formatDate(L.pickedDate(a, state)) + '</td>' +
+          '<td class="text-nowrap">' + M.formatDateRange(a.dateStart, a.dateEnd) + '</td>' +
           '<td class="text-center">' + (a.expectedParticipants || '—') + '</td>' +
           '<td>' + M.badge(a.proposalStatus) + '</td>' +
           '<td>' + (a.eventStatus === C.EVENT.NOT_APPLICABLE ? '—' : M.badge(a.eventStatus)) + '</td>' +

@@ -34,7 +34,7 @@
   }
 
   var state = { search: '', org: '', status: '', scope: 'pipeline',
-                sort: 'waiting', dir: 'desc', dateField: 'start', page: 1 };
+                sort: 'waiting', dir: 'desc', page: 1 };
 
   var PIPELINE = [C.PROPOSAL.SUBMITTED, C.PROPOSAL.FOR_REVIEW,
                   C.PROPOSAL.REQUIREMENTS_NEEDED, C.PROPOSAL.REVISION_REQUIRED,
@@ -150,7 +150,7 @@
       if (key === 'waiting') { return waiting(a); }
       if (key === 'org') { return M.orgAcronym(a.organizationId); }
       if (key === 'submitted') { return new Date(a.submittedAt || 0); }
-      if (key === 'eventDate') { return new Date(L.pickedDate(a, state) || 0); }
+      if (key === 'eventDate') { return new Date(a.dateStart || 0); }
       return a[key];
     });
   }
@@ -182,12 +182,12 @@
     }
 
     /* `top-scroll` puts the horizontal scrollbar above the table (layout.js). */
-    host.innerHTML = '<div class="table-responsive top-scroll"><table class="table table-hover table-compact">' +
+    host.innerHTML = '<div class="table-responsive top-scroll"><table class="table table-hover">' +
       '<thead><tr>' +
         L.sortHeader(state, 'org', 'Organization') +
         L.sortHeader(state, 'title', 'Activity') +
         L.sortHeader(state, 'submitted', 'Submitted') +
-        L.dateHeader(state, 'eventDate', 'Event Date') +
+        L.sortHeader(state, 'eventDate', 'Event Date') +
         '<th>Requirements</th><th>Status</th><th>Now With</th>' +
         L.sortHeader(state, 'waiting', 'Days Waiting', 'text-center') +
         '<th></th>' +
@@ -205,7 +205,7 @@
             M.label(a.venueType) + '</span></td>' +
           '<td class="text-nowrap text-muted text-sm">' +
             (a.submittedAt ? M.formatDate(a.submittedAt) : '—') + '</td>' +
-          '<td class="text-nowrap">' + M.formatDate(L.pickedDate(a, state)) + '</td>' +
+          '<td class="text-nowrap">' + M.formatDateRange(a.dateStart, a.dateEnd) + '</td>' +
           '<td><div class="req-progress ' + (complete ? 'is-complete' : '') + '">' +
             '<div class="progress"><div class="progress-bar" style="width:' + p.percent + '%"></div></div>' +
             '<span class="req-count">' + p.approved + '/' + p.mandatory + '</span></div></td>' +
