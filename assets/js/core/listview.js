@@ -187,12 +187,13 @@ SASO.listview = (function () {
         '<input type="search" class="form-control form-control-sm" id="fSearch" ' +
           'placeholder="' + esc(placeholder) + '" aria-label="' + esc(placeholder) + '"></div>' +
       '<div class="dropdown"><button type="button" class="btn btn-sm btn-outline-secondary list-tool" ' +
-          'id="btnSort" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
+          'id="btnSort" data-toggle="dropdown" data-flip="false" aria-haspopup="true" aria-expanded="false">' +
           '<i class="fa-solid fa-arrow-down-wide-short mr-1"></i>Sort ' +
           '<i class="fa-solid fa-chevron-down ml-1 list-tool-caret"></i></button>' +
-        '<div class="dropdown-menu dropdown-menu-right list-menu" id="sortMenu" aria-labelledby="btnSort"></div></div>' +
+        '<div class="dropdown-menu dropdown-menu-right list-menu list-menu-wide" id="sortMenu" ' +
+          'aria-labelledby="btnSort"></div></div>' +
       '<div class="dropdown"><button type="button" class="btn btn-sm btn-outline-secondary list-tool" ' +
-          'id="btnFilter" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
+          'id="btnFilter" data-toggle="dropdown" data-flip="false" aria-haspopup="true" aria-expanded="false">' +
           '<i class="fa-solid fa-filter mr-1"></i>Filter<span id="filterCount"></span> ' +
           '<i class="fa-solid fa-chevron-down ml-1 list-tool-caret"></i></button>' +
         '<div class="dropdown-menu dropdown-menu-right list-menu list-menu-wide" id="filterMenu" ' +
@@ -274,21 +275,23 @@ SASO.listview = (function () {
     }
 
     function refresh() {
-      sortMenu.innerHTML =
-        '<h6 class="dropdown-header">Sort by</h6>' +
-        cfg.sorts.map(function (o) {
-          return item('data-sort="' + o.key + '"', o.label, state.sort === o.key);
-        }).join('') +
-        '<div class="dropdown-divider"></div>' +
-        item('data-dir="asc"', 'Ascending', state.dir === 'asc') +
-        item('data-dir="desc"', 'Descending', state.dir === 'desc') +
-        (groups.length
-          ? '<div class="dropdown-divider"></div>' +
-            '<h6 class="dropdown-header">Group by</h6>' +
-            groups.map(function (o) {
-              return item('data-group="' + o.key + '"', o.label, (state.group || '') === o.key);
-            }).join('')
-          : '');
+      /* Two columns keep the menu short enough to open below the button
+         even with the summary tiles above the table. */
+      sortMenu.innerHTML = '<div class="list-menu-cols">' +
+        '<div><h6 class="dropdown-header">Sort by</h6>' +
+          cfg.sorts.map(function (o) {
+            return item('data-sort="' + o.key + '"', o.label, state.sort === o.key);
+          }).join('') + '</div>' +
+        '<div><h6 class="dropdown-header">Order</h6>' +
+          item('data-dir="asc"', 'Ascending', state.dir === 'asc') +
+          item('data-dir="desc"', 'Descending', state.dir === 'desc') +
+          (groups.length
+            ? '<h6 class="dropdown-header mt-2">Group by</h6>' +
+              groups.map(function (o) {
+                return item('data-group="' + o.key + '"', o.label, (state.group || '') === o.key);
+              }).join('')
+            : '') + '</div>' +
+        '</div>';
 
       cols.innerHTML = filters.map(function (f) {
         return '<div><h6 class="dropdown-header">' + f.label + '</h6>' +

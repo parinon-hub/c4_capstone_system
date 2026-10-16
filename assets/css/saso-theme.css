@@ -1532,6 +1532,9 @@ a.notif-message:hover { color: var(--cspc-navy); text-decoration: underline; }
 /* The shared toolbar (listview.js) sets --cols to its number of filters.
    Long lists, such as every activity, scroll inside their own column. */
 .list-menu-wide { max-width: calc(100vw - 2rem); }
+/* The shared toolbar's menus always open downward (data-flip="false"), so
+   on a short window they scroll rather than slide under the top bar. */
+#sortMenu.list-menu, #filterMenu.list-menu { max-height: calc(100vh - 7rem); overflow-y: auto; }
 .list-menu-grid { display: grid; grid-template-columns: repeat(var(--cols, 2), 11rem); }
 .list-menu-grid > div { max-height: 20rem; overflow-y: auto; }
 .list-menu-grid > div + div { border-left: 1px solid var(--cspc-line); }
