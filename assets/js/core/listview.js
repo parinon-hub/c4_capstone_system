@@ -23,6 +23,30 @@ SASO.listview = (function () {
         ' <i class="fa-solid ' + icon + '"></i></a></th>';
   }
 
+  /* An "Event Date" header that sorts like any other and carries a small
+     Start/End picker, so each row shows one date instead of a full range.
+     `state.dateField` holds the choice ('start' or 'end'). */
+  function dateHeader(state, key, label) {
+    var active = state.sort === key;
+    var icon = !active ? 'fa-sort' : (state.dir === 'asc' ? 'fa-sort-up' : 'fa-sort-down');
+    var pick = state.dateField === 'end' ? 'end' : 'start';
+    return '<th>' +
+      '<a href="#" class="sort-link' + (active ? ' is-active' : '') +
+        '" data-sort="' + key + '">' + label +
+        ' <i class="fa-solid ' + icon + '"></i></a>' +
+      '<select class="date-pick" aria-label="Show start or end date">' +
+        '<option value="start"' + (pick === 'start' ? ' selected' : '') + '>Start</option>' +
+        '<option value="end"' + (pick === 'end' ? ' selected' : '') + '>End</option>' +
+      '</select></th>';
+  }
+
+  /* The date the picker points at; one-day activities have no end date. */
+  function pickedDate(activity, state) {
+    return state.dateField === 'end'
+      ? (activity.dateEnd || activity.dateStart)
+      : activity.dateStart;
+  }
+
   /* Wires every sort header inside `root`. Numeric keys are compared as
      numbers, date-like keys as dates, everything else as lowercase text. */
   function bindSort(root, state, onChange) {
@@ -37,6 +61,12 @@ SASO.listview = (function () {
           state.dir = 'asc';
         }
         state.page = 1;
+        onChange();
+      });
+    });
+    root.querySelectorAll('.date-pick').forEach(function (select) {
+      select.addEventListener('change', function () {
+        state.dateField = this.value;
         onChange();
       });
     });
@@ -125,6 +155,8 @@ SASO.listview = (function () {
 
   return {
     sortHeader: sortHeader,
+    dateHeader: dateHeader,
+    pickedDate: pickedDate,
     bindSort: bindSort,
     sort: sort,
     paginate: paginate,
