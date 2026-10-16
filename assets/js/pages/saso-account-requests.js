@@ -1,5 +1,11 @@
 /* =========================================================================
-   saso-account-requests.js  —  Organization account requests.
+   saso-account-requests.js  —  Manage Accounts: organization accounts and
+   account requests.
+
+   The first card lists every organization's sign-in account. The Head,
+   Administrative Aide and Coordinator can add an organization, edit an
+   organization's details and account, or delete its account (the
+   organization and its records stay; Edit can give it a new account).
 
    There is no open sign-up. Organizations request an account from the
    sign-in screen; it waits here until SASO's Head, Administrative Aide or
@@ -22,15 +28,16 @@
   var session = SASO.layout.init({
     role: C.ROLE.SASO,
     page: 'accounts',
-    title: 'Account Requests',
+    title: 'Manage Accounts',
     breadcrumb: [{ label: 'Dashboard', href: 'pages/saso/dashboard.html' },
                  { label: 'Organizations', href: 'pages/saso/organizations.html' },
-                 { label: 'Account Requests' }]
+                 { label: 'Manage Accounts' }]
   });
   if (!session) { return; }
 
   var canAct = M.canManageAccounts(session);
   var state = { status: R.PENDING, search: '', sort: 'submittedAt', dir: 'desc', page: 1 };
+  var accState = { search: '', sort: 'acronym', dir: 'asc', page: 1 };
 
   /* ---- shell ------------------------------------------------------------------- */
 
@@ -38,17 +45,26 @@
     '<div class="row" id="tiles"></div>' +
     (canAct ? '' :
       '<div class="callout callout-info text-sm py-2"><i class="fa-solid fa-eye mr-2"></i>' +
-        'View only. Requests are approved or declined by the SASO Head, Administrative Aide ' +
-        'and Student Activities Coordinator.</div>') +
+        'View only. Accounts are added, edited and deleted, and requests approved or declined, ' +
+        'by the SASO Head, Administrative Aide and Student Activities Coordinator.</div>') +
     '<div class="card">' +
       '<div class="card-header">' +
-        '<h3 class="card-title">Organization account requests</h3>' +
-        '<div class="card-tools">' +
+        '<h3 class="card-title">Organization accounts</h3>' +
+        '<div class="card-tools d-flex align-items-center">' +
+          '<input type="search" class="form-control form-control-sm account-search" id="fAccSearch" ' +
+            'placeholder="Search accounts">' +
           (canAct
-            ? '<button type="button" class="btn btn-sm btn-primary" id="btnAddOrg">' +
+            ? '<button type="button" class="btn btn-sm btn-primary ml-2 text-nowrap" id="btnAddOrg">' +
                 '<i class="fa-solid fa-user-plus mr-1"></i>Add organization</button>'
             : '') +
         '</div>' +
+      '</div>' +
+      '<div class="card-body p-0" id="accountsHost"></div>' +
+      '<div class="card-footer d-flex align-items-center py-2" id="accountsPager"></div>' +
+    '</div>' +
+    '<div class="card">' +
+      '<div class="card-header">' +
+        '<h3 class="card-title">Account requests</h3>' +
       '</div>' +
       '<div class="card-body border-bottom py-2">' +
         '<div class="form-row align-items-end">' +
@@ -77,7 +93,8 @@
       { value: c.PENDING, label: 'Awaiting approval', icon: 'fa-hourglass-half', mod: c.PENDING ? 'is-attention' : '' },
       { value: c.APPROVED, label: 'Approved', icon: 'fa-user-check', mod: 'is-complete' },
       { value: c.DECLINED, label: 'Declined', icon: 'fa-user-xmark' },
-      { value: M.db().organizations.length, label: 'Organizations with accounts', icon: 'fa-people-group' }
+      { value: M.db().organizations.filter(function (o) { return M.accountForOrg(o.id); }).length,
+        label: 'Organizations with accounts', icon: 'fa-people-group' }
     ];
     document.getElementById('tiles').innerHTML = tiles.map(function (t) {
       return '<div class="col-6 col-md-3"><div class="stat-tile ' + (t.mod || '') + '">' +
@@ -105,7 +122,99 @@
     });
   }
 
-  /* ---- table ---------------------------------------------------------------------------- */
+  /* ---- organization accounts -------------------------------------------------------------- */
+
+  function accountRows() {
+    var q = accState.search.toLowerCase();
+    var list = M.db().organizations.map(function (o) {
+      return { org: o, user: M.accountForOrg(o.id) };
+    }).filter(function (r) {
+      if (!q) { return true; }
+      var u = r.user || {};
+      var hay = [r.org.acronym, r.org.name, u.name, u.username, u.email].join(' ').toLowerCase();
+      return hay.indexOf(q) !== -1;
+    });
+    return L.sort(list, accState, function (r) { return r.org.acronym; });
+  }
+
+  function renderAccounts() {
+    var list = accountRows();
+    var paged = L.paginate(list, accState, PAGE_SIZE);
+    var host = document.getElementById('accountsHost');
+
+    if (!list.length) {
+      host.innerHTML = '<div class="empty-state"><i class="fa-regular fa-id-card"></i>' +
+        '<h6>No accounts match</h6><p>Clear the search to see every organization.</p></div>';
+      L.renderPager('accountsPager', 0, 1, accState, PAGE_SIZE, renderAccounts);
+      return;
+    }
+
+    host.innerHTML = '<div class="table-responsive"><table class="table table-hover">' +
+      '<thead><tr>' +
+        L.header('Organization') +
+        L.header('Account holder') +
+        L.header('Contact') +
+        L.header('Username') +
+        '<th></th>' +
+      '</tr></thead><tbody>' +
+      paged.slice.map(function (r) {
+        var o = r.org, u = r.user;
+        return '<tr>' +
+          '<td><span class="cell-primary">' + M.escapeHtml(o.acronym) + '</span>' +
+            '<span class="cell-sub">' + M.escapeHtml(o.name) + '</span></td>' +
+          (u
+            ? '<td class="text-sm">' + M.escapeHtml(u.name) +
+                '<span class="cell-sub">' + M.escapeHtml(u.position) + '</span></td>' +
+              '<td class="text-sm">' + (u.email ? M.escapeHtml(u.email) : '<span class="text-muted">—</span>') +
+                (u.contact ? '<span class="cell-sub">' + M.escapeHtml(u.contact) + '</span>' : '') + '</td>' +
+              '<td><code>' + M.escapeHtml(u.username) + '</code></td>'
+            : '<td colspan="3" class="text-sm text-muted"><i class="fa-solid fa-user-slash mr-1"></i>' +
+                'No sign-in account' + (canAct ? '. Use Edit to create one.' : '.') + '</td>') +
+          '<td class="text-right text-nowrap">' +
+            (canAct
+              ? '<button type="button" class="btn btn-sm btn-outline-secondary ml-1" data-edit-org="' + o.id + '" ' +
+                  'title="Edit account" aria-label="Edit ' + M.escapeHtml(o.acronym) + ' account">' +
+                  '<i class="fa-solid fa-pen-to-square"></i></button>' +
+                (u
+                  ? '<button type="button" class="btn btn-sm btn-outline-danger ml-1" data-delete-org="' + o.id + '" ' +
+                      'title="Delete account" aria-label="Delete ' + M.escapeHtml(o.acronym) + ' account">' +
+                      '<i class="fa-solid fa-trash-can"></i></button>'
+                  : '')
+              : '') +
+          '</td>' +
+        '</tr>';
+      }).join('') + '</tbody></table></div>';
+
+    L.renderPager('accountsPager', list.length, paged.pages, accState, PAGE_SIZE, renderAccounts);
+    host.querySelectorAll('[data-edit-org]').forEach(function (b) {
+      b.addEventListener('click', function () { F.openEditDialog(this.getAttribute('data-edit-org'), renderAll); });
+    });
+    host.querySelectorAll('[data-delete-org]').forEach(function (b) {
+      b.addEventListener('click', function () { confirmDelete(this.getAttribute('data-delete-org')); });
+    });
+  }
+
+  function confirmDelete(orgId) {
+    var org = M.orgById(orgId);
+    var user = M.accountForOrg(orgId);
+    if (!org || !user) { return; }
+    SASO.layout.confirmDialog({
+      title: 'Delete the ' + org.acronym + ' account',
+      body: 'The username "' + user.username + '" will no longer be able to sign in. ' + org.acronym +
+            ' stays on the roster with all its activities and records, and you can give it a new ' +
+            'account later with Edit.',
+      confirmLabel: 'Delete account', variant: 'danger'
+    }, function () {
+      var result = E.deleteOrganizationAccount(orgId);
+      if (!result.ok) { SASO.layout.toast(result.message, 'danger'); return; }
+      SASO.layout.toast('The ' + org.acronym + ' account was deleted.', 'warning');
+      renderAll();
+    });
+  }
+
+  function renderAll() { renderAccounts(); render(); }
+
+  /* ---- account requests ------------------------------------------------------------------- */
 
   function rows() {
     var q = state.search.toLowerCase();
@@ -312,7 +421,7 @@
       }
       $m.modal('hide');
       SASO.layout.toast(result.org.acronym + ' approved — "' + result.user.username + '" can now sign in.');
-      render();
+      renderAll();
     });
 
     document.getElementById('rvDecline').addEventListener('click', function () {
@@ -331,12 +440,15 @@
   document.getElementById('fSearch').addEventListener('input', function () {
     state.search = this.value; state.page = 1; render();
   });
+  document.getElementById('fAccSearch').addEventListener('input', function () {
+    accState.search = this.value; accState.page = 1; renderAccounts();
+  });
   var add = document.getElementById('btnAddOrg');
-  if (add) { add.addEventListener('click', function () { F.openAddDialog(render); }); }
+  if (add) { add.addEventListener('click', function () { F.openAddDialog(renderAll); }); }
 
   /* Open a specific request straight from a notification link. */
   var openId = new URLSearchParams(window.location.search).get('review');
-  render();
+  renderAll();
   if (openId && M.accountRequestById(openId)) {
     var target = M.accountRequestById(openId);
     state.status = target.status; render();

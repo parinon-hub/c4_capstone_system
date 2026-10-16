@@ -22,7 +22,7 @@ SASO.layout = (function () {
     SASO: [
       { key: 'dashboard',    label: 'Dashboard',          icon: 'fa-gauge-high',        href: 'pages/saso/dashboard.html' },
       { key: 'organizations',label: 'Organizations',      icon: 'fa-people-group',      href: 'pages/saso/organizations.html' },
-      { key: 'accounts',     label: 'Account Requests',   icon: 'fa-user-plus',         href: 'pages/saso/account-requests.html', badge: 'accounts' },
+      { key: 'accounts',     label: 'Manage Accounts',    icon: 'fa-users-gear',         href: 'pages/saso/account-requests.html', badge: 'accounts' },
       { key: 'proposals',    label: 'Activity Proposals', icon: 'fa-file-circle-plus',  href: 'pages/saso/proposals.html',  badge: 'proposals' },
       { key: 'activities',   label: 'Activities',         icon: 'fa-calendar-check',    href: 'pages/saso/activities.html' },
       { key: 'requirements', label: 'Requirements',       icon: 'fa-list-check',        href: 'pages/saso/requirements.html', badge: 'requirements' },

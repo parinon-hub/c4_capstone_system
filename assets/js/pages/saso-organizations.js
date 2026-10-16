@@ -32,7 +32,7 @@
         '<div class="card-tools d-flex align-items-center flex-wrap">' +
           '<span class="card-subtitle mr-2" id="ayLabel"></span>' +
           '<a class="btn btn-sm btn-outline-secondary mr-1" href="account-requests.html">' +
-            '<i class="fa-solid fa-id-card mr-1"></i>Account requests' +
+            '<i class="fa-solid fa-users-gear mr-1"></i>Manage accounts' +
             (M.pendingAccountRequests().length
               ? ' <span class="badge badge-warning ml-1">' + M.pendingAccountRequests().length + '</span>' : '') +
           '</a>' +

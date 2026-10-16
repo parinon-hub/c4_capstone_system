@@ -110,7 +110,7 @@
               'SASO accounts share the same permissions, except that only the Head, Administrative ' +
               'Aide and Student Activities Coordinator can edit or delete a proposal under SASO ' +
               'review, manage the trash bin (deleted proposals are kept ' + C.TRASH_RETENTION_DAYS +
-              ' days), and approve organization account requests or add organizations. There is no ' +
+              ' days), and approve account requests or add, edit and delete organization accounts. There is no ' +
               'open sign-up.</div>' +
           '</div>' +
 

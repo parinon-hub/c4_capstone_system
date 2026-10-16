@@ -1483,3 +1483,7 @@ a.notif-message:hover { color: var(--cspc-navy); text-decoration: underline; }
 .login-hero .login-card {
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
 }
+
+/* ---- Manage Accounts ---------------------------------------------------------- */
+
+.account-search { width: 18rem; max-width: 50vw; }
