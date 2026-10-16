@@ -560,6 +560,13 @@ a:hover { color: var(--cspc-navy); }
 .sort-link.is-active { color: var(--cspc-navy); }
 .sort-link.is-active i { opacity: 1; }
 
+/* Settings sections fold under their header; the chevron flips when open. */
+.card.is-folded > :not(.card-header) { display: none; }
+.card.is-folded > .card-header { border-bottom: 0; }
+.card:has(.section-toggle) > .card-header { cursor: pointer; }
+.section-toggle i { transition: transform 0.15s ease; }
+.section-toggle[aria-expanded="true"] i { transform: rotate(180deg); }
+
 /* Start date / End date dropdown beside the Event Date header. The arrow
    button alone carries the choice: green for start date, red for end date. */
 .date-pick { display: inline-block; margin-left: 0.3rem; vertical-align: middle; }
