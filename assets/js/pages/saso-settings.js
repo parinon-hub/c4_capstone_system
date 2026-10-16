@@ -20,6 +20,11 @@
   });
   if (!session) { return; }
 
+  /* Sections start folded so the page opens as a short list of headings.
+     Remembers which ones the user opened, so saving the policy (which
+     redraws the page) does not fold them back up. */
+  var openSections = {};
+
   function render() {
     var st = M.settings();
     var db = M.db();
@@ -162,7 +167,44 @@
         '</div>' +
       '</div>';
 
+    addCollapseButtons();
     bind();
+  }
+
+  function addCollapseButtons() {
+    document.querySelectorAll('#pageRoot .card').forEach(function (card, i) {
+      var header = card.querySelector('.card-header');
+      var title = header.querySelector('.card-title').textContent;
+      var tools = header.querySelector('.card-tools');
+      if (!tools) {
+        tools = document.createElement('div');
+        tools.className = 'card-tools';
+        header.appendChild(tools);
+      }
+
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'btn btn-tool section-toggle';
+      button.innerHTML = '<i class="fa-solid fa-chevron-down"></i>';
+      tools.appendChild(button);
+
+      function apply() {
+        var open = !!openSections[title];
+        card.classList.toggle('is-folded', !open);
+        button.setAttribute('aria-expanded', open ? 'true' : 'false');
+        button.setAttribute('aria-label', (open ? 'Hide ' : 'Show ') + title);
+        button.title = open ? 'Hide' : 'Show';
+      }
+
+      button.addEventListener('click', function () {
+        openSections[title] = !openSections[title];
+        apply();
+      });
+      header.addEventListener('click', function (e) {
+        if (e.target === header || e.target.classList.contains('card-title')) { button.click(); }
+      });
+      apply();
+    });
   }
 
   function checklist(title, items) {
