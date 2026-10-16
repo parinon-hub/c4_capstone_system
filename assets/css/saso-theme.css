@@ -386,6 +386,15 @@ a:hover { color: var(--cspc-navy); }
 .timeline > div > .timeline-item > .timeline-header { border-bottom: 1px solid var(--cspc-line); font-size: 0.875rem; }
 .timeline > div > .timeline-item > .timeline-body { font-size: 0.8125rem; }
 
+/* A plain feed of cards: no rail down the left and no marker icons. */
+.timeline-plain::before { display: none; }
+.timeline-plain > div { margin-right: 0; }
+.timeline-plain > div > .timeline-item { margin-left: 0; margin-right: 0; }
+
+/* Cards side by side in one row stretch to the taller one, so the pair
+   always ends level. The 1rem is the card's own bottom margin. */
+.row-equal > [class*="col"] > .card { height: calc(100% - 1rem); }
+
 /* ---- Scrollable panels ---------------------------------------------------
    Feeds that grow without bound get a fixed height and their own scrollbar,
    so a long history never pushes the rest of the dashboard off screen.

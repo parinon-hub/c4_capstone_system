@@ -236,13 +236,9 @@
       return;
     }
 
-    host.innerHTML = '<div class="scroll-panel"><div class="timeline timeline-inverse mb-0 pr-2">' +
+    host.innerHTML = '<div class="scroll-panel"><div class="timeline timeline-plain mb-0 pr-2">' +
       events.map(function (e) {
-        var toneClass = e.entry.toValue === C.PROPOSAL.APPROVED ||
-                        e.entry.toValue === C.TERMINAL.ACCEPTED ? 'bg-success'
-          : e.entry.toValue === C.TERMINAL.OVERDUE || e.entry.toValue === C.PROPOSAL.REJECTED ? 'bg-danger'
-          : 'bg-info';
-        return '<div><i class="fa-solid fa-circle ' + toneClass + '"></i>' +
+        return '<div>' +
           '<div class="timeline-item">' +
             '<span class="time text-muted"><i class="fa-regular fa-clock"></i> ' +
               M.relativeTime(e.entry.timestamp) + '</span>' +
