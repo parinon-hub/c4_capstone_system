@@ -639,6 +639,9 @@ a:hover { color: var(--cspc-navy); }
   gap: 0.9rem 1.5rem;
   margin: 0;
 }
+/* Side-by-side cards on Activity Details stretch to the taller one's height. */
+.row-even > [class*="col-"] { display: flex; flex-direction: column; }
+.row-even > [class*="col-"] > .card { flex: 1 1 auto; }
 .detail-field { min-width: 0; }
 .detail-field.is-wide { grid-column: 1 / -1; }
 .detail-field dt {
