@@ -560,6 +560,28 @@ a:hover { color: var(--cspc-navy); }
 .sort-link.is-active { color: var(--cspc-navy); }
 .sort-link.is-active i { opacity: 1; }
 
+/* Wide lists with many columns: tighter side padding keeps them inside
+   the card instead of scrolling sideways. */
+.table.table-compact thead th,
+.table.table-compact tbody td { padding-left: 0.5rem; padding-right: 0.5rem; }
+
+/* Start/End picker under the Event Date header, so the column is no wider
+   than one date. */
+.date-pick {
+  display: block;
+  margin-top: 0.2rem;
+  padding: 0 0.15rem;
+  border: 1px solid var(--cspc-line);
+  border-radius: 3px;
+  background: #fff;
+  color: var(--cspc-navy);
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: none;
+  cursor: pointer;
+}
+.date-pick:focus { outline: none; border-color: var(--cspc-navy-light); }
+
 .pagination .page-link { color: var(--cspc-navy); }
 .pagination .page-item.active .page-link {
   background-color: var(--cspc-navy);
