@@ -281,7 +281,8 @@
 
     /* Organization side */
     if (r.status === C.REQUIREMENT.NOT_SUBMITTED || r.status === C.REQUIREMENT.NEEDS_REVISION) {
-      return '<label class="btn btn-sm btn-outline-primary mb-0">' +
+      return SASO.requirementDownload.button(r.name) +
+        '<label class="btn btn-sm btn-outline-primary mb-0">' +
         '<i class="fa-solid fa-paperclip mr-1"></i>' +
         (r.status === C.REQUIREMENT.NEEDS_REVISION ? 'Replace' : 'Attach') +
         '<input type="file" class="d-none" data-attach="' + M.escapeHtml(r.name) +
@@ -450,6 +451,10 @@
 
   function bind() {
     var root = document.getElementById('detailRoot');
+
+    if (!isSaso) {
+      SASO.requirementDownload.bind(root, function () { return { org: org, activity: activity }; });
+    }
 
     P.bind(root, reload, function () {
       window.location.href = (isSaso ? 'proposals.html' : 'activities.html') + '?trashed=1';
