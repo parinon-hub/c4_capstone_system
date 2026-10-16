@@ -1443,12 +1443,10 @@ a.notif-message:hover { color: var(--cspc-navy); text-decoration: underline; }
   background-repeat: no-repeat;
 }
 
-.login-hero .login-brand h1 {
-  color: #fff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
-}
+/* The seal and title sit inside the white card, so the navy seal does not
+   blend into the navy wash behind it. */
+.login-hero .login-card .login-brand h1 { color: var(--cspc-navy); }
 
-.login-hero .login-brand p,
 .login-hero .login-note {
   color: rgba(255, 255, 255, 0.86);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
@@ -1456,8 +1454,4 @@ a.notif-message:hover { color: var(--cspc-navy); text-decoration: underline; }
 
 .login-hero .login-card {
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
-}
-
-.login-hero .seal-shadow {
-  opacity: 0.35;
 }
