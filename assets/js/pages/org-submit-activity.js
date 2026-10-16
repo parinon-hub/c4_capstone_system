@@ -128,7 +128,8 @@
             '<span class="cell-sub">' + (r.mandatory ? 'Required' : 'Optional') +
             (r.name.indexOf('CMO 63') === 0 ? ' · off-campus activities only' : '') + '</span></td>' +
           '<td>' + M.badge(r.status) + '</td>' +
-          '<td class="text-right">' +
+          '<td class="text-right text-nowrap">' +
+            SASO.requirementDownload.button(r.name) +
             (attached
               ? '<span class="file-chip">' + M.escapeHtml(r.fileName) + '</span>' +
                 '<button type="button" class="btn btn-sm btn-link text-danger detach-req" ' +
@@ -140,6 +141,10 @@
           '</td>' +
         '</tr>';
       }).join('') + '</tbody></table></div>';
+
+    SASO.requirementDownload.bind(host, function () {
+      return { org: M.orgById(draft.organizationId), activity: M.activityById(draft.id) || draft };
+    });
 
     host.querySelectorAll('.attach-req').forEach(function (input) {
       input.addEventListener('change', function () {
