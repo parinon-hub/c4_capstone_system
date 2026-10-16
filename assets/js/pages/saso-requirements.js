@@ -2,9 +2,10 @@
    saso-requirements.js  —  Cross-activity requirements review.
 
    Activity Details reviews one activity's documents. This module inverts the
-   view: every document in the system, filterable by organization, activity,
-   phase and status, so SASO can work through a review queue rather than
-   opening activities one at a time.
+   view: every document in the system, sortable and filterable by
+   organization, activity, phase and status from the Sort and Filter menus,
+   so SASO can work through a review queue rather than opening activities
+   one at a time.
    ========================================================================= */
 
 (function () {
@@ -13,6 +14,7 @@
   var C = SASO.config;
   var M = SASO.model;
   var E = SASO.events;
+  var L = SASO.listview;
   var PAGE_SIZE = 12;
 
   var session = SASO.layout.init({
@@ -23,44 +25,65 @@
   });
   if (!session) { return; }
 
-  var state = { search: '', org: '', activity: '', phase: '', status: '', page: 1 };
+  /* The default order puts work waiting on SASO at the top. */
+  var state = { search: '', org: '', activity: '', phase: '', status: '', page: 1,
+                sort: 'status', dir: 'asc', group: '' };
 
   /* Arriving from a dashboard tile lands on the review queue. */
   var preset = new URLSearchParams(window.location.search).get('status');
-  if (preset) { state.status = preset; }
+  if (preset && C.LABEL[preset]) { state.status = preset; }
 
-  /* ---- filter controls ------------------------------------------------------ */
+  var STATUS_ORDER = {};
+  STATUS_ORDER[C.REQUIREMENT.UNDER_REVIEW] = 0;
+  STATUS_ORDER[C.REQUIREMENT.NEEDS_REVISION] = 1;
+  STATUS_ORDER[C.REQUIREMENT.NOT_SUBMITTED] = 2;
+  STATUS_ORDER[C.REQUIREMENT.APPROVED] = 3;
+  var PHASES = Object.keys(C.PHASE).map(function (k) { return C.PHASE[k]; });
 
-  function fillSelect(id, options, allLabel) {
-    document.getElementById(id).innerHTML =
-      '<option value="">' + allLabel + '</option>' +
-      options.map(function (o) {
-        return '<option value="' + M.escapeHtml(o.value) + '">' + M.escapeHtml(o.label) + '</option>';
-      }).join('');
-  }
+  /* ---- sort and filter menus --------------------------------------------------- */
 
-  fillSelect('fOrg', M.db().organizations.map(function (o) {
-    return { value: o.id, label: o.acronym };
-  }), 'All organizations');
+  document.getElementById('toolbarHost').innerHTML =
+    L.toolbarHtml('Search document, activity or organization');
 
-  fillSelect('fPhase', Object.keys(C.PHASE).map(function (k) {
-    return { value: C.PHASE[k], label: C.LABEL[C.PHASE[k]] };
-  }), 'Both phases');
-
-  fillSelect('fStatus', Object.keys(C.REQUIREMENT).map(function (k) {
-    return { value: C.REQUIREMENT[k], label: C.LABEL[C.REQUIREMENT[k]] };
-  }), 'All statuses');
-
-  /* The activity list narrows to the chosen organization. */
-  function refreshActivityFilter() {
-    var acts = state.org ? M.activitiesFor(state.org) : M.allActivities();
-    fillSelect('fActivity', acts
-      .filter(function (a) { return a.proposalStatus !== C.PROPOSAL.DRAFT; })
-      .map(function (a) { return { value: a.id, label: a.title }; }), 'All activities');
-    document.getElementById('fActivity').value = state.activity;
-  }
-
-  document.getElementById('fStatus').value = state.status;
+  var tb = L.toolbar({
+    state: state,
+    onChange: render,
+    sorts: [
+      { key: 'document',  label: 'Document' },
+      { key: 'org',       label: 'Organization' },
+      { key: 'activity',  label: 'Activity' },
+      { key: 'phase',     label: 'Phase' },
+      { key: 'status',    label: 'Status' },
+      { key: 'submitted', label: 'Submitted' }
+    ],
+    groups: [
+      { key: '',         label: 'None' },
+      { key: 'org',      label: 'Organization', of: function (r) { return r.organization.acronym; } },
+      { key: 'activity', label: 'Activity',     of: function (r) { return r.activity.title; } },
+      { key: 'phase',    label: 'Phase',        of: function (r) { return C.LABEL[r.requirement.phase]; },
+        rank: function (r) { return PHASES.indexOf(r.requirement.phase); } },
+      { key: 'status',   label: 'Status',       of: function (r) { return C.LABEL[r.requirement.status]; },
+        rank: function (r) { return STATUS_ORDER[r.requirement.status]; } }
+    ],
+    filters: [
+      { key: 'org', label: 'Organization', all: 'All organizations', resets: ['activity'],
+        options: M.db().organizations.map(function (o) { return { value: o.id, label: o.acronym }; }) },
+      /* The activity list narrows to the chosen organization. */
+      { key: 'activity', label: 'Activity', all: 'All activities',
+        options: function () {
+          var acts = state.org ? M.activitiesFor(state.org) : M.allActivities();
+          return acts
+            .filter(function (a) { return a.proposalStatus !== C.PROPOSAL.DRAFT; })
+            .map(function (a) { return { value: a.id, label: a.title }; });
+        } },
+      { key: 'phase', label: 'Phase', all: 'Both phases',
+        options: PHASES.map(function (p) { return { value: p, label: C.LABEL[p] }; }) },
+      { key: 'status', label: 'Status', all: 'All statuses',
+        options: Object.keys(C.REQUIREMENT).map(function (k) {
+          return { value: C.REQUIREMENT[k], label: C.LABEL[C.REQUIREMENT[k]] };
+        }) }
+    ]
+  });
 
   /* ---- summary tiles --------------------------------------------------------- */
 
@@ -98,19 +121,12 @@
         e.preventDefault();
         state.status = this.getAttribute('data-status');
         state.page = 1;
-        document.getElementById('fStatus').value = state.status;
         render();
       });
     });
   }
 
   /* ---- filtering -------------------------------------------------------------- */
-
-  var STATUS_ORDER = {};
-  STATUS_ORDER[C.REQUIREMENT.UNDER_REVIEW] = 0;
-  STATUS_ORDER[C.REQUIREMENT.NEEDS_REVISION] = 1;
-  STATUS_ORDER[C.REQUIREMENT.NOT_SUBMITTED] = 2;
-  STATUS_ORDER[C.REQUIREMENT.APPROVED] = 3;
 
   function filtered() {
     var q = state.search.toLowerCase();
@@ -130,20 +146,28 @@
       return true;
     });
 
-    /* Work waiting on SASO sorts to the top. */
+    /* Newest submissions first wherever the chosen key ties. */
     rows.sort(function (a, b) {
-      var d = STATUS_ORDER[a.requirement.status] - STATUS_ORDER[b.requirement.status];
-      if (d !== 0) { return d; }
       return new Date(b.requirement.submittedAt || 0) - new Date(a.requirement.submittedAt || 0);
     });
 
-    return rows;
+    return tb.order(rows, sortValue);
+  }
+
+  function sortValue(row, key) {
+    var r = row.requirement;
+    if (key === 'document') { return r.name || ''; }
+    if (key === 'org') { return row.organization.acronym; }
+    if (key === 'activity') { return row.activity.title || ''; }
+    if (key === 'phase') { return PHASES.indexOf(r.phase); }
+    if (key === 'submitted') { return new Date(r.submittedAt || 0).getTime(); }
+    return STATUS_ORDER[r.status];
   }
 
   /* ---- render ------------------------------------------------------------------ */
 
   function render() {
-    refreshActivityFilter();
+    tb.refresh();
     renderTiles();
 
     var rows = filtered();
@@ -173,11 +197,11 @@
         '<th>Document</th><th>Organization</th><th>Activity</th>' +
         '<th>Phase</th><th>Status</th><th>Submitted</th><th></th>' +
       '</tr></thead><tbody>' +
-      slice.map(function (row) {
+      slice.map(function (row, i) {
         var r = row.requirement;
         var cls = r.status === C.REQUIREMENT.UNDER_REVIEW ? 'row-stale'
           : r.status === C.REQUIREMENT.NOT_SUBMITTED && !r.mandatory ? '' : '';
-        return '<tr class="' + cls + '">' +
+        return tb.groupRow(slice, i, rows, 7) + '<tr class="' + cls + '">' +
           '<td><span class="cell-primary">' + M.escapeHtml(r.name) +
             (r.requestedBySaso ? ' <span class="badge badge-info status-badge">Requested</span>' : '') +
             '</span><span class="cell-sub">' + (r.mandatory ? 'Required' : 'Optional') +
@@ -340,31 +364,7 @@
     });
   }
 
-  function clearFilters() {
-    state = { search: '', org: '', activity: '', phase: '', status: '', page: 1 };
-    document.getElementById('fSearch').value = '';
-    ['fOrg', 'fActivity', 'fPhase', 'fStatus'].forEach(function (id) {
-      document.getElementById(id).value = '';
-    });
-    render();
-  }
-
-  document.getElementById('fSearch').addEventListener('input', function () {
-    state.search = this.value; state.page = 1; render();
-  });
-  document.getElementById('fOrg').addEventListener('change', function () {
-    state.org = this.value; state.activity = ''; state.page = 1; render();
-  });
-  document.getElementById('fActivity').addEventListener('change', function () {
-    state.activity = this.value; state.page = 1; render();
-  });
-  document.getElementById('fPhase').addEventListener('change', function () {
-    state.phase = this.value; state.page = 1; render();
-  });
-  document.getElementById('fStatus').addEventListener('change', function () {
-    state.status = this.value; state.page = 1; render();
-  });
-  document.getElementById('btnClear').addEventListener('click', clearFilters);
+  function clearFilters() { tb.clear(); }
 
   render();
 })();

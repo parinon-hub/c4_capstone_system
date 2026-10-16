@@ -23,7 +23,8 @@
   if (!session) { return; }
 
   var state = { search: '', org: '', stage: '', category: '', venue: '',
-                from: '', to: '', sort: 'eventDate', dir: 'desc', dateField: 'start', page: 1 };
+                from: '', to: '', sort: 'eventDate', dir: 'desc', group: '', dateField: 'start', page: 1 };
+  var STAGE_ORDER = Object.keys(C.STAGE);
 
   var qs = new URLSearchParams(window.location.search);
   var presetStage = qs.get('stage');
@@ -38,54 +39,49 @@
         '<div class="card-tools"><span class="card-subtitle" id="resultCount"></span></div>' +
       '</div>' +
       '<div class="card-body border-bottom py-2">' +
-        '<div class="form-row align-items-end">' +
-          '<div class="form-group col-md-3 mb-2">' +
-            '<label for="fSearch" class="text-sm">Search</label>' +
-            '<input type="search" class="form-control form-control-sm" id="fSearch" ' +
-              'placeholder="Activity or venue"></div>' +
-          '<div class="form-group col-md-2 mb-2">' +
-            '<label for="fOrg" class="text-sm">Organization</label>' +
-            '<select class="form-control form-control-sm" id="fOrg"></select></div>' +
-          '<div class="form-group col-md-2 mb-2">' +
-            '<label for="fStage" class="text-sm">Stage</label>' +
-            '<select class="form-control form-control-sm" id="fStage"></select></div>' +
-          '<div class="form-group col-md-2 mb-2">' +
-            '<label for="fCategory" class="text-sm">Category</label>' +
-            '<select class="form-control form-control-sm" id="fCategory"></select></div>' +
-          '<div class="form-group col-md-2 mb-2">' +
-            '<label for="fVenue" class="text-sm">Venue</label>' +
-            '<select class="form-control form-control-sm" id="fVenue"></select></div>' +
-          '<div class="form-group col-md-1 mb-2">' +
-            '<button type="button" class="btn btn-sm btn-light btn-block" id="btnClear">Clear</button></div>' +
-        '</div>' +
-        '<div class="form-row align-items-end">' +
-          '<div class="form-group col-md-2 mb-2">' +
-            '<label for="fFrom" class="text-sm">Event date from</label>' +
-            '<input type="date" class="form-control form-control-sm" id="fFrom"></div>' +
-          '<div class="form-group col-md-2 mb-2">' +
-            '<label for="fTo" class="text-sm">to</label>' +
-            '<input type="date" class="form-control form-control-sm" id="fTo"></div>' +
-        '</div>' +
+        L.toolbarHtml('Search activity, organization or venue') +
       '</div>' +
       '<div class="card-body p-0" id="tableHost"></div>' +
       '<div class="card-footer d-flex align-items-center py-2" id="pager"></div>' +
     '</div>';
 
-  L.fillSelect('fOrg', M.db().organizations.map(function (o) {
-    return { value: o.id, label: o.acronym };
-  }), 'All organizations', state.org);
+  /* ---- sort and filter menus --------------------------------------------------- */
 
-  L.fillSelect('fStage', Object.keys(C.STAGE).map(function (k) {
-    return { value: k, label: C.LABEL[k] };
-  }), 'All stages', state.stage);
-
-  L.fillSelect('fCategory', C.ACTIVITY_CATEGORIES.map(function (c) {
-    return { value: c, label: c };
-  }), 'All categories');
-
-  L.fillSelect('fVenue', Object.keys(C.VENUE).map(function (k) {
-    return { value: C.VENUE[k], label: C.LABEL[C.VENUE[k]] };
-  }), 'All venue types');
+  var tb = L.toolbar({
+    state: state,
+    onChange: render,
+    sorts: [
+      { key: 'org',          label: 'Organization' },
+      { key: 'title',        label: 'Activity' },
+      { key: 'category',     label: 'Category' },
+      { key: 'eventDate',    label: 'Event date' },
+      { key: 'participants', label: 'Participants' },
+      { key: 'stage',        label: 'Stage' }
+    ],
+    groups: [
+      { key: '',         label: 'None' },
+      { key: 'org',      label: 'Organization', of: function (a) { return M.orgAcronym(a.organizationId); } },
+      { key: 'stage',    label: 'Stage', of: function (a) { return C.LABEL[M.stageOf(a)]; },
+        rank: function (a) { return STAGE_ORDER.indexOf(M.stageOf(a)); } },
+      { key: 'category', label: 'Category', of: function (a) { return a.category || 'No category'; } }
+    ],
+    filters: [
+      { key: 'org', label: 'Organization', all: 'All organizations',
+        options: M.db().organizations.map(function (o) { return { value: o.id, label: o.acronym }; }) },
+      { key: 'stage', label: 'Stage', all: 'All stages',
+        /* Drafts never reach SASO, so there is nothing to filter for. */
+        options: STAGE_ORDER.filter(function (k) { return k !== C.STAGE.DRAFT; })
+          .map(function (k) { return { value: k, label: C.LABEL[k] }; }) },
+      { key: 'category', label: 'Category', all: 'All categories',
+        options: C.ACTIVITY_CATEGORIES.map(function (c) { return { value: c, label: c }; }) },
+      { key: 'venue', label: 'Venue', all: 'All venue types',
+        options: Object.keys(C.VENUE).map(function (k) {
+          return { value: C.VENUE[k], label: C.LABEL[C.VENUE[k]] };
+        }) }
+    ],
+    /* Filters on the start date, as the old "Event date from / to" fields did. */
+    range: { from: 'from', to: 'to', label: 'Event date' }
+  });
 
   function rows() {
     var q = state.search.toLowerCase();
@@ -106,16 +102,18 @@
       return true;
     });
 
-    return L.sort(list, state, function (a, key) {
+    return tb.order(list, function (a, key) {
       if (key === 'org') { return M.orgAcronym(a.organizationId); }
-      if (key === 'eventDate') { return new Date(L.pickedDate(a, state) || 0); }
-      if (key === 'updated') { return new Date(a.updatedAt || 0); }
+      if (key === 'title') { return a.title || ''; }
+      if (key === 'category') { return a.category || ''; }
       if (key === 'participants') { return a.expectedParticipants || 0; }
-      return a[key];
+      if (key === 'stage') { return STAGE_ORDER.indexOf(M.stageOf(a)); }
+      return new Date(L.pickedDate(a, state) || 0).getTime();
     });
   }
 
   function render() {
+    tb.refresh();
     var list = rows();
     var paged = L.paginate(list, state, PAGE_SIZE);
     var host = document.getElementById('tableHost');
@@ -144,11 +142,11 @@
         L.header('Participants', 'text-center') +
         '<th>Proposal</th><th>Event</th><th>Reports</th><th>Stage</th><th></th>' +
       '</tr></thead><tbody>' +
-      paged.slice.map(function (a) {
+      paged.slice.map(function (a, i) {
         var ts = M.terminalStatus(a);
         var overdue = ts === C.TERMINAL.OVERDUE;
 
-        return '<tr class="' + (overdue ? 'row-overdue' : '') + '">' +
+        return tb.groupRow(paged.slice, i, list, 10) + '<tr class="' + (overdue ? 'row-overdue' : '') + '">' +
           '<td>' + M.escapeHtml(M.orgAcronym(a.organizationId)) + '</td>' +
           '<td><a href="activity-details.html?id=' + a.id + '" class="cell-primary">' +
             M.escapeHtml(a.title) + '</a>' +
@@ -172,23 +170,7 @@
     L.renderPager('pager', list.length, paged.pages, state, PAGE_SIZE, render);
   }
 
-  function clearFilters() {
-    state.search = ''; state.org = ''; state.stage = '';
-    state.category = ''; state.venue = ''; state.from = ''; state.to = ''; state.page = 1;
-    ['fSearch', 'fOrg', 'fStage', 'fCategory', 'fVenue', 'fFrom', 'fTo'].forEach(function (id) {
-      document.getElementById(id).value = '';
-    });
-    render();
-  }
-
-  [['fSearch', 'search', 'input'], ['fOrg', 'org', 'change'], ['fStage', 'stage', 'change'],
-   ['fCategory', 'category', 'change'], ['fVenue', 'venue', 'change'],
-   ['fFrom', 'from', 'change'], ['fTo', 'to', 'change']].forEach(function (cfg) {
-    document.getElementById(cfg[0]).addEventListener(cfg[2], function () {
-      state[cfg[1]] = this.value; state.page = 1; render();
-    });
-  });
-  document.getElementById('btnClear').addEventListener('click', clearFilters);
+  function clearFilters() { tb.clear(); }
 
   render();
 })();

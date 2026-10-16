@@ -1488,7 +1488,7 @@ a.notif-message:hover { color: var(--cspc-navy); text-decoration: underline; }
 
 .account-search { width: 18rem; max-width: 50vw; }
 
-/* ---- List toolbar: search with Sort and Filter menus (org Activities) -------- */
+/* ---- List toolbar: search with Sort and Filter menus ------------------------- */
 
 .list-toolbar { display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0; }
 /* The search box takes all the free width, which pushes Sort, Filter and
@@ -1529,6 +1529,20 @@ a.notif-message:hover { color: var(--cspc-navy); text-decoration: underline; }
 .list-menu-wide { min-width: 22rem; }
 .list-menu-cols { display: grid; grid-template-columns: 1fr 1fr; }
 .list-menu-cols > div + div { border-left: 1px solid var(--cspc-line); }
+/* The shared toolbar (listview.js) sets --cols to its number of filters.
+   Long lists, such as every activity, scroll inside their own column. */
+.list-menu-wide { max-width: calc(100vw - 2rem); }
+.list-menu-grid { display: grid; grid-template-columns: repeat(var(--cols, 2), 11rem); }
+.list-menu-grid > div { max-height: 20rem; overflow-y: auto; }
+.list-menu-grid > div + div { border-left: 1px solid var(--cspc-line); }
+.list-menu-grid .dropdown-item { white-space: normal; }
+.list-menu-range { margin-top: 0.35rem; border-top: 1px solid var(--cspc-line); padding-top: 0.2rem; }
+.list-range-fields { display: flex; gap: 0.5rem; padding: 0 1rem 0.35rem 1.75rem; }
+.list-range-fields label { flex: 1; margin: 0; font-size: 0.75rem; font-weight: 400; color: var(--cspc-muted); }
+@media (max-width: 767.98px) {
+  .list-menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .list-menu-grid > div:nth-child(odd) { border-left: 0; }
+}
 
 .list-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
 .list-chips:not(:empty) { padding: 0.25rem 0 0.35rem; }

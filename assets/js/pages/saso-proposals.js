@@ -34,12 +34,15 @@
   }
 
   var state = { search: '', org: '', status: '', scope: 'pipeline',
-                sort: 'waiting', dir: 'desc', dateField: 'start', page: 1 };
+                sort: 'waiting', dir: 'desc', group: '', dateField: 'start', page: 1 };
 
   var PIPELINE = [C.PROPOSAL.SUBMITTED, C.PROPOSAL.FOR_REVIEW,
                   C.PROPOSAL.REQUIREMENTS_NEEDED, C.PROPOSAL.REVISION_REQUIRED,
                   C.PROPOSAL.SASO_ENDORSED, C.PROPOSAL.WITH_VPAA,
                   C.PROPOSAL.WITH_PRESIDENT];
+  /* Every status past draft, in lifecycle order. */
+  var STATUSES = Object.keys(C.PROPOSAL).map(function (k) { return C.PROPOSAL[k]; })
+    .filter(function (s) { return s !== C.PROPOSAL.DRAFT; });
 
   document.getElementById('pageRoot').innerHTML =
     '<div class="row" id="tiles"></div>' +
@@ -55,32 +58,11 @@
         '</div>' +
       '</div>' +
       '<div class="card-body border-bottom py-2">' +
-        '<div class="form-row align-items-end">' +
-          '<div class="form-group col-md-4 mb-2">' +
-            '<label for="fSearch" class="text-sm">Search</label>' +
-            '<input type="search" class="form-control form-control-sm" id="fSearch" ' +
-              'placeholder="Activity, organization or venue"></div>' +
-          '<div class="form-group col-md-3 mb-2">' +
-            '<label for="fOrg" class="text-sm">Organization</label>' +
-            '<select class="form-control form-control-sm" id="fOrg"></select></div>' +
-          '<div class="form-group col-md-3 mb-2">' +
-            '<label for="fStatus" class="text-sm">Status</label>' +
-            '<select class="form-control form-control-sm" id="fStatus"></select></div>' +
-          '<div class="form-group col-md-2 mb-2">' +
-            '<button type="button" class="btn btn-sm btn-light btn-block" id="btnClear">Clear</button></div>' +
-        '</div>' +
+        L.toolbarHtml('Search activity, organization or venue') +
       '</div>' +
       '<div class="card-body p-0" id="tableHost"></div>' +
       '<div class="card-footer d-flex align-items-center py-2" id="pager"></div>' +
     '</div>';
-
-  L.fillSelect('fOrg', M.db().organizations.map(function (o) {
-    return { value: o.id, label: o.acronym };
-  }), 'All organizations');
-
-  L.fillSelect('fStatus', PIPELINE.map(function (s) {
-    return { value: s, label: C.LABEL[s] };
-  }), 'All statuses');
 
   /* Days the proposal has been sitting with whichever office holds it. */
   function waiting(a) {
@@ -93,6 +75,44 @@
     var office = M.currentOffice(a.id);
     return office ? C.LABEL[office.office] : '—';
   }
+
+  /* ---- sort and filter menus --------------------------------------------------- */
+
+  var tb = L.toolbar({
+    state: state,
+    onChange: render,
+    sorts: [
+      { key: 'org',          label: 'Organization' },
+      { key: 'title',        label: 'Activity' },
+      { key: 'submitted',    label: 'Submitted' },
+      { key: 'eventDate',    label: 'Event date' },
+      { key: 'requirements', label: 'Requirements' },
+      { key: 'status',       label: 'Status' },
+      { key: 'holder',       label: 'Now with' },
+      { key: 'waiting',      label: 'Days waiting' }
+    ],
+    groups: [
+      { key: '',       label: 'None' },
+      { key: 'org',    label: 'Organization', of: function (a) { return M.orgAcronym(a.organizationId); } },
+      { key: 'status', label: 'Status', of: function (a) { return C.LABEL[a.proposalStatus]; },
+        rank: function (a) { return STATUSES.indexOf(a.proposalStatus); } },
+      { key: 'holder', label: 'Now with', of: function (a) {
+        var office = holder(a);
+        return office === '—' ? 'Not with an office' : office;
+      } }
+    ],
+    filters: [
+      { key: 'org', label: 'Organization', all: 'All organizations',
+        options: M.db().organizations.map(function (o) { return { value: o.id, label: o.acronym }; }) },
+      /* "In pipeline" only offers the statuses still moving toward approval. */
+      { key: 'status', label: 'Status', all: 'All statuses',
+        options: function () {
+          return (state.scope === 'pipeline' ? PIPELINE : STATUSES).map(function (s) {
+            return { value: s, label: C.LABEL[s] };
+          });
+        } }
+    ]
+  });
 
   /* ---- tiles ------------------------------------------------------------------ */
 
@@ -146,18 +166,22 @@
       return true;
     });
 
-    return L.sort(list, state, function (a, key) {
-      if (key === 'waiting') { return waiting(a); }
+    return tb.order(list, function (a, key) {
       if (key === 'org') { return M.orgAcronym(a.organizationId); }
-      if (key === 'submitted') { return new Date(a.submittedAt || 0); }
-      if (key === 'eventDate') { return new Date(L.pickedDate(a, state) || 0); }
-      return a[key];
+      if (key === 'title') { return a.title || ''; }
+      if (key === 'submitted') { return new Date(a.submittedAt || 0).getTime(); }
+      if (key === 'eventDate') { return new Date(L.pickedDate(a, state) || 0).getTime(); }
+      if (key === 'requirements') { return M.requirementProgress(a.id, C.PHASE.PRE_APPROVAL).percent; }
+      if (key === 'status') { return STATUSES.indexOf(a.proposalStatus); }
+      if (key === 'holder') { return holder(a); }
+      return waiting(a);
     });
   }
 
   /* ---- render ------------------------------------------------------------------- */
 
   function render() {
+    tb.refresh();
     renderTiles();
     document.getElementById('trashSlot').innerHTML = P.trashButton('trash.html');
 
@@ -192,12 +216,13 @@
         L.header('Days Waiting', 'text-center') +
         '<th></th>' +
       '</tr></thead><tbody>' +
-      paged.slice.map(function (a) {
+      paged.slice.map(function (a, i) {
         var d = waiting(a);
         var p = M.requirementProgress(a.id, C.PHASE.PRE_APPROVAL);
         var complete = p.approved === p.mandatory;
 
-        return '<tr class="' + (d > M.settings().proposalAlertDays ? 'row-stale' : '') + '">' +
+        return tb.groupRow(paged.slice, i, list, 9) +
+          '<tr class="' + (d > M.settings().proposalAlertDays ? 'row-stale' : '') + '">' +
           '<td><span class="cell-primary">' + M.escapeHtml(M.orgAcronym(a.organizationId)) + '</span></td>' +
           '<td><a href="activity-details.html?id=' + a.id + '" class="cell-primary">' +
             M.escapeHtml(a.title) + '</a>' +
@@ -225,24 +250,7 @@
 
   /* ---- controls -------------------------------------------------------------------- */
 
-  function clearFilters() {
-    state.search = ''; state.org = ''; state.status = ''; state.page = 1;
-    document.getElementById('fSearch').value = '';
-    document.getElementById('fOrg').value = '';
-    document.getElementById('fStatus').value = '';
-    render();
-  }
-
-  document.getElementById('fSearch').addEventListener('input', function () {
-    state.search = this.value; state.page = 1; render();
-  });
-  document.getElementById('fOrg').addEventListener('change', function () {
-    state.org = this.value; state.page = 1; render();
-  });
-  document.getElementById('fStatus').addEventListener('change', function () {
-    state.status = this.value; state.page = 1; render();
-  });
-  document.getElementById('btnClear').addEventListener('click', clearFilters);
+  function clearFilters() { tb.clear(); }
 
   document.querySelectorAll('#scopeToggle button').forEach(function (b) {
     b.addEventListener('click', function () {
@@ -251,6 +259,9 @@
       });
       this.classList.add('active');
       state.scope = this.getAttribute('data-scope');
+      if (state.scope === 'pipeline' && state.status && PIPELINE.indexOf(state.status) === -1) {
+        state.status = '';
+      }
       state.page = 1;
       render();
     });
