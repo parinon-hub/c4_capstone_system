@@ -154,12 +154,12 @@
 
     host.innerHTML = '<div class="table-responsive"><table class="table table-hover">' +
       '<thead><tr>' +
-        L.sortHeader(state, 'ref', 'Reference') +
-        L.sortHeader(state, 'acronym', 'Organization') +
+        L.header('Reference') +
+        L.header('Organization') +
         '<th>College / type</th><th>Requested by</th>' +
-        L.sortHeader(state, 'username', 'Username') +
+        L.header('Username') +
         '<th>Proof</th>' +
-        L.sortHeader(state, 'submittedAt', 'Submitted') +
+        L.header('Submitted') +
         '<th>Status</th><th></th>' +
       '</tr></thead><tbody>' +
       paged.slice.map(function (r) {
@@ -184,7 +184,6 @@
         '</tr>';
       }).join('') + '</tbody></table></div>';
 
-    L.bindSort(host, state, render);
     L.renderPager('pager', list.length, paged.pages, state, PAGE_SIZE, render);
     host.querySelectorAll('[data-review]').forEach(function (b) {
       b.addEventListener('click', function () { openReview(this.getAttribute('data-review')); });

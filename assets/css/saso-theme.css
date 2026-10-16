@@ -560,6 +560,43 @@ a:hover { color: var(--cspc-navy); }
 .sort-link.is-active { color: var(--cspc-navy); }
 .sort-link.is-active i { opacity: 1; }
 
+/* Start date / End date dropdown beside the Event Date header. */
+.date-pick { display: inline-block; margin-left: 0.3rem; vertical-align: middle; }
+.date-pick-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.1rem 0.35rem;
+  border: 1px solid var(--cspc-line);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--cspc-ink);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  line-height: 1.4;
+  cursor: pointer;
+}
+.date-pick-toggle i { font-size: 0.55rem; color: var(--cspc-muted); }
+.date-pick-toggle:hover,
+.date-pick.show .date-pick-toggle { border-color: var(--cspc-navy-light); }
+.date-pick-toggle:focus { outline: none; box-shadow: 0 0 0 2px rgba(19, 58, 99, 0.15); }
+.date-pick-menu {
+  min-width: 7.5rem;
+  margin-top: 0.25rem;
+  padding: 0.25rem 0;
+  border: 1px solid var(--cspc-line);
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(16, 24, 40, 0.08);
+  font-size: 0.8125rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.date-pick-menu .dropdown-item { padding: 0.35rem 0.75rem; color: var(--cspc-ink); font-weight: 400; }
+.date-pick-menu .dropdown-item:hover { background: #f4f7fb; }
+.date-pick-menu .dropdown-item.is-selected { background: #e3f0fb; color: var(--cspc-navy); }
+
 .pagination .page-link { color: var(--cspc-navy); }
 .pagination .page-item.active .page-link {
   background-color: var(--cspc-navy);
