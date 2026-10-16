@@ -1001,35 +1001,6 @@ a.notif-message:hover { color: var(--cspc-navy); text-decoration: underline; }
 
 .login-card label { font-size: 0.8125rem; font-weight: 600; }
 
-.login-accounts {
-  margin-top: 1rem;
-  border-top: 1px dashed var(--cspc-line);
-  padding-top: 0.9rem;
-}
-
-.login-accounts h6 {
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--cspc-muted);
-}
-
-.account-chip {
-  display: inline-block;
-  border: 1px solid var(--cspc-line);
-  border-radius: 4px;
-  background: #f8fafc;
-  padding: 0.25rem 0.55rem;
-  margin: 0.2rem 0.25rem 0 0;
-  font-size: 0.75rem;
-  color: var(--cspc-ink);
-  cursor: pointer;
-}
-
-.account-chip:hover { border-color: var(--cspc-navy-light); background: #eef4fb; }
-.account-chip code { color: var(--cspc-navy); background: none; padding: 0; }
-
 .login-note {
   margin-top: 1rem;
   font-size: 0.75rem;
