@@ -1491,7 +1491,9 @@ a.notif-message:hover { color: var(--cspc-navy); text-decoration: underline; }
 /* ---- List toolbar: search with Sort and Filter menus (org Activities) -------- */
 
 .list-toolbar { display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0; }
-.list-search { position: relative; flex: 1 1 auto; max-width: 28rem; }
+/* The search box takes all the free width, which pushes Sort, Filter and
+   Clear to the far right. */
+.list-search { position: relative; flex: 1 1 auto; min-width: 0; }
 .list-search > i {
   position: absolute; left: 0.6rem; top: 50%; transform: translateY(-50%);
   color: var(--cspc-muted); font-size: 0.75rem; pointer-events: none;
