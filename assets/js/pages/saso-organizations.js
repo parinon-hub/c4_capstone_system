@@ -22,7 +22,8 @@
   });
   if (!session) { return; }
 
-  var state = { search: '', level: '', compliance: '', sort: 'acronym', dir: 'asc', page: 1 };
+  var state = { search: '', level: '', compliance: '', sort: 'acronym', dir: 'asc', group: '', page: 1 };
+  var LEVELS = Object.keys(C.ACCREDITATION_LEVEL).map(function (k) { return C.ACCREDITATION_LEVEL[k]; });
 
   document.getElementById('pageRoot').innerHTML =
     '<div class="row" id="tiles"></div>' +
@@ -43,32 +44,10 @@
         '</div>' +
       '</div>' +
       '<div class="card-body border-bottom py-2">' +
-        '<div class="form-row align-items-end">' +
-          '<div class="form-group col-md-4 mb-2">' +
-            '<label for="fSearch" class="text-sm">Search</label>' +
-            '<input type="search" class="form-control form-control-sm" id="fSearch" ' +
-              'placeholder="Name, acronym, college or adviser"></div>' +
-          '<div class="form-group col-md-3 mb-2">' +
-            '<label for="fLevel" class="text-sm">Accreditation</label>' +
-            '<select class="form-control form-control-sm" id="fLevel"></select></div>' +
-          '<div class="form-group col-md-3 mb-2">' +
-            '<label for="fCompliance" class="text-sm">Compliance</label>' +
-            '<select class="form-control form-control-sm" id="fCompliance">' +
-              '<option value="">All organizations</option>' +
-              '<option value="outstanding">With outstanding documents</option>' +
-              '<option value="overdue">With overdue reports</option>' +
-              '<option value="clear">Fully compliant</option>' +
-            '</select></div>' +
-          '<div class="form-group col-md-2 mb-2">' +
-            '<button type="button" class="btn btn-sm btn-light btn-block" id="btnClear">Clear</button></div>' +
-        '</div>' +
+        L.toolbarHtml('Search name, acronym, college or adviser') +
       '</div>' +
       '<div class="card-body p-0" id="tableHost"></div>' +
     '</div>';
-
-  L.fillSelect('fLevel', Object.keys(C.ACCREDITATION_LEVEL).map(function (k) {
-    return { value: C.ACCREDITATION_LEVEL[k], label: C.LABEL[C.ACCREDITATION_LEVEL[k]] };
-  }), 'All levels');
 
   var ay = M.db().organizations[0];
   document.getElementById('ayLabel').textContent =
@@ -104,6 +83,50 @@
       completed: stages[C.STAGE.COMPLETED] || 0
     };
   }
+
+  /* ---- sort and filter menus --------------------------------------------------- */
+
+  var COMPLIANCE = [
+    { value: 'overdue',     label: 'With overdue reports' },
+    { value: 'outstanding', label: 'With outstanding documents' },
+    { value: 'clear',       label: 'Fully compliant' }
+  ];
+
+  /* Worst first: overdue reports, then outstanding documents. */
+  function complianceRank(p) {
+    if (p.overdue) { return 0; }
+    if (p.outstanding) { return 1; }
+    return p.total ? 2 : 3;
+  }
+
+  function complianceGroup(p) {
+    return ['Overdue reports', 'Outstanding documents', 'Compliant', 'No activities yet'][complianceRank(p)];
+  }
+
+  var tb = L.toolbar({
+    state: state,
+    onChange: render,
+    sorts: [
+      { key: 'acronym',     label: 'Organization' },
+      { key: 'college',     label: 'College' },
+      { key: 'adviser',     label: 'Adviser' },
+      { key: 'level',       label: 'Accreditation' },
+      { key: 'activities',  label: 'Activities' },
+      { key: 'outstanding', label: 'Compliance' }
+    ],
+    groups: [
+      { key: '',           label: 'None' },
+      { key: 'college',    label: 'College', of: function (p) { return p.org.college || 'No college'; } },
+      { key: 'level',      label: 'Accreditation', of: function (p) { return C.LABEL[p.org.accreditationLevel]; },
+        rank: function (p) { return LEVELS.indexOf(p.org.accreditationLevel); } },
+      { key: 'compliance', label: 'Compliance', of: complianceGroup, rank: complianceRank }
+    ],
+    filters: [
+      { key: 'level', label: 'Accreditation', all: 'All levels',
+        options: LEVELS.map(function (l) { return { value: l, label: C.LABEL[l] }; }) },
+      { key: 'compliance', label: 'Compliance', all: 'All organizations', options: COMPLIANCE }
+    ]
+  });
 
   /* ---- tiles ------------------------------------------------------------------- */
 
@@ -149,13 +172,13 @@
       return true;
     });
 
-    return L.sort(list, state, function (p, key) {
-      if (key === 'acronym') { return p.org.acronym; }
-      if (key === 'college') { return p.org.college; }
-      if (key === 'level') { return M.accreditationLabel(p.org); }
+    return tb.order(list, function (p, key) {
+      if (key === 'college') { return p.org.college || ''; }
+      if (key === 'adviser') { return p.org.adviser || ''; }
+      if (key === 'level') { return LEVELS.indexOf(p.org.accreditationLevel); }
       if (key === 'activities') { return p.total; }
       if (key === 'outstanding') { return p.outstanding + p.overdue * 100; }
-      return p.org[key];
+      return p.org.acronym;
     });
   }
 
@@ -174,6 +197,7 @@
   }
 
   function render() {
+    tb.refresh();
     renderTiles();
     var list = rows();
     var host = document.getElementById('tableHost');
@@ -199,12 +223,12 @@
         L.header('Compliance') +
         '<th></th>' +
       '</tr></thead><tbody>' +
-      list.map(function (p) {
+      list.map(function (p, i) {
         var o = p.org;
         var left = M.accreditationDaysLeft(o);
         var due = left !== null && left <= 60;
 
-        return '<tr class="' + (p.overdue ? 'row-overdue' : '') + '">' +
+        return tb.groupRow(list, i, list, 7) + '<tr class="' + (p.overdue ? 'row-overdue' : '') + '">' +
           '<td><span class="cell-primary">' + M.escapeHtml(o.acronym) + '</span>' +
             '<span class="cell-sub">' + M.escapeHtml(o.name) + '</span></td>' +
           '<td class="text-sm">' + M.escapeHtml(o.college) + '</td>' +
@@ -298,24 +322,7 @@
 
   /* ---- controls --------------------------------------------------------------------- */
 
-  function clearFilters() {
-    state.search = ''; state.level = ''; state.compliance = '';
-    ['fSearch', 'fLevel', 'fCompliance'].forEach(function (id) {
-      document.getElementById(id).value = '';
-    });
-    render();
-  }
-
-  document.getElementById('fSearch').addEventListener('input', function () {
-    state.search = this.value; render();
-  });
-  document.getElementById('fLevel').addEventListener('change', function () {
-    state.level = this.value; render();
-  });
-  document.getElementById('fCompliance').addEventListener('change', function () {
-    state.compliance = this.value; render();
-  });
-  document.getElementById('btnClear').addEventListener('click', clearFilters);
+  function clearFilters() { tb.clear(); }
 
   var addOrg = document.getElementById('btnAddOrg');
   if (addOrg) {
