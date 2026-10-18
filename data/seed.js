@@ -363,6 +363,138 @@ SASO.buildSeed = function () {
   history('act-12','proposalStatus',C.PROPOSAL.WITH_VPAA,C.PROPOSAL.WITH_PRESIDENT,'C. Bermudo',C.ROLE.SASO,48,'Transmitted to the Office of the President.');
   notify(C.ROLE.ORG,'org-5','act-12',C.NOTIF.ROUTED,'Your proposal is now with the President\u2019s Office.',48,false);
 
+  /* ---- post-activity (terminal) report submissions -------------------------
+     Worked examples of organizations filing their reports after an activity:
+     CCS-SC on time and accepted, CAS-CSC accepted after one returned report,
+     JPCS accepted for an off-campus visit, and CHS-SC mid-review on the day
+     the reports are due. CSPC-SSC (act-8) is left as the overdue case. */
+
+  function reqFor(activityId, name) {
+    return requirements.filter(function (r) {
+      return r.activityId === activityId && r.phase === C.PHASE.POST_ACTIVITY && r.name === name;
+    })[0];
+  }
+
+  /* Overwrites the generic post-activity records with what was filed.
+     Each entry: file, submitted (hours ago), status, reviewed (hours ago),
+     by (SASO reviewer), remarks (SASO's note to the organization). */
+  function fileReports(activityId, entries) {
+    Object.keys(entries).forEach(function (name) {
+      var e = entries[name], r = reqFor(activityId, name);
+      r.status = e.status;
+      r.fileName = e.file;
+      r.submittedAt = hoursAgo(e.submitted);
+      r.reviewedAt = e.reviewed ? hoursAgo(e.reviewed) : null;
+      r.reviewedBy = e.reviewed ? e.by : null;
+      r.remarks = e.remarks || null;
+    });
+  }
+
+  function reportComment(activityId, name, sender, message, hrs) {
+    var r = reqFor(activityId, name);
+    comments.push({ id:nextId('cmt'), activityId:activityId, senderId:sender.id,
+      senderName:sender.name, role:sender.role, message:message,
+      requirementId:r ? r.id : null, timestamp:hoursAgo(hrs), readByCounterpart:true });
+  }
+
+  function outcome(activityId, participants, summary, issues, hrs) {
+    var a = activities.filter(function (x) { return x.id === activityId; })[0];
+    a.outcome = { actualParticipants:participants, summary:summary, issues:issues || null,
+      recordedAt:hoursAgo(hrs) };
+  }
+
+  var U = {};
+  users.forEach(function (u) { U[u.username] = u; });
+
+  /* CCS-SC \u2014 CCS Research Colloquium: all four filed within the five days,
+     accepted on first review. */
+  fileReports('act-5', {
+    'Narrative Report with Documentation': { status:APPROVED_ALL,
+      file:'CCS-SC_Research-Colloquium_Narrative-Report_with_Photos.pdf', submitted:660, reviewed:430, by:'M. Delfin',
+      remarks:'Complete. Photos, attendance sheets and programme are attached.' },
+    'Evaluation': { status:APPROVED_ALL,
+      file:'CCS-SC_Research-Colloquium_Evaluation-Summary.pdf', submitted:655, reviewed:430, by:'M. Delfin',
+      remarks:'Summary of 132 evaluation forms received. Overall rating 4.6 / 5.' },
+    'Financial Report': { status:APPROVED_ALL,
+      file:'CCS-SC_Research-Colloquium_Financial-Report.pdf', submitted:640, reviewed:410, by:'C. Bermudo',
+      remarks:'Expenses of PHP 6,120 against the PHP 6,400 budget. Figures tally with the receipts.' },
+    'Liquidation': { status:APPROVED_ALL,
+      file:'CCS-SC_Research-Colloquium_Liquidation_with_ORs.pdf', submitted:640, reviewed:405, by:'C. Bermudo' }
+  });
+  outcome('act-5', 141,
+    'Twenty-four capstone groups presented across three parallel sessions. Faculty panels gave written feedback to each group.',
+    'Session B started 30 minutes late because of a projector fault in AVR 1.', 650);
+  reportComment('act-5', 'Narrative Report with Documentation', U.ccs,
+    'Good day, Ma\u2019am. Attached are the narrative report, evaluation summary, financial report and liquidation for the Research Colloquium.', 660);
+  notify(C.ROLE.SASO,null,'act-5',C.NOTIF.TR_SUBMITTED,'CCS-SC submitted Narrative Report with Documentation for CCS Research Colloquium.',660,true);
+  notify(C.ROLE.SASO,null,'act-5',C.NOTIF.TR_SUBMITTED,'CCS-SC submitted Financial Report for CCS Research Colloquium.',640,true);
+
+  /* CAS-CSC \u2014 CAS Literary Night: Financial Report returned once for missing
+     receipts, resubmitted, then the whole set accepted. */
+  fileReports('act-9', {
+    'Narrative Report with Documentation': { status:APPROVED_ALL,
+      file:'CAS-CSC_Literary-Night_Narrative-Report.pdf', submitted:470, reviewed:340, by:'G. Pe\u00f1aflor',
+      remarks:'Accepted. Include the names of the awardees in future narratives.' },
+    'Evaluation': { status:APPROVED_ALL,
+      file:'CAS-CSC_Literary-Night_Evaluation-Results.pdf', submitted:465, reviewed:340, by:'G. Pe\u00f1aflor' },
+    'Financial Report': { status:APPROVED_ALL,
+      file:'CAS-CSC_Literary-Night_Financial-Report_REVISED.pdf', submitted:330, reviewed:305, by:'C. Bermudo',
+      remarks:'Accepted on resubmission. Official receipts for sound system rental are now attached.' },
+    'Liquidation': { status:APPROVED_ALL,
+      file:'CAS-CSC_Literary-Night_Liquidation.pdf', submitted:330, reviewed:300, by:'C. Bermudo' }
+  });
+  outcome('act-9', 164,
+    'Eighteen readings and six spoken word pieces were performed. Three works were selected for the campus publication.',
+    null, 460);
+  reportComment('act-9', 'Financial Report', U.aide,
+    'The Financial Report lists PHP 1,500 for sound system rental but no official receipt is attached. Please resubmit with the receipt.', 400);
+  reportComment('act-9', 'Financial Report', U.cas,
+    'Noted, Sir. The supplier has issued the receipt; we resubmitted the report together with the liquidation.', 330);
+  notify(C.ROLE.ORG,'org-5','act-9',C.NOTIF.TR_RETURNED,'Financial Report for CAS Literary Night needs revision: attach the official receipt for sound system rental.',400,true);
+  notify(C.ROLE.SASO,null,'act-9',C.NOTIF.TR_SUBMITTED,'CAS-CSC resubmitted Financial Report for CAS Literary Night.',330,true);
+  notify(C.ROLE.ORG,'org-5','act-9',C.NOTIF.TR_ACCEPTED,'Post-activity reports accepted \u2014 CAS Literary Night is completed.',300,true);
+
+  /* JPCS - CSPC \u2014 Industry Immersion Visit (off campus). */
+  fileReports('act-11', {
+    'Narrative Report with Documentation': { status:APPROVED_ALL,
+      file:'JPCS_Industry-Immersion_Narrative-Report_and_Learning-Journals.pdf', submitted:1420, reviewed:1230, by:'M. Delfin',
+      remarks:'Accepted. Learning journals from all 43 participants are included.' },
+    'Evaluation': { status:APPROVED_ALL,
+      file:'JPCS_Industry-Immersion_Evaluation.pdf', submitted:1420, reviewed:1230, by:'M. Delfin' },
+    'Financial Report': { status:APPROVED_ALL,
+      file:'JPCS_Industry-Immersion_Financial-Report.pdf', submitted:1390, reviewed:1210, by:'C. Bermudo',
+      remarks:'Transport and meals tally with the PHP 22,000 budget; participant shares are itemized.' },
+    'Liquidation': { status:APPROVED_ALL,
+      file:'JPCS_Industry-Immersion_Liquidation_with_ORs.pdf', submitted:1390, reviewed:1200, by:'C. Bermudo' }
+  });
+  outcome('act-11', 43,
+    'Forty-three students attended three company briefings on software delivery, cloud operations and QA practice.',
+    'Two registered students did not join because of a class conflict.', 1410);
+  notify(C.ROLE.ORG,'org-1','act-11',C.NOTIF.TR_ACCEPTED,'Post-activity reports accepted \u2014 JPCS Industry Immersion Visit is completed.',1200,true);
+
+  /* CHS-SC \u2014 Health Awareness Week, due today: two reports with SASO, the
+     Financial Report returned, the Liquidation not yet filed. */
+  fileReports('act-6', {
+    'Narrative Report with Documentation': { status:C.REQUIREMENT.UNDER_REVIEW,
+      file:'CHS-SC_Health-Awareness-Week_Narrative-Report.pdf', submitted:70 },
+    'Evaluation': { status:C.REQUIREMENT.UNDER_REVIEW,
+      file:'CHS-SC_Health-Awareness-Week_Evaluation-Summary.pdf', submitted:50 },
+    'Financial Report': { status:C.REQUIREMENT.NEEDS_REVISION,
+      file:'CHS-SC_Health-Awareness-Week_Financial-Report.pdf', submitted:60, reviewed:20, by:'C. Bermudo',
+      remarks:'Total expenses do not match the attached receipts (PHP 46,350 vs PHP 44,900). Please reconcile and separate the external partner contributions.' }
+  });
+  outcome('act-6', 468,
+    'Free blood pressure, blood sugar and BMI screening for 312 residents of Barangay San Jose, plus four health talks on campus.',
+    'The outreach day was shortened by two hours due to rain.', 65);
+  reportComment('act-6', 'Narrative Report with Documentation', U.chs,
+    'Good morning, Ma\u2019am. We have submitted the narrative report. The evaluation summary follows once all forms are encoded.', 70);
+  reportComment('act-6', 'Financial Report', U.aide,
+    'Returned: the total does not match the receipts. Please reconcile before the deadline today.', 20);
+  notify(C.ROLE.SASO,null,'act-6',C.NOTIF.TR_SUBMITTED,'CHS-SC submitted Narrative Report with Documentation for Health Awareness Week.',70,true);
+  notify(C.ROLE.SASO,null,'act-6',C.NOTIF.TR_SUBMITTED,'CHS-SC submitted Financial Report for Health Awareness Week.',60,true);
+  notify(C.ROLE.SASO,null,'act-6',C.NOTIF.TR_SUBMITTED,'CHS-SC submitted Evaluation for Health Awareness Week.',50,false);
+  notify(C.ROLE.ORG,'org-3','act-6',C.NOTIF.TR_RETURNED,'Financial Report for Health Awareness Week needs revision: totals do not match the receipts.',20,false);
+
   /* ---- assorted notifications --------------------------------------------- */
   notify(C.ROLE.SASO,null,'act-6',C.NOTIF.TR_DUE_SOON,'CHS-SC post-activity reports are due today.',12,false);
   notify(C.ROLE.SASO,null,'act-4',C.NOTIF.ENDORSED,'You endorsed CCS Acquaintance Party 2026 to the VPAA.',100,true);
