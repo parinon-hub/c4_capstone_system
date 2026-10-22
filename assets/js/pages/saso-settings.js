@@ -119,8 +119,8 @@
             '<div class="card-header"><h3 class="card-title">Requirement checklists</h3>' +
               '<div class="card-tools"><span class="card-subtitle">Read only</span></div></div>' +
             '<div class="card-body p-0">' +
-              checklist('Pre-approval — all activities', C.REQUIREMENT_TEMPLATES.PRE_APPROVAL_COMMON) +
-              checklist('Pre-approval — off-campus only',
+              checklist('Pre-approval (all activities)', C.REQUIREMENT_TEMPLATES.PRE_APPROVAL_COMMON) +
+              checklist('Pre-approval (off-campus only)',
                         C.REQUIREMENT_TEMPLATES.PRE_APPROVAL_OFF_CAMPUS_EXTRA) +
               checklist('Post-activity', C.REQUIREMENT_TEMPLATES.POST_ACTIVITY) +
             '</div>' +

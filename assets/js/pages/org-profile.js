@@ -114,7 +114,7 @@
                   overdue.length + ' activit' + (overdue.length === 1 ? 'y' : 'ies') +
                   ' with overdue reports</h5>' +
                   '<p class="mb-2 text-sm">' + overdue.map(function (a) {
-                    return M.escapeHtml(a.title) + ' — ' + M.daysPending(a) + ' days late';
+                    return M.escapeHtml(a.title) + ' (' + M.daysPending(a) + ' days late)';
                   }).join('<br>') + '</p>' +
                   '<a class="btn btn-sm btn-danger" href="terminal-reports.html">Submit reports</a>' +
                 '</div>'

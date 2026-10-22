@@ -99,7 +99,7 @@ SASO.proposalActions = (function () {
     var s = session();
     var a = M.activityById(activityId);
     if (!M.canModifyProposal(s, a)) {
-      SASO.layout.toast('This proposal can no longer be edited — it has left SASO review.', 'warning');
+      SASO.layout.toast('This proposal can no longer be edited: it has left SASO review.', 'warning');
       return;
     }
     var isSaso = s.role === C.ROLE.SASO;
@@ -239,7 +239,7 @@ SASO.proposalActions = (function () {
       } else if (!result.changed.length) {
         SASO.layout.toast('No changes to save.', 'warning');
       } else {
-        SASO.layout.toast('Proposal updated — ' +
+        SASO.layout.toast('Proposal updated: ' +
           (isSaso ? 'the organization and SASO staff' : 'SASO') + ' have been notified.');
         if (onSaved) { onSaved(result.activity); }
       }
@@ -254,7 +254,7 @@ SASO.proposalActions = (function () {
     var s = session();
     var a = M.activityById(activityId);
     if (!M.canModifyProposal(s, a)) {
-      SASO.layout.toast('This proposal can no longer be deleted — it has left SASO review.', 'warning');
+      SASO.layout.toast('This proposal can no longer be deleted: it has left SASO review.', 'warning');
       return;
     }
     var isSaso = s.role === C.ROLE.SASO;

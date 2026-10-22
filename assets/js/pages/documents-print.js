@@ -82,7 +82,7 @@
   }
 
   function stamp() {
-    return '<div class="report-stamp">PROTOTYPE — NOT AN OFFICIAL INSTITUTIONAL DOCUMENT · ' +
+    return '<div class="report-stamp">PROTOTYPE: NOT AN OFFICIAL INSTITUTIONAL DOCUMENT · ' +
       'Layout is a reconstruction, not the official CSPC form · Printed ' +
       M.formatDate(new Date()) + '</div>';
   }
@@ -121,7 +121,7 @@
           ' <span class="doc-muted">(' + M.label(activity.venueType) + ')</span>') +
         field('Expected Participants', (activity.expectedParticipants || '') +
           (activity.participantDescription
-            ? ' — ' + M.escapeHtml(activity.participantDescription) : '')) +
+            ? ' (' + M.escapeHtml(activity.participantDescription) + ')' : '')) +
         field('Rationale', M.escapeHtml(activity.rationale)) +
         field('Objectives', objectives) +
         field('Description', M.escapeHtml(activity.description)) +
@@ -167,7 +167,7 @@
           : '') + '.</p>' +
 
       '<table class="doc-table">' +
-        field('Organization', M.escapeHtml(org.acronym) + ' — ' + M.escapeHtml(org.name)) +
+        field('Organization', M.escapeHtml(org.acronym) + ' (' + M.escapeHtml(org.name) + ')') +
         field('Activity', '<strong>' + M.escapeHtml(activity.title) + '</strong>') +
         field('Category', M.escapeHtml(activity.category)) +
         field('Date and Time', M.formatDateRange(activity.dateStart, activity.dateEnd) +
@@ -176,7 +176,7 @@
         field('Classification', M.label(activity.venueType)) +
         field('Participants', (activity.expectedParticipants || '') +
           (activity.participantDescription
-            ? ' — ' + M.escapeHtml(activity.participantDescription) : '')) +
+            ? ' (' + M.escapeHtml(activity.participantDescription) + ')' : '')) +
         field('Purpose', M.escapeHtml(activity.rationale)) +
         field('Fund Source', activity.fundSource
           ? M.escapeHtml(activity.fundSource) +
@@ -209,7 +209,7 @@
       '<div class="doc-status-line">Current status: <strong>' +
         M.label(activity.proposalStatus) + '</strong>' +
         (M.isInApprovalRoute(activity)
-          ? ' — with the ' + C.LABEL[M.currentOffice(activity.id).office] +
+          ? ', with the ' + C.LABEL[M.currentOffice(activity.id).office] +
             ' for ' + M.daysWithCurrentOffice(activity.id) + ' day(s)'
           : '') + '</div>' +
       stamp();
@@ -224,7 +224,7 @@
 
     return letterhead('TERMINAL REPORT', 'Post-Activity Accomplishment') +
       '<table class="doc-table">' +
-        field('Organization', M.escapeHtml(org.acronym) + ' — ' + M.escapeHtml(org.name)) +
+        field('Organization', M.escapeHtml(org.acronym) + ' (' + M.escapeHtml(org.name) + ')') +
         field('Activity', '<strong>' + M.escapeHtml(activity.title) + '</strong>') +
         field('Category', M.escapeHtml(activity.category)) +
         field('Date Conducted', M.formatDateRange(activity.dateStart, activity.dateEnd)) +
@@ -252,8 +252,8 @@
 
       '<div class="doc-status-line">Report status: <strong>' + M.label(status) + '</strong>' +
         (status === C.TERMINAL.ACCEPTED
-          ? ' — this activity is recorded as completed.'
-          : ' — this activity remains open until all required reports are accepted.') +
+          ? ': this activity is recorded as completed.'
+          : ': this activity remains open until all required reports are accepted.') +
       '</div>' +
 
       '<div class="sig-grid">' +

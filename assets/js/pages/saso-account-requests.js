@@ -165,7 +165,7 @@
           (u
             ? '<td class="text-sm">' + M.escapeHtml(u.name) +
                 '<span class="cell-sub">' + M.escapeHtml(u.position) + '</span></td>' +
-              '<td class="text-sm">' + (u.email ? M.escapeHtml(u.email) : '<span class="text-muted">—</span>') +
+              '<td class="text-sm">' + (u.email ? M.escapeHtml(u.email) : '<span class="text-muted">-</span>') +
                 (u.contact ? '<span class="cell-sub">' + M.escapeHtml(u.contact) + '</span>' : '') + '</td>' +
               '<td><code>' + M.escapeHtml(u.username) + '</code></td>'
             : '<td colspan="3" class="text-sm text-muted"><i class="fa-solid fa-user-slash mr-1"></i>' +
@@ -284,7 +284,7 @@
           '<td><code>' + M.escapeHtml(r.username) + '</code></td>' +
           '<td class="text-sm">' + (r.proofFileName
             ? '<span class="file-chip"><i class="fa-solid fa-paperclip mr-1"></i>' + M.escapeHtml(r.proofFileName) + '</span>'
-            : '<span class="text-muted">—</span>') + '</td>' +
+            : '<span class="text-muted">-</span>') + '</td>' +
           '<td class="text-nowrap text-sm text-muted">' + M.formatDate(r.submittedAt) + '</td>' +
           '<td class="text-nowrap">' + statusCell(r) + '</td>' +
           '<td class="text-right"><button type="button" class="btn btn-sm ' +
@@ -302,7 +302,7 @@
   /* ---- review dialog ------------------------------------------------------------------------- */
 
   function item(label, value) {
-    return '<div><span class="cell-sub">' + label + '</span>' + (value || '—') + '</div>';
+    return '<div><span class="cell-sub">' + label + '</span>' + (value || '-') + '</div>';
   }
 
   function openReview(id) {
@@ -339,7 +339,7 @@
                   (dupAcronym ? 'An organization with the acronym <strong>' + M.escapeHtml(r.acronym) +
                     '</strong> already exists. ' : '') +
                   (dupUser ? 'The username <strong>' + M.escapeHtml(r.username) + '</strong> is already in use. ' : '') +
-                  'This request cannot be approved as it stands — decline it with a reason.</div>'
+                  'This request cannot be approved as it stands. Decline it with a reason.</div>'
               : '') +
             '<h6 class="oa-section"><i class="fa-solid fa-people-group mr-2"></i>Organization</h6>' +
             '<div class="review-grid">' +
@@ -420,7 +420,7 @@
         return;
       }
       $m.modal('hide');
-      SASO.layout.toast(result.org.acronym + ' approved — "' + result.user.username + '" can now sign in.');
+      SASO.layout.toast(result.org.acronym + ' approved: "' + result.user.username + '" can now sign in.');
       renderAll();
     });
 

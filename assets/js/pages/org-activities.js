@@ -47,7 +47,7 @@
   if (submitted) {
     var justSubmitted = M.activityById(submitted);
     if (justSubmitted) {
-      SASO.layout.toast('Proposal submitted — SASO has been notified.');
+      SASO.layout.toast('Proposal submitted: SASO has been notified.');
       window.history.replaceState({}, '', 'activities.html');
     }
   }
@@ -286,8 +286,8 @@
 
         return groupRow + '<tr class="' + rowClass + '">' +
           '<td><span class="cell-primary">' + M.escapeHtml(a.title || 'Untitled draft') + '</span>' +
-            '<span class="cell-sub">' + M.escapeHtml(a.category || '—') + ' · ' +
-              M.label(a.venueType) + ' · ' + M.escapeHtml(a.venue || '—') + '</span></td>' +
+            '<span class="cell-sub">' + M.escapeHtml(a.category || '-') + ' · ' +
+              M.label(a.venueType) + ' · ' + M.escapeHtml(a.venue || '-') + '</span></td>' +
           '<td class="text-nowrap">' + M.formatDate(L.pickedDate(a, state)) + '</td>' +
           '<td>' + M.badge(a.proposalStatus) +
             (M.isInApprovalRoute(a)

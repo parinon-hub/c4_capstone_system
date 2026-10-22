@@ -88,7 +88,7 @@
           '<div class="mr-auto">' +
             '<h2 class="detail-title">' + M.escapeHtml(activity.title || 'Untitled draft') + '</h2>' +
             '<div class="detail-sub">' +
-              M.escapeHtml(org.acronym) + ' · ' + M.escapeHtml(activity.category || '—') + ' · ' +
+              M.escapeHtml(org.acronym) + ' · ' + M.escapeHtml(activity.category || '-') + ' · ' +
               M.label(activity.venueType) +
             '</div>' +
             (activity.lastEditedAt
@@ -282,7 +282,7 @@
             'data-req="' + r.id + '" data-req-action="return">Return</button>';
       }
       return '<span class="text-muted text-sm">' +
-        (r.reviewedAt ? 'Reviewed ' + M.relativeTime(r.reviewedAt) : '—') + '</span>';
+        (r.reviewedAt ? 'Reviewed ' + M.relativeTime(r.reviewedAt) : '-') + '</span>';
     }
 
     /* Organization side */
@@ -313,7 +313,7 @@
           '<td><span class="cell-primary">' + M.label(l.office) + '</span>' +
             (l.remarks ? '<span class="cell-sub">' + M.escapeHtml(l.remarks) + '</span>' : '') + '</td>' +
           '<td class="text-sm text-muted text-nowrap">' +
-            (l.transmittedAt ? 'Sent ' + M.formatDate(l.transmittedAt) : '—') + '</td>' +
+            (l.transmittedAt ? 'Sent ' + M.formatDate(l.transmittedAt) : '-') + '</td>' +
           '<td class="text-right text-nowrap">' +
             (l.decidedAt
               ? '<span class="badge badge-success status-badge">' +
@@ -322,7 +322,7 @@
               : pending
                 ? '<span class="badge badge-primary status-badge">Pending</span>' +
                   '<span class="cell-sub">' + M.daysBetween(l.transmittedAt, new Date()) + ' days</span>'
-                : '—') +
+                : '-') +
           '</td></tr>';
       }).join('') + '</tbody></table></div></div>';
   }
@@ -372,16 +372,16 @@
   function infoCard() {
     function field(label, value, wide) {
       return '<div class="detail-field' + (wide ? ' is-wide' : '') + '"><dt>' + label + '</dt>' +
-        '<dd>' + (value || '—') + '</dd></div>';
+        '<dd>' + (value || '-') + '</dd></div>';
     }
     return '<div class="card"><div class="card-header"><h3 class="card-title">Activity information</h3></div>' +
       '<div class="card-body"><dl class="detail-grid">' +
         field('Organization', M.escapeHtml(org.name)) +
         field('Adviser', M.escapeHtml(org.adviser)) +
         field('Category', M.escapeHtml(activity.category)) +
-        field('Venue', M.label(activity.venueType) + ' — ' + M.escapeHtml(activity.venue)) +
+        field('Venue', M.label(activity.venueType) + ': ' + M.escapeHtml(activity.venue)) +
         field('Date', M.formatDateRange(activity.dateStart, activity.dateEnd)) +
-        field('Time', (activity.timeStart || '—') + ' to ' + (activity.timeEnd || '—')) +
+        field('Time', (activity.timeStart || '-') + ' to ' + (activity.timeEnd || '-')) +
         field('Expected participants', activity.expectedParticipants +
             (activity.participantDescription
               ? ' <span class="cell-sub">' + M.escapeHtml(activity.participantDescription) + '</span>' : '')) +
@@ -429,7 +429,7 @@
 
     var preCard = requirementCard(C.PHASE.PRE_APPROVAL, 'Pre-approval requirements',
       activity.venueType === C.VENUE.OFF_CAMPUS
-        ? 'Off-campus activity — the CMO 63 documentary requirements apply.' : null);
+        ? 'Off-campus activity: the CMO 63 documentary requirements apply.' : null);
     var route = routeCard();
     var history = historyCard();
 

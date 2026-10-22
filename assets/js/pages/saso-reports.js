@@ -147,7 +147,7 @@
     /* The monthly / quarterly / annual accomplishment summary. */
     accomplishment: {
       label: 'Accomplishment Summary',
-      hint: 'Counts per organization for the period — the monthly, quarterly and annual ' +
+      hint: 'Counts per organization for the period: the monthly, quarterly and annual ' +
             'summary required by the administration.',
       build: function () {
         var acts = baseActivities();
@@ -530,7 +530,7 @@
                 '<div class="sig-name">' + M.escapeHtml(head ? head.name : '') + '</div>' +
                 '<div class="sig-role">' + M.escapeHtml(head ? head.position : '') + '</div></div>' +
             '</div>' +
-            '<div class="report-stamp">PROTOTYPE — NOT AN OFFICIAL INSTITUTIONAL DOCUMENT · ' +
+            '<div class="report-stamp">PROTOTYPE: NOT AN OFFICIAL INSTITUTIONAL DOCUMENT · ' +
               'Generated ' + M.formatDate(state.generated.at) + '</div>' +
           '</div>' +
         '</div>' +
@@ -571,7 +571,7 @@
     });
     if (data.totals) { lines.push(data.totals.map(cell).join(',')); }
     lines.push('');
-    lines.push(cell('PROTOTYPE — NOT AN OFFICIAL INSTITUTIONAL DOCUMENT'));
+    lines.push(cell('PROTOTYPE: NOT AN OFFICIAL INSTITUTIONAL DOCUMENT'));
 
     var blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
     var link = document.createElement('a');

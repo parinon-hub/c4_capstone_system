@@ -91,7 +91,7 @@
 
   function deadlineLine(row) {
     if (row.status === C.TERMINAL.ACCEPTED) {
-      return '<span class="badge badge-success status-badge">Accepted — activity completed</span>';
+      return '<span class="badge badge-success status-badge">Accepted (activity completed)</span>';
     }
     if (row.daysLate > 0) {
       return '<span class="badge badge-danger status-badge">Overdue by ' + row.daysLate +
@@ -137,7 +137,7 @@
             '<a class="cell-primary" href="activity-details.html?id=' + a.id + '">' +
               M.escapeHtml(a.title) + '</a>' +
             '<span class="cell-sub">' + M.formatDateRange(a.dateStart, a.dateEnd) + ' · ' +
-              M.label(a.venueType) + ' · ' + M.escapeHtml(a.venue || '—') + '</span>' +
+              M.label(a.venueType) + ' · ' + M.escapeHtml(a.venue || '-') + '</span>' +
           '</div>' +
           '<div class="ml-auto text-right">' + deadlineLine(row) + '</div>' +
         '</div>' +
@@ -176,7 +176,7 @@
                   'id="op-' + a.id + '" value="' + (o.actualParticipants || '') +
                   '" placeholder="' + (a.expectedParticipants || '') + '">' +
                 '<small class="form-text text-muted">Expected: ' +
-                  (a.expectedParticipants || '—') + '</small>' +
+                  (a.expectedParticipants || '-') + '</small>' +
               '</div>' +
               '<div class="form-group col-md-9">' +
                 '<label class="text-sm">Summary of what took place</label>' +

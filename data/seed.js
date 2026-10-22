@@ -164,7 +164,7 @@ SASO.buildSeed = function () {
   history('act-1','proposalStatus',C.PROPOSAL.DRAFT,C.PROPOSAL.SUBMITTED,'K. Mercado',C.ROLE.ORG,290);
   history('act-1','proposalStatus',C.PROPOSAL.FOR_REVIEW,C.PROPOSAL.SASO_ENDORSED,'M. Delfin',C.ROLE.SASO,240,'Requirements complete. Endorsed to VPAA.');
   history('act-1','proposalStatus',C.PROPOSAL.WITH_PRESIDENT,C.PROPOSAL.APPROVED,'M. Delfin',C.ROLE.SASO,120,'Approval received from the President\u2019s Office.');
-  notify(C.ROLE.ORG,'org-1','act-1',C.NOTIF.PROPOSAL_APPROVED,'Activity approved \u2014 you may proceed with JPCS Leadership Seminar.',120,true);
+  notify(C.ROLE.ORG,'org-1','act-1',C.NOTIF.PROPOSAL_APPROVED,'Activity approved: you may proceed with JPCS Leadership Seminar.',120,true);
 
   activity({ id:'act-2', org:'org-1', title:'JPCS Code Camp 2026', category:'Life Skills',
     venueType:C.VENUE.ON_CAMPUS, venue:'CCS Computer Laboratory 1', dateStart:dateOnly(-1), dateEnd:dateOnly(1),
@@ -180,7 +180,7 @@ SASO.buildSeed = function () {
   route('act-2', C.OFFICE.PRESIDENT, 470, 400, 'Approved');
   history('act-2','eventStatus',C.EVENT.UPCOMING,C.EVENT.ONGOING,'M. Delfin',C.ROLE.SASO,24);
 
-  activity({ id:'act-3', org:'org-1', title:'JPCS General Assembly \u2014 Second Semester', category:'Leadership',
+  activity({ id:'act-3', org:'org-1', title:'JPCS General Assembly - Second Semester', category:'Leadership',
     venueType:C.VENUE.ON_CAMPUS, venue:'CSPC Gymnasium', dateStart:dateOnly(21), participants:300,
     participantDescription:'All JPCS members', budget:'3,100', fundSource:'JPCS - CSPC Chapter Fund',
     rationale:'The chapter must convene all members to present the annual plan and financial report.',
@@ -279,7 +279,7 @@ SASO.buildSeed = function () {
   route('act-6', C.OFFICE.PRESIDENT, 700, 600, 'Approved');
   history('act-6','eventStatus',C.EVENT.ONGOING,C.EVENT.FINISHED,'M. Delfin',C.ROLE.SASO,120);
   notify(C.ROLE.ORG,'org-3','act-6',C.NOTIF.EVENT_FINISHED,'Health Awareness Week has finished. Post-activity reports are due today.',120,false);
-  notify(C.ROLE.SASO,null,'act-6',C.NOTIF.EVENT_FINISHED,'Health Awareness Week finished \u2014 reports pending from CHS-SC.',120,true);
+  notify(C.ROLE.SASO,null,'act-6',C.NOTIF.EVENT_FINISHED,'Health Awareness Week finished: reports pending from CHS-SC.',120,true);
 
   /* ===================== CSPC-SSC ========================================= */
 
@@ -298,7 +298,7 @@ SASO.buildSeed = function () {
   });
   route('act-7', C.OFFICE.SASO, 32, null, null);
   history('act-7','proposalStatus',C.PROPOSAL.SUBMITTED,C.PROPOSAL.FOR_REVIEW,'M. Delfin',C.ROLE.SASO,30);
-  notify(C.ROLE.SASO,null,'act-7',C.NOTIF.PROPOSAL_SUBMITTED,'New proposal submitted by CSPC-SSC \u2014 Student Leaders Congress 2026.',34,false);
+  notify(C.ROLE.SASO,null,'act-7',C.NOTIF.PROPOSAL_SUBMITTED,'New proposal submitted by CSPC-SSC: Student Leaders Congress 2026.',34,false);
 
   activity({ id:'act-8', org:'org-4', title:'SSC Intramural Sportsfest 2026', category:'Sports',
     venueType:C.VENUE.ON_CAMPUS, venue:'CSPC Sports Complex', dateStart:dateOnly(-40), dateEnd:dateOnly(-36),
@@ -452,7 +452,7 @@ SASO.buildSeed = function () {
     'Noted, Sir. The supplier has issued the receipt; we resubmitted the report together with the liquidation.', 330);
   notify(C.ROLE.ORG,'org-5','act-9',C.NOTIF.TR_RETURNED,'Financial Report for CAS Literary Night needs revision: attach the official receipt for sound system rental.',400,true);
   notify(C.ROLE.SASO,null,'act-9',C.NOTIF.TR_SUBMITTED,'CAS-CSC resubmitted Financial Report for CAS Literary Night.',330,true);
-  notify(C.ROLE.ORG,'org-5','act-9',C.NOTIF.TR_ACCEPTED,'Post-activity reports accepted \u2014 CAS Literary Night is completed.',300,true);
+  notify(C.ROLE.ORG,'org-5','act-9',C.NOTIF.TR_ACCEPTED,'Post-activity reports accepted: CAS Literary Night is completed.',300,true);
 
   /* JPCS - CSPC \u2014 Industry Immersion Visit (off campus). */
   fileReports('act-11', {
@@ -470,7 +470,7 @@ SASO.buildSeed = function () {
   outcome('act-11', 43,
     'Forty-three students attended three company briefings on software delivery, cloud operations and QA practice.',
     'Two registered students did not join because of a class conflict.', 1410);
-  notify(C.ROLE.ORG,'org-1','act-11',C.NOTIF.TR_ACCEPTED,'Post-activity reports accepted \u2014 JPCS Industry Immersion Visit is completed.',1200,true);
+  notify(C.ROLE.ORG,'org-1','act-11',C.NOTIF.TR_ACCEPTED,'Post-activity reports accepted: JPCS Industry Immersion Visit is completed.',1200,true);
 
   /* CHS-SC \u2014 Health Awareness Week, due today: two reports with SASO, the
      Financial Report returned, the Liquidation not yet filed. */
@@ -498,7 +498,7 @@ SASO.buildSeed = function () {
   /* ---- assorted notifications --------------------------------------------- */
   notify(C.ROLE.SASO,null,'act-6',C.NOTIF.TR_DUE_SOON,'CHS-SC post-activity reports are due today.',12,false);
   notify(C.ROLE.SASO,null,'act-4',C.NOTIF.ENDORSED,'You endorsed CCS Acquaintance Party 2026 to the VPAA.',100,true);
-  notify(C.ROLE.ORG,'org-2','act-5',C.NOTIF.TR_ACCEPTED,'Post-activity reports accepted \u2014 CCS Research Colloquium is completed.',400,true);
+  notify(C.ROLE.ORG,'org-2','act-5',C.NOTIF.TR_ACCEPTED,'Post-activity reports accepted: CCS Research Colloquium is completed.',400,true);
 
   /* ---- proposal edits and the trash bin -------------------------------------
      Edits and deletions notify the organization and, individually, the three
@@ -529,8 +529,8 @@ SASO.buildSeed = function () {
     var summary = 'Changed venue. Reason: The Auditorium is booked on that date; moved to the Gymnasium.';
     history('act-7','record',null,'EDITED','G. Peñaflor',C.ROLE.SASO,6,summary);
     notifyChange('act-7','org-4',C.NOTIF.PROPOSAL_EDITED,
-      'G. Peñaflor (SASO) edited the proposal Student Leaders Congress 2026 — ' + summary,
-      'You edited the proposal Student Leaders Congress 2026 — ' + summary,
+      'G. Peñaflor (SASO) edited the proposal Student Leaders Congress 2026. ' + summary,
+      'You edited the proposal Student Leaders Congress 2026. ' + summary,
       'usr-8', false, 6);
   })();
 
@@ -573,7 +573,7 @@ SASO.buildSeed = function () {
   trashActivity('act-13','N. Ramos',C.ROLE.ORG,'usr-4',624,
     'Merged into the CCS Research Colloquium programme instead.');
   notifyChange('act-13','org-2',C.NOTIF.PROPOSAL_DELETED,
-    'CCS-SC deleted the proposal CCS Tech Quiz Bee 2026 — Merged into the CCS Research Colloquium programme instead. It stays in the trash bin for 30 days.',
+    'CCS-SC deleted the proposal CCS Tech Quiz Bee 2026: Merged into the CCS Research Colloquium programme instead. It stays in the trash bin for 30 days.',
     'You deleted the proposal CCS Tech Quiz Bee 2026. It stays in the trash bin for 30 days.',
     null, true, 624);
 
@@ -590,9 +590,9 @@ SASO.buildSeed = function () {
   route('act-14', C.OFFICE.SASO, 110, null, null);
   history('act-14','proposalStatus',C.PROPOSAL.SUBMITTED,C.PROPOSAL.FOR_REVIEW,'C. Bermudo',C.ROLE.SASO,100);
   trashActivity('act-14','C. Bermudo',C.ROLE.SASO,'usr-2',48,
-    'Duplicate submission — the same activity was filed twice. Please follow the other entry.');
+    'Duplicate submission (the same activity was filed twice). Please follow the other entry.');
   notifyChange('act-14','org-5',C.NOTIF.PROPOSAL_DELETED,
-    'C. Bermudo (SASO) deleted the proposal CAS Film Screening Night — Duplicate submission — the same activity was filed twice. Please follow the other entry. It stays in the trash bin for 30 days.',
+    'C. Bermudo (SASO) deleted the proposal CAS Film Screening Night: Duplicate submission (the same activity was filed twice). Please follow the other entry. It stays in the trash bin for 30 days.',
     'You deleted the proposal CAS Film Screening Night. It stays in the trash bin for 30 days.',
     'usr-2', false, 48);
 
@@ -635,13 +635,13 @@ SASO.buildSeed = function () {
     adviser:'Prof. E. Navarro', officer:'R. Villareal', position:'President', email:'rvillareal@example.com',
     contact:'0917 000 0000', username:'cmsc', password:'cmsc123', proof:'CMSC_Certificate_of_Recognition.pdf',
     notes:'Newly recognized this semester. We plan to hold an inter-college tournament next month.' });
-  notifyManagers(C.NOTIF.ACCOUNT_REQUESTED, 'CMSC (CSPC Chess and Mind Sports Club) requested an organization account \u2014 ' + chess.ref + '.', 74, chess.id, null);
+  notifyManagers(C.NOTIF.ACCOUNT_REQUESTED, 'CMSC (CSPC Chess and Mind Sports Club) requested an organization account: ' + chess.ref + '.', 74, chess.id, null);
 
   var tour = accountRequest({ n:'0003', status:C.ACCOUNT_REQUEST.PENDING, hrs:5,
     name:'Junior Tourism Professionals Society', acronym:'JTPS', college:'College of Arts and Sciences',
     adviser:'Prof. H. Santiago', officer:'P. Caballero', position:'Secretary', email:'pcaballero@example.com',
     username:'jtps', password:'jtps123', proof:'JTPS_Recognition_AY2025-2026.pdf' });
-  notifyManagers(C.NOTIF.ACCOUNT_REQUESTED, 'JTPS (Junior Tourism Professionals Society) requested an organization account \u2014 ' + tour.ref + '.', 5, tour.id, null);
+  notifyManagers(C.NOTIF.ACCOUNT_REQUESTED, 'JTPS (Junior Tourism Professionals Society) requested an organization account: ' + tour.ref + '.', 5, tour.id, null);
 
   return {
     meta:{ seededAt:new Date().toISOString(), version:4 },

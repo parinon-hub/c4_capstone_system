@@ -202,7 +202,7 @@
           (missing ? '<span class="cell-sub">Missing: ' + missing + '</span>' : '') + '</td>' +
         '<td class="text-nowrap">' + M.formatDate(r.activity.dateEnd) + '</td>' +
         '<td>' + M.badge(r.terminalStatus) + '</td>' +
-        '<td class="text-center">' + (overdue ? r.daysPending : '—') + '</td>' +
+        '<td class="text-center">' + (overdue ? r.daysPending : '-') + '</td>' +
         '<td class="text-right"><a class="btn btn-sm btn-outline-primary" href="' +
           'activity-details.html?id=' + r.activity.id +
           '">Open</a></td>' +

@@ -48,7 +48,7 @@ SASO.model = (function () {
 
   function orgAcronym(id) {
     var o = orgById(id);
-    return o ? o.acronym : '—';
+    return o ? o.acronym : '-';
   }
 
   /* ---- accreditation -----------------------------------------------------
@@ -58,7 +58,7 @@ SASO.model = (function () {
      -------------------------------------------------------------------------- */
 
   function accreditationLabel(org) {
-    if (!org) { return '—'; }
+    if (!org) { return '-'; }
     if (org.accreditationLevel === C.ACCREDITATION_LEVEL.RECOGNIZED) {
       return C.LABEL.RECOGNIZED;
     }
@@ -668,7 +668,7 @@ SASO.model = (function () {
                 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   function formatDate(value) {
-    if (!value) { return '—'; }
+    if (!value) { return '-'; }
     var d = new Date(value);
     return MONTHS[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
   }
@@ -683,7 +683,7 @@ SASO.model = (function () {
   }
 
   function relativeTime(value) {
-    if (!value) { return '—'; }
+    if (!value) { return '-'; }
     var diff = Math.floor((Date.now() - new Date(value).getTime()) / 1000);
     if (diff < 60) { return 'just now'; }
     if (diff < 3600) { return Math.floor(diff / 60) + ' min ago'; }
@@ -697,7 +697,7 @@ SASO.model = (function () {
   }
 
   function label(status) {
-    return C.LABEL[status] || status || '—';
+    return C.LABEL[status] || status || '-';
   }
 
   function badge(status, text) {

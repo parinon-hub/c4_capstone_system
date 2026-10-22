@@ -219,7 +219,7 @@
         return '<tr class="' + (M.trashDaysLeft(t) <= SOON_DAYS ? 'row-overdue' : '') + '">' +
           (isSaso ? '<td><span class="cell-primary">' + M.escapeHtml(M.orgAcronym(a.organizationId)) + '</span></td>' : '') +
           '<td><span class="cell-primary">' + M.escapeHtml(a.title || 'Untitled') + '</span>' +
-            '<span class="cell-sub">' + M.escapeHtml(a.category || '—') + ' · ' + M.label(a.venueType) +
+            '<span class="cell-sub">' + M.escapeHtml(a.category || '-') + ' · ' + M.label(a.venueType) +
               ' · ' + docs + ' document' + (docs === 1 ? '' : 's') +
               (msgs ? ', ' + msgs + ' message' + (msgs === 1 ? '' : 's') : '') + '</span></td>' +
           '<td class="text-nowrap">' + M.formatDateRange(a.dateStart, a.dateEnd) + '</td>' +
@@ -227,7 +227,7 @@
           '<td class="text-nowrap"><span class="cell-primary">' + M.escapeHtml(t.deletedBy) + '</span>' +
             '<span class="cell-sub">' + (t.deletedByRole === C.ROLE.SASO ? 'SASO' : 'Organization') +
               ' · ' + M.relativeTime(t.deletedAt) + '</span></td>' +
-          '<td class="trash-reason">' + (t.reason ? M.escapeHtml(t.reason) : '<span class="text-muted">—</span>') + '</td>' +
+          '<td class="trash-reason">' + (t.reason ? M.escapeHtml(t.reason) : '<span class="text-muted">-</span>') + '</td>' +
           '<td>' + daysLeftCell(t) + '</td>' +
           '<td class="text-right text-nowrap">' +
             '<button type="button" class="btn btn-sm btn-outline-success mr-1" data-restore="' + t.id + '">' +
@@ -261,7 +261,7 @@
         }, function () {
           var activity = E.restoreProposal(t.id);
           if (activity) {
-            SASO.layout.toast('Restored — "' + activity.title + '" is back under SASO review.');
+            SASO.layout.toast('Restored: "' + activity.title + '" is back under SASO review.');
           } else {
             SASO.layout.toast('This proposal could not be restored.', 'danger');
           }
