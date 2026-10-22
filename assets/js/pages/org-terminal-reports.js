@@ -209,7 +209,8 @@
 
   function docAction(activity, r) {
     if (r.status === C.REQUIREMENT.NOT_SUBMITTED || r.status === C.REQUIREMENT.NEEDS_REVISION) {
-      return '<label class="btn btn-sm btn-' +
+      return SASO.requirementDownload.button(r.name) +
+        '<label class="btn btn-sm btn-' +
         (r.status === C.REQUIREMENT.NEEDS_REVISION ? 'warning' : 'primary') + ' mb-0">' +
         '<i class="fa-solid fa-paperclip mr-1"></i>' +
         (r.status === C.REQUIREMENT.NEEDS_REVISION ? 'Replace' : 'Submit') +
@@ -226,6 +227,14 @@
   /* ---- bindings -------------------------------------------------------------------- */
 
   function bind() {
+    /* Each group is one activity, so its templates carry that activity. */
+    document.querySelectorAll('.req-group').forEach(function (grp) {
+      var activityId = grp.id.replace(/^grp-/, '');
+      SASO.requirementDownload.bind(grp, function () {
+        return { org: org, activity: M.activityById(activityId) };
+      });
+    });
+
     document.querySelectorAll('[data-report]').forEach(function (input) {
       input.addEventListener('change', function () {
         var activityId = this.getAttribute('data-activity');
