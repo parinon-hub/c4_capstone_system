@@ -453,7 +453,7 @@
 
     var def = REPORTS[state.generated.type];
     var data = def.build();
-    var head = M.db().users.filter(function (u) { return u.username === 'admin'; })[0];
+    var head = M.db().users.filter(function (u) { return u.username === 'head'; })[0];
 
     var body;
     if (!data.rows.length) {
