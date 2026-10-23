@@ -212,7 +212,7 @@
           '<td>' + M.badge(r.phase) + '</td>' +
           '<td>' + M.badge(r.status) + '</td>' +
           '<td class="text-nowrap text-muted text-sm">' +
-            (r.submittedAt ? M.relativeTime(r.submittedAt) : '—') + '</td>' +
+            (r.submittedAt ? M.relativeTime(r.submittedAt) : '-') + '</td>' +
           '<td class="text-right text-nowrap">' + rowActions(r) + '</td>' +
         '</tr>';
       }).join('') + '</tbody></table></div>';
@@ -234,7 +234,7 @@
       return '<span class="text-muted text-sm">Awaiting resubmission</span>';
     }
     return '<span class="text-muted text-sm">' +
-      (r.reviewedAt ? 'Reviewed ' + M.relativeTime(r.reviewedAt) : '—') + '</span>';
+      (r.reviewedAt ? 'Reviewed ' + M.relativeTime(r.reviewedAt) : '-') + '</span>';
   }
 
   function renderPager(total, pages) {
@@ -286,7 +286,7 @@
                 '<div><span class="cell-sub">Activity</span>' + M.escapeHtml(activity.title) + '</div>' +
                 '<div><span class="cell-sub">Phase</span>' + M.label(r.phase) + '</div>' +
                 '<div><span class="cell-sub">Submitted</span>' +
-                  (r.submittedAt ? M.formatDate(r.submittedAt) : '—') + '</div>' +
+                  (r.submittedAt ? M.formatDate(r.submittedAt) : '-') + '</div>' +
               '</div>' +
               '<div class="doc-preview">' +
                 '<i class="fa-regular fa-file-lines"></i>' +

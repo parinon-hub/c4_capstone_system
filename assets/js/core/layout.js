@@ -205,7 +205,7 @@ SASO.layout = (function () {
           '<li class="nav-item"><a class="nav-link" data-widget="pushmenu" href="#" role="button">' +
             '<i class="fa-solid fa-bars"></i></a></li>' +
           '<li class="nav-item d-none d-sm-inline-block navbar-context">' +
-            'Camarines Sur Polytechnic Colleges — Student Affairs and Services Office' +
+            'Camarines Sur Polytechnic Colleges - Student Affairs and Services Office' +
           '</li>' +
         '</ul>' +
         '<ul class="navbar-nav ml-auto">' +

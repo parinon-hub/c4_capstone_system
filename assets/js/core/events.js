@@ -121,7 +121,7 @@ SASO.events = (function () {
 
     changeStatus(activityId, 'eventStatus', C.EVENT.FINISHED, {
       notifySaso: { type: C.NOTIF.EVENT_FINISHED,
-        message: activity.title + ' finished — post-activity reports pending from ' +
+        message: activity.title + ' finished: post-activity reports pending from ' +
                  SASO.model.orgAcronym(activity.organizationId) + '.' },
       notifyOrg: { type: C.NOTIF.EVENT_FINISHED,
         message: activity.title + ' has finished. Post-activity reports are due ' +
@@ -199,7 +199,7 @@ SASO.events = (function () {
       changeStatus(activityId, 'proposalStatus', C.PROPOSAL.APPROVED, {
         remarks: remarks,
         notifyOrg: { type: C.NOTIF.PROPOSAL_APPROVED,
-          message: 'Activity approved — you may proceed with ' + activity.title + '.' }
+          message: 'Activity approved: you may proceed with ' + activity.title + '.' }
       });
     } else if (decision === 'Returned' || decision === 'Rejected') {
       changeStatus(activityId, 'proposalStatus', C.PROPOSAL.REVISION_REQUIRED, {
@@ -331,11 +331,11 @@ SASO.events = (function () {
       notifySaso: {
         type: C.NOTIF.PROPOSAL_SUBMITTED,
         message: 'New proposal submitted by ' +
-                 SASO.model.orgAcronym(activity.organizationId) + ' — ' + activity.title + '.'
+                 SASO.model.orgAcronym(activity.organizationId) + ': ' + activity.title + '.'
       },
       notifyOrg: {
         type: C.NOTIF.PROPOSAL_SUBMITTED,
-        message: 'Proposal submitted successfully — ' + activity.title + '.'
+        message: 'Proposal submitted successfully: ' + activity.title + '.'
       }
     });
 
@@ -610,8 +610,8 @@ SASO.events = (function () {
     logHistory(activityId, 'record', null, 'EDITED', summary);
 
     notifyProposalChange(activity, C.NOTIF.PROPOSAL_EDITED,
-      actorLabel(actor) + ' edited the proposal ' + activity.title + ' — ' + summary,
-      'You edited the proposal ' + activity.title + ' — ' + summary, actor);
+      actorLabel(actor) + ' edited the proposal ' + activity.title + '. ' + summary,
+      'You edited the proposal ' + activity.title + '. ' + summary, actor);
 
     SASO.storage.save();
     return { activity: activity, changed: changed };
@@ -657,7 +657,7 @@ SASO.events = (function () {
 
     notifyProposalChange(activity, C.NOTIF.PROPOSAL_DELETED,
       actorLabel(actor) + ' deleted the proposal ' + activity.title +
-        (reason ? ' — ' + reason : '') + '. It stays in the trash bin for ' +
+        (reason ? ': ' + reason : '') + '. It stays in the trash bin for ' +
         C.TRASH_RETENTION_DAYS + ' days.',
       'You deleted the proposal ' + activity.title + '. It stays in the trash bin for ' +
         C.TRASH_RETENTION_DAYS + ' days.', actor);
@@ -785,7 +785,7 @@ SASO.events = (function () {
     SASO.model.accountRequests().push(req);
 
     notifyAccountManagers(C.NOTIF.ACCOUNT_REQUESTED,
-      req.acronym + ' (' + req.name + ') requested an organization account — ' + req.ref + '.',
+      req.acronym + ' (' + req.name + ') requested an organization account: ' + req.ref + '.',
       null, null, req.id);
 
     SASO.storage.save();
@@ -845,7 +845,7 @@ SASO.events = (function () {
 
     notifyOrg(made.org.id, null, C.NOTIF.ACCOUNT_APPROVED,
       'Welcome to SASO Activity Monitoring. Your account request ' + req.ref +
-      ' was approved by ' + actor.name + ' — you can now submit activity proposals.' +
+      ' was approved by ' + actor.name + '. You can now submit activity proposals.' +
       (remarks ? ' Note from SASO: ' + remarks : ''));
     notifyAccountManagers(C.NOTIF.ACCOUNT_APPROVED,
       actor.name + ' approved the account request of ' + req.acronym + ' (' + req.ref + ').',
@@ -889,7 +889,7 @@ SASO.events = (function () {
 
     notifyOrg(made.org.id, null, C.NOTIF.ACCOUNT_APPROVED,
       'Welcome to SASO Activity Monitoring. Your organization account was created by ' +
-      actor.name + ' — you can now submit activity proposals.');
+      actor.name + '. You can now submit activity proposals.');
     notifyAccountManagers(C.NOTIF.ACCOUNT_CREATED,
       actor.name + ' added ' + made.org.acronym + ' and created its account (' + made.user.username + ').',
       'You added ' + made.org.acronym + ' and created its account (' + made.user.username + ').', actor);

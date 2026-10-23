@@ -73,7 +73,7 @@
 
   function holder(a) {
     var office = M.currentOffice(a.id);
-    return office ? C.LABEL[office.office] : '—';
+    return office ? C.LABEL[office.office] : '-';
   }
 
   /* ---- sort and filter menus --------------------------------------------------- */
@@ -98,7 +98,7 @@
         rank: function (a) { return STATUSES.indexOf(a.proposalStatus); } },
       { key: 'holder', label: 'Now with', of: function (a) {
         var office = holder(a);
-        return office === '—' ? 'Not with an office' : office;
+        return office === '-' ? 'Not with an office' : office;
       } }
     ],
     filters: [
@@ -226,10 +226,10 @@
           '<td><span class="cell-primary">' + M.escapeHtml(M.orgAcronym(a.organizationId)) + '</span></td>' +
           '<td><a href="activity-details.html?id=' + a.id + '" class="cell-primary">' +
             M.escapeHtml(a.title) + '</a>' +
-            '<span class="cell-sub">' + M.escapeHtml(a.category || '—') + ' · ' +
+            '<span class="cell-sub">' + M.escapeHtml(a.category || '-') + ' · ' +
             M.label(a.venueType) + '</span></td>' +
           '<td class="text-nowrap text-muted text-sm">' +
-            (a.submittedAt ? M.formatDate(a.submittedAt) : '—') + '</td>' +
+            (a.submittedAt ? M.formatDate(a.submittedAt) : '-') + '</td>' +
           '<td class="text-nowrap">' + M.formatDate(L.pickedDate(a, state)) + '</td>' +
           '<td><div class="req-progress ' + (complete ? 'is-complete' : '') + '">' +
             '<div class="progress"><div class="progress-bar" style="width:' + p.percent + '%"></div></div>' +
@@ -237,7 +237,7 @@
           '<td>' + M.badge(a.proposalStatus) + '</td>' +
           '<td class="text-sm">' + holder(a) + '</td>' +
           '<td class="text-center' + (d > M.settings().proposalAlertDays ? ' text-danger font-weight-bold' : '') +
-            '">' + (d || '—') + '</td>' +
+            '">' + (d || '-') + '</td>' +
           '<td class="text-right text-nowrap"><a class="btn btn-sm btn-outline-primary" ' +
             'href="activity-details.html?id=' + a.id + '">Review</a>' + P.rowButtons(a) + '</td>' +
         '</tr>';

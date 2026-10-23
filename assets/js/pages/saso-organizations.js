@@ -268,11 +268,11 @@
           return '<tr>' +
             '<td><a href="activity-details.html?id=' + a.id + '">' +
               M.escapeHtml(a.title) + '</a>' +
-              '<span class="cell-sub">' + M.escapeHtml(a.category || '—') + ' · ' +
+              '<span class="cell-sub">' + M.escapeHtml(a.category || '-') + ' · ' +
               M.label(a.venueType) + '</span></td>' +
             '<td class="text-nowrap text-sm">' + M.formatDateRange(a.dateStart, a.dateEnd) + '</td>' +
             '<td>' + M.badge(M.stageOf(a)) + '</td>' +
-            '<td>' + (ts === C.TERMINAL.NOT_APPLICABLE ? '—' : M.badge(ts)) + '</td>' +
+            '<td>' + (ts === C.TERMINAL.NOT_APPLICABLE ? '-' : M.badge(ts)) + '</td>' +
           '</tr>';
         }).join('')
       : '<tr><td colspan="4" class="text-muted text-center py-3">No activities submitted yet.</td></tr>';

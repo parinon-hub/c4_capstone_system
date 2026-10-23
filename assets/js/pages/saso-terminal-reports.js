@@ -142,7 +142,7 @@
           '<td class="text-center' + (late ? ' text-danger font-weight-bold' : '') + '">' +
             (late ? row.daysLate + ' late'
                   : row.daysLeft !== null && row.status !== C.TERMINAL.ACCEPTED
-                    ? row.daysLeft + ' left' : '—') + '</td>' +
+                    ? row.daysLeft + ' left' : '-') + '</td>' +
           '<td class="text-right text-nowrap">' + actions(row) + '</td>' +
         '</tr>';
       }).join('') + '</tbody></table></div>';
@@ -163,7 +163,7 @@
       out += '<button type="button" class="btn btn-sm btn-outline-warning" data-remind="' +
         row.activity.id + '"><i class="fa-solid fa-bell mr-1"></i>Follow up</button>';
     }
-    return out || '<span class="text-muted text-sm">—</span>';
+    return out || '<span class="text-muted text-sm">-</span>';
   }
 
   /* ---- review dialog ------------------------------------------------------------- */
@@ -193,7 +193,7 @@
               '<div><span class="cell-sub">Reports due</span>' +
                 M.formatDate(a.reportDeadline) + '</div>' +
               '<div><span class="cell-sub">Expected participants</span>' +
-                (a.expectedParticipants || '—') + '</div>' +
+                (a.expectedParticipants || '-') + '</div>' +
               '<div><span class="cell-sub">Actual participants</span>' +
                 (outcome.actualParticipants || 'Not reported') + '</div>' +
             '</div>' +
@@ -221,7 +221,7 @@
                       '<button type="button" class="btn btn-sm btn-outline-warning" ' +
                         'data-doc="' + r.id + '" data-decision="RETURN">Return</button>'
                     : '<span class="text-muted text-sm">' +
-                      (r.reviewedAt ? M.relativeTime(r.reviewedAt) : '—') + '</span>') +
+                      (r.reviewedAt ? M.relativeTime(r.reviewedAt) : '-') + '</span>') +
                 '</td></tr>';
             }).join('') + '</tbody></table>' +
             '<p class="text-muted text-sm mb-0">The activity is marked completed automatically ' +
@@ -246,7 +246,7 @@
           $m.modal('hide');
           var stage = M.stageOf(M.activityById(activityId));
           SASO.layout.toast(stage === C.STAGE.COMPLETED
-            ? 'All reports accepted — activity completed.'
+            ? 'All reports accepted: activity completed.'
             : 'Report approved.');
           render();
         } else {

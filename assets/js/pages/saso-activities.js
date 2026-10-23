@@ -151,13 +151,13 @@
           '<td><a href="activity-details.html?id=' + a.id + '" class="cell-primary">' +
             M.escapeHtml(a.title) + '</a>' +
             '<span class="cell-sub">' + M.label(a.venueType) + ' · ' +
-            M.escapeHtml(a.venue || '—') + '</span></td>' +
-          '<td class="text-sm">' + M.escapeHtml(a.category || '—') + '</td>' +
+            M.escapeHtml(a.venue || '-') + '</span></td>' +
+          '<td class="text-sm">' + M.escapeHtml(a.category || '-') + '</td>' +
           '<td class="text-nowrap">' + M.formatDate(L.pickedDate(a, state)) + '</td>' +
-          '<td class="text-center">' + (a.expectedParticipants || '—') + '</td>' +
+          '<td class="text-center">' + (a.expectedParticipants || '-') + '</td>' +
           '<td>' + M.badge(a.proposalStatus) + '</td>' +
-          '<td>' + (a.eventStatus === C.EVENT.NOT_APPLICABLE ? '—' : M.badge(a.eventStatus)) + '</td>' +
-          '<td>' + (ts === C.TERMINAL.NOT_APPLICABLE ? '—' : M.badge(ts)) +
+          '<td>' + (a.eventStatus === C.EVENT.NOT_APPLICABLE ? '-' : M.badge(a.eventStatus)) + '</td>' +
+          '<td>' + (ts === C.TERMINAL.NOT_APPLICABLE ? '-' : M.badge(ts)) +
             (overdue ? '<span class="cell-sub text-danger">' + M.daysPending(a) +
               ' days late</span>' : '') + '</td>' +
           '<td>' + M.badge(M.stageOf(a)) + '</td>' +

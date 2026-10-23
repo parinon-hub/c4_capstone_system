@@ -69,7 +69,7 @@
           'below at any time.</p>' +
         '<div class="request-ref">' + M.escapeHtml(req.ref) + '</div>' +
         '<table class="table table-sm detail-table text-sm text-left mt-3 mb-3"><tbody>' +
-          '<tr><th>Organization</th><td>' + M.escapeHtml(req.acronym) + ' — ' + M.escapeHtml(req.name) + '</td></tr>' +
+          '<tr><th>Organization</th><td>' + M.escapeHtml(req.acronym) + ' (' + M.escapeHtml(req.name) + ')</td></tr>' +
           '<tr><th>Requested by</th><td>' + M.escapeHtml(req.officerName) + ', ' + M.escapeHtml(req.officerPosition) + '</td></tr>' +
           '<tr><th>Username</th><td><code>' + M.escapeHtml(req.username) + '</code></td></tr>' +
           '<tr><th>Status</th><td>' + M.badge(req.status) + '</td></tr>' +
