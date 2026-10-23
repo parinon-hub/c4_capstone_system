@@ -28,10 +28,10 @@ below on the login screen.
 
 | Username | Password  | Role | Organization |
 |---|---|---|---|
-| `admin`   | `admin123`   | SASO Administrator | — |
-| `aide`    | `aide123`    | SASO Administrator | — |
-| `coord`   | `coord123`   | SASO Administrator | — |
-| `records` | `records123` | SASO Administrator | — |
+| `head`   | `head123`   | SASO Head | — |
+| `admin`  | `admin123`  | SASO Administrative Aide | — |
+| `admin1` | `admin1123` | SASO Student Activities Coordinator | — |
+| `admin2` | `admin2123` | SASO Records Officer (view-only on proposals and account requests) | — |
 | `jpcs`  | `jpcs123`  | Organization Officer | JPCS |
 | `ccs`   | `ccs123`   | Organization Officer | CCS-SC |
 | `chs`   | `chs123`   | Organization Officer | CHS-SC |
@@ -226,8 +226,8 @@ renewal warning window.
 
 While a proposal is still **under SASO review** (Submitted, For Review,
 Requirements Needed, Revision Required), it can be edited or deleted by the
-organization that sent it, or by the SASO Head (`admin`), Administrative Aide
-(`aide`) and Student Activities Coordinator (`coord`). The Records Officer
+organization that sent it, or by the SASO Head (`head`), Administrative Aide
+(`admin`) and Student Activities Coordinator (`admin1`). The Records Officer
 keeps view-only access. Once SASO endorses a proposal, it can no longer be
 edited or deleted. *This is a prototype assumption made by the researchers,
 not a stated SASO rule.* It is declared once, as `PROPOSAL_MANAGERS` in
@@ -267,7 +267,7 @@ it), or delete the account. Deleting only removes the sign-in: the
 organization stays on the roster with all its records, and Edit can give it a
 new account later.
 
-Below that list, the **Account requests** queue is where the Head (`admin`), Administrative Aide (`aide`) and Coordinator (`coord`)
+Below that list, the **Account requests** queue is where the Head (`head`), Administrative Aide (`admin`) and Coordinator (`admin1`)
 review each request. Approving records the organization's standing
 (Recognized, or Level I–IV and accredited/re-accredited, with its validity
 date) and creates the organization and its account in one step. Declining

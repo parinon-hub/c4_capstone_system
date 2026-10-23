@@ -405,15 +405,15 @@ SASO.config = (function () {
      and the record is frozen.
 
      Who may do it: the organization that submitted the proposal, and these
-     SASO accounts — the Head (admin), the Administrative Aide (aide) and the
-     Student Activities Coordinator (coord). The Records Officer keeps
+     SASO accounts — the Head (head), the Administrative Aide (admin) and the
+     Student Activities Coordinator (admin1). The Records Officer keeps
      view-only access to proposals.
 
      Deleting does not destroy the record. It moves to a trash bin, where it
      can be restored or permanently deleted, and is permanently deleted
      automatically after TRASH_RETENTION_DAYS.
      ---------------------------------------------------------------------------- */
-  var PROPOSAL_MANAGERS = ['admin', 'aide', 'coord'];
+  var PROPOSAL_MANAGERS = ['head', 'admin', 'admin1'];
   var TRASH_RETENTION_DAYS = 30;
 
   /* ---- Organization accounts ------------------------------------------------
@@ -427,13 +427,14 @@ SASO.config = (function () {
      approve requests and create accounts. The Records Officer can view the
      requests but not act on them.
      ---------------------------------------------------------------------------- */
-  var ACCOUNT_MANAGERS = ['admin', 'aide', 'coord'];
+  var ACCOUNT_MANAGERS = ['head', 'admin', 'admin1'];
   var ACCOUNT_REQUEST = { PENDING: 'PENDING', APPROVED: 'APPROVED', DECLINED: 'DECLINED' };
 
   /* v3: adds the trash bin and per-staff notifications. Bumping the key loads
      the new sample data automatically instead of reusing an older store. */
   /* v4: adds organization account requests. */
-  var STORAGE_KEY = 'cspc_saso_prototype_v4';
+  /* v5: SASO demo accounts renamed to head, admin, admin1 and admin2. */
+  var STORAGE_KEY = 'cspc_saso_prototype_v5';
   var SESSION_KEY = 'cspc_saso_session_v2';
 
   return {

@@ -60,13 +60,13 @@ SASO.buildSeed = function () {
   ];
 
   var users = [
-    { id:'usr-1', username:'admin', password:'admin123', name:'M. Delfin',
+    { id:'usr-1', username:'head', password:'head123', name:'Head',
       position:'Head, Student Affairs and Services Office', role:C.ROLE.SASO, organizationId:null },
-    { id:'usr-2', username:'aide', password:'aide123', name:'C. Bermudo',
+    { id:'usr-2', username:'admin', password:'admin123', name:'Admin',
       position:'Administrative Aide II, SASO', role:C.ROLE.SASO, organizationId:null },
-    { id:'usr-8', username:'coord', password:'coord123', name:'G. Peñaflor',
+    { id:'usr-8', username:'admin1', password:'admin1123', name:'Admin 1',
       position:'Student Activities Coordinator, SASO', role:C.ROLE.SASO, organizationId:null },
-    { id:'usr-9', username:'records', password:'records123', name:'A. Cordial',
+    { id:'usr-9', username:'admin2', password:'admin2123', name:'Admin 2',
       position:'Records Officer, SASO', role:C.ROLE.SASO, organizationId:null },
 
     { id:'usr-3', username:'jpcs', password:'jpcs123', name:'K. Mercado', position:'President, JPCS - CSPC',      role:C.ROLE.ORG, organizationId:'org-1' },
@@ -446,7 +446,7 @@ SASO.buildSeed = function () {
   outcome('act-9', 164,
     'Eighteen readings and six spoken word pieces were performed. Three works were selected for the campus publication.',
     null, 460);
-  reportComment('act-9', 'Financial Report', U.aide,
+  reportComment('act-9', 'Financial Report', U.admin,
     'The Financial Report lists PHP 1,500 for sound system rental but no official receipt is attached. Please resubmit with the receipt.', 400);
   reportComment('act-9', 'Financial Report', U.cas,
     'Noted, Sir. The supplier has issued the receipt; we resubmitted the report together with the liquidation.', 330);
@@ -488,7 +488,7 @@ SASO.buildSeed = function () {
     'The outreach day was shortened by two hours due to rain.', 65);
   reportComment('act-6', 'Narrative Report with Documentation', U.chs,
     'Good morning, Ma\u2019am. We have submitted the narrative report. The evaluation summary follows once all forms are encoded.', 70);
-  reportComment('act-6', 'Financial Report', U.aide,
+  reportComment('act-6', 'Financial Report', U.admin,
     'Returned: the total does not match the receipts. Please reconcile before the deadline today.', 20);
   notify(C.ROLE.SASO,null,'act-6',C.NOTIF.TR_SUBMITTED,'CHS-SC submitted Narrative Report with Documentation for Health Awareness Week.',70,true);
   notify(C.ROLE.SASO,null,'act-6',C.NOTIF.TR_SUBMITTED,'CHS-SC submitted Financial Report for Health Awareness Week.',60,true);

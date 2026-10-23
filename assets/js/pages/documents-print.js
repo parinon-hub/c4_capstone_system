@@ -48,7 +48,7 @@
   }
 
   var org = M.orgById(activity.organizationId);
-  var head = M.db().users.filter(function (u) { return u.username === 'admin'; })[0];
+  var head = M.db().users.filter(function (u) { return u.username === 'head'; })[0];
   var officer = M.db().users.filter(function (u) {
     return u.organizationId === org.id;
   })[0];
