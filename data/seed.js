@@ -61,13 +61,13 @@ SASO.buildSeed = function () {
 
   var users = [
     { id:'usr-1', username:'head', password:'head123', name:'Head',
-      position:'Head, Student Affairs and Services Office', role:C.ROLE.SASO, organizationId:null },
+      position:'Head SASO Administrative Aide II', role:C.ROLE.SASO, organizationId:null },
     { id:'usr-2', username:'admin', password:'admin123', name:'Admin',
-      position:'Administrative Aide II, SASO', role:C.ROLE.SASO, organizationId:null },
+      position:'Administrative Aide II', role:C.ROLE.SASO, organizationId:null },
     { id:'usr-8', username:'admin1', password:'admin1123', name:'Admin 1',
-      position:'Student Activities Coordinator, SASO', role:C.ROLE.SASO, organizationId:null },
+      position:'Administrative Aide II', role:C.ROLE.SASO, organizationId:null },
     { id:'usr-9', username:'admin2', password:'admin2123', name:'Admin 2',
-      position:'Records Officer, SASO', role:C.ROLE.SASO, organizationId:null },
+      position:'Administrative Aide III', role:C.ROLE.SASO, organizationId:null },
 
     { id:'usr-3', username:'jpcs', password:'jpcs123', name:'K. Mercado', position:'President, JPCS - CSPC',      role:C.ROLE.ORG, organizationId:'org-1' },
     { id:'usr-4', username:'ccs',  password:'ccs123',  name:'N. Ramos',   position:'Secretary, CCS-SC',           role:C.ROLE.ORG, organizationId:'org-2' },

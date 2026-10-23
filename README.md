@@ -28,10 +28,10 @@ below on the login screen.
 
 | Username | Password  | Role | Organization |
 |---|---|---|---|
-| `head`   | `head123`   | SASO Head | — |
-| `admin`  | `admin123`  | SASO Administrative Aide | — |
-| `admin1` | `admin1123` | SASO Student Activities Coordinator | — |
-| `admin2` | `admin2123` | SASO Records Officer (view-only on proposals and account requests) | — |
+| `head`   | `head123`   | Head SASO Administrative Aide II | — |
+| `admin`  | `admin123`  | Administrative Aide II | — |
+| `admin1` | `admin1123` | Administrative Aide II | — |
+| `admin2` | `admin2123` | Administrative Aide III (view-only on proposals and account requests) | — |
 | `jpcs`  | `jpcs123`  | Organization Officer | JPCS |
 | `ccs`   | `ccs123`   | Organization Officer | CCS-SC |
 | `chs`   | `chs123`   | Organization Officer | CHS-SC |
