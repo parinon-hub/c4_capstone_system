@@ -812,7 +812,8 @@ SASO.buildSeed = function () {
   function accountRequest(o) {
     var r = { id:nextId('areq'), ref:'AR-' + year + '-' + o.n, status:o.status,
       name:o.name, acronym:o.acronym, entityType:C.ENTITY.STUDENT_ORG, college:o.college, adviser:o.adviser,
-      officerName:o.officer, officerPosition:o.position, email:o.email, contact:o.contact || '',
+      officerName:o.officer, officerPosition:o.position, officerProgram:o.program || '',
+      officerCollege:o.officerCollege || '', email:o.email, contact:o.contact || '',
       username:o.username, password:o.password, proofFileName:o.proof, notes:o.notes || null,
       submittedAt:hoursAgo(o.hrs), reviewedAt:o.reviewedHrs ? hoursAgo(o.reviewedHrs) : null,
       reviewedBy:o.reviewedBy || null, remarks:o.remarks || null, createdOrgId:null, createdUserId:null };
@@ -833,24 +834,27 @@ SASO.buildSeed = function () {
     remarks:'JPCS - CSPC is already registered (username jpcs). Each officer and member has a personal account under the existing organization: ask your president or SASO to add yours instead of filing a new organization request.',
     name:'Junior Philippine Computer Society - CSPC Chapter', acronym:'JPCS-CSPC2', college:'College of Computer Studies',
     adviser:'Prof. R. Almeda', officer:'L. Fajardo', position:'Vice President', email:'lfajardo@example.com',
+    program:'Bachelor of Science in Information Technology', officerCollege:'College of Computer Studies',
     username:'jpcs.vp', password:'request123', proof:'JPCS_Recognition_2025.pdf' });
   notifyManagers(C.NOTIF.ACCOUNT_DECLINED, 'C. Bermudo declined the account request of JPCS-CSPC2 (' + dup.ref + '): duplicate of an existing account.', 220, dup.id, 'usr-2');
 
   var chess = accountRequest({ n:'0002', status:C.ACCOUNT_REQUEST.PENDING, hrs:74,
     name:'CSPC Chess and Mind Sports Club', acronym:'CMSC', college:'Institution-wide',
     adviser:'Prof. E. Navarro', officer:'R. Villareal', position:'President', email:'rvillareal@example.com',
+    program:'Bachelor of Science in Civil Engineering', officerCollege:'College of Engineering and Architecture',
     contact:'0917 000 0000', username:'cmsc', password:'cmsc123', proof:'CMSC_Certificate_of_Recognition.pdf',
     notes:'Newly recognized this semester. We plan to hold an inter-college tournament next month.' });
   notifyManagers(C.NOTIF.ACCOUNT_REQUESTED, 'CMSC (CSPC Chess and Mind Sports Club) requested an organization account: ' + chess.ref + '.', 74, chess.id, null);
 
   var tour = accountRequest({ n:'0003', status:C.ACCOUNT_REQUEST.PENDING, hrs:5,
-    name:'Junior Tourism Professionals Society', acronym:'JTPS', college:'College of Arts and Sciences',
+    name:'Junior Tourism Professionals Society', acronym:'JTPS', college:'College of Tourism, Hospitality and Business Management',
     adviser:'Prof. H. Santiago', officer:'P. Caballero', position:'Secretary', email:'pcaballero@example.com',
+    program:'Bachelor of Science in Tourism Management', officerCollege:'College of Tourism, Hospitality and Business Management',
     username:'jtps', password:'jtps123', proof:'JTPS_Recognition_AY2025-2026.pdf' });
   notifyManagers(C.NOTIF.ACCOUNT_REQUESTED, 'JTPS (Junior Tourism Professionals Society) requested an organization account: ' + tour.ref + '.', 5, tour.id, null);
 
   return {
-    meta:{ seededAt:new Date().toISOString(), version:8 },
+    meta:{ seededAt:new Date().toISOString(), version:9 },
     /* Office policy values. Seeded from what SASO stated; adjustable in
        Settings so the prototype can be shown against a different policy. */
     settings:{

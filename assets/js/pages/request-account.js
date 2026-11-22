@@ -26,9 +26,10 @@
   function renderForm() {
     card.innerHTML =
       '<div class="callout callout-info text-sm py-2 mb-3">' +
-        '<strong>How it works.</strong> Fill in your organization’s details and attach proof of ' +
-        'recognition. SASO reviews the request; once it is approved you can sign in with the ' +
-        'username and password you choose here.' +
+        '<strong>How it works.</strong> Fill in your organization’s details and your own as the ' +
+        'requesting officer, then attach proof of recognition. SASO reviews the request. Once it is ' +
+        'approved, you sign in with the username and password you choose here, and your name, ' +
+        'position, program and college appear on your profile.' +
       '</div>' +
       '<div id="oaForm">' + F.html('request') + '</div>' +
       '<div class="alert alert-danger text-sm py-2 d-none" id="formError"></div>' +
@@ -70,7 +71,8 @@
         '<div class="request-ref">' + M.escapeHtml(req.ref) + '</div>' +
         '<table class="table table-sm detail-table text-sm text-left mt-3 mb-3"><tbody>' +
           '<tr><th>Organization</th><td>' + M.escapeHtml(req.acronym) + ' (' + M.escapeHtml(req.name) + ')</td></tr>' +
-          '<tr><th>Requested by</th><td>' + M.escapeHtml(req.officerName) + ', ' + M.escapeHtml(req.officerPosition) + '</td></tr>' +
+          '<tr><th>Requested by</th><td>' + M.escapeHtml(req.officerName) + ', ' + M.escapeHtml(req.officerPosition) +
+            (req.officerProgram ? '<span class="cell-sub">' + M.escapeHtml(req.officerProgram) + '</span>' : '') + '</td></tr>' +
           '<tr><th>Username</th><td><code>' + M.escapeHtml(req.username) + '</code></td></tr>' +
           '<tr><th>Status</th><td>' + M.badge(req.status) + '</td></tr>' +
         '</tbody></table>' +

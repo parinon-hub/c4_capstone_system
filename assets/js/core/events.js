@@ -779,7 +779,7 @@ SASO.events = (function () {
   }
 
   var ORG_FIELDS = ['name', 'acronym', 'entityType', 'college', 'adviser'];
-  var OFFICER_FIELDS = ['officerName', 'officerPosition', 'email', 'contact', 'username'];
+  var OFFICER_FIELDS = ['officerName', 'officerPosition', 'officerProgram', 'officerCollege', 'email', 'contact', 'username'];
 
   /* Public: called from the Request an account page, with no one signed in. */
   function submitAccountRequest(form) {
@@ -830,6 +830,8 @@ SASO.events = (function () {
       username: src.username, password: src.password,
       name: src.officerName,
       position: src.officerPosition + ', ' + src.acronym,
+      program: src.officerProgram || null,
+      college: src.officerCollege || (src.college !== 'Institution-wide' ? src.college : null) || null,
       email: src.email || null, contact: src.contact || null,
       role: C.ROLE.ORG, organizationId: org.id
     };
@@ -952,6 +954,8 @@ SASO.events = (function () {
     if (form.password) { user.password = form.password; }
     user.name = form.officerName;
     user.position = form.officerPosition + ', ' + org.acronym;
+    user.program = form.officerProgram || null;
+    user.college = form.officerCollege || user.college || null;
     user.email = form.email || null;
     user.contact = form.contact || null;
 
