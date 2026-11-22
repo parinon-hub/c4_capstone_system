@@ -94,9 +94,9 @@
       { value: c.APPROVED, label: 'Approved', icon: 'fa-user-check', mod: 'is-complete' },
       { value: c.DECLINED, label: 'Declined', icon: 'fa-user-xmark' },
       { value: M.organizations().filter(function (o) { return M.accountForOrg(o.id); }).length,
-        label: 'Organizations with accounts', icon: 'fa-people-group' },
+        label: 'Orgs with accounts', icon: 'fa-people-group' },
       { value: M.db().users.filter(function (u) { return u.role === C.ROLE.ORG; }).length,
-        label: 'Personal accounts (' + (M.hasAccountLimit() ? 'up to ' + M.orgAccountLimit() + ' each' : 'no limit') + ')',
+        label: M.hasAccountLimit() ? 'Accounts (max ' + M.orgAccountLimit() + ' each)' : 'Accounts, no limit',
         icon: 'fa-id-card' }
     ];
     document.getElementById('tiles').innerHTML = tiles.map(function (t) {

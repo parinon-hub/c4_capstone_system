@@ -139,7 +139,7 @@
     var tiles = [
       { value: a.total, label: 'Organizations', icon: 'fa-people-group' },
       { value: a.accredited, label: 'Accredited', icon: 'fa-certificate', mod: 'is-complete' },
-      { value: withOutstanding, label: 'With outstanding documents',
+      { value: withOutstanding, label: 'Outstanding documents',
         icon: 'fa-circle-exclamation', mod: withOutstanding ? 'is-attention' : '' },
       { value: withOverdue, label: 'With overdue reports',
         icon: 'fa-triangle-exclamation', mod: withOverdue ? 'is-overdue' : '' }

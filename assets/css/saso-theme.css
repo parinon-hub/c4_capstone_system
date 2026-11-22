@@ -1783,3 +1783,5 @@ a.notif-message:hover { color: var(--cspc-navy); text-decoration: underline; }
 .sf-holder .sf-page + .sf-page { margin-top: 12px; }
 @media print { .sf-holder .sf-page + .sf-page { page-break-before: always; margin-top: 0; } }
 .sf-offscreen .sf-page { height: 1122px; min-height: 0; overflow: hidden; }
+/* Dashboard strips scroll sideways, so their labels stay on one line. */
+.stat-strip-item .stat-tile .stat-label { white-space: nowrap; }

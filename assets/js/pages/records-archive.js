@@ -54,9 +54,9 @@
       ' years are always on file for accreditation and re-accreditation. A conducted activity ' +
       'cannot be deleted during that period, and no record is ever deleted automatically.</div>' +
     '<div class="card no-print">' +
-      '<div class="card-header"><h3 class="card-title">Academic year</h3></div>' +
+      '<div class="card-header"><h3 class="card-title">Show records for</h3></div>' +
       '<div class="card-body py-2">' +
-        '<div class="form-row align-items-end">' +
+        '<div class="form-row align-items-start">' +
           '<div class="form-group col-md-4 mb-2"><label for="fAY" class="text-sm mb-1">Academic year</label>' +
             '<select class="form-control form-control-sm" id="fAY"></select>' +
             '<small class="form-text text-muted" id="ayRange"></small></div>' +
@@ -113,10 +113,8 @@
   function renderTabs() {
     var sel = document.getElementById('fAY');
     sel.innerHTML = years.map(function (ay) {
-      var n = M.activitiesInYear(ay, state.org || null).length;
       return '<option value="' + ay + '"' + (state.ay === ay ? ' selected' : '') + '>AY ' + ay +
-        (ay === M.currentAcademicYear() ? ' (current)' : '') + ' · ' + n + ' record' + (n === 1 ? '' : 's') +
-        (M.isRetained(ay) ? '' : ' · retention met') + '</option>';
+        (ay === M.currentAcademicYear() ? ' (current)' : '') + '</option>';
     }).join('');
     var range = M.academicYearRange(state.ay);
     document.getElementById('ayRange').textContent = M.formatDate(range.from) + ' to ' + M.formatDate(range.to);
@@ -139,10 +137,10 @@
       });
     });
     var tiles = [
-      { v: acts.length, l: 'Activities on record', i: 'fa-folder-open' },
+      { v: acts.length, l: 'On record', i: 'fa-folder-open' },
       { v: conducted.length, l: 'Conducted', i: 'fa-flag-checkered' },
-      { v: conducted.filter(SASO.ched.reportsComplete).length, l: 'With complete post-activity reports', i: 'fa-file-circle-check', mod: 'is-complete' },
-      { v: accepted + ' / ' + docs, l: 'Post-activity documents accepted', i: 'fa-paperclip' },
+      { v: conducted.filter(SASO.ched.reportsComplete).length, l: 'Reports complete', i: 'fa-file-circle-check', mod: 'is-complete' },
+      { v: accepted + ' / ' + docs, l: 'Documents accepted', i: 'fa-paperclip' },
       { v: conducted.reduce(function (s, a) { return s + SASO.ched.participants(a); }, 0), l: 'Participants', i: 'fa-users' }
     ];
     document.getElementById('tiles').innerHTML = tiles.map(function (t) {
