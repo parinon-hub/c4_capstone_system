@@ -270,7 +270,22 @@ SASO.config = (function () {
       { name: 'Letter to Enter / Supporting Letters',     mandatory: false, source: 'SASO' },
       { name: 'Excuse Letter',                            mandatory: false, source: 'SASO' }
     ],
+    /* CSPC-F-SASO-59 (Requirements for the Conduct of On-Campus Activities)
+       lists the Responsibility Acceptance Slip and the budget proposal as
+       attachments. The budget proposal is optional here because many
+       activities carry no budget. */
+    PRE_APPROVAL_ON_CAMPUS_EXTRA: [
+      { name: 'Responsibility Acceptance Slip',           mandatory: true,  source: 'SASO' }
+    ],
+    PRE_APPROVAL_BUDGET: [
+      { name: 'Budget Proposal / Source of Funds',        mandatory: false, source: 'SASO' }
+    ],
+    /* SASO's Order of Documentary Requirements for local off-campus
+       activities starts with the Responsibility Acceptance Slip and the PTC,
+       then the CMO No. 63 documents (Certificate and Report of Compliance and
+       tabs A to K), which are filed together as one packet. */
     PRE_APPROVAL_OFF_CAMPUS_EXTRA: [
+      { name: 'Responsibility Acceptance Slip',           mandatory: true,  source: 'SASO' },
       { name: 'CMO 63 Documentary Requirements',          mandatory: true,  source: 'SASO' }
     ],
     POST_ACTIVITY: [
@@ -430,16 +445,123 @@ SASO.config = (function () {
   var ACCOUNT_MANAGERS = ['head', 'admin', 'admin1'];
   var ACCOUNT_REQUEST = { PENDING: 'PENDING', APPROVED: 'APPROVED', DECLINED: 'DECLINED' };
 
-  /* ---- Accounts per organization (panel RSC) --------------------------------
-     How many sign-in accounts an organization may hold. Each account belongs
-     to one named person with its own username and password, so every action
-     in the system is traced to that person rather than to a shared login.
-     PROTOTYPE ASSUMPTION: three accounts, for the adviser and two officers
-     (president and secretary). SASO can change the number in Settings.
+  /* ---- Personal accounts (panel RSC, second round) ---------------------------
+     Nobody signs in with a shared organization login. Every member who works
+     in the system (officers, members and the adviser) has a personal account
+     with their own username and password, tied to one organization and a
+     position, so every submission is recorded under that person's name.
+
+     Panel question: "How many accounts can be allocated per organization?"
+     Answer: as many as SASO allows. There is NO limit by default (0 means no
+     limit); SASO can set a maximum per organization in Settings.
+
+     SASO creates the organization's first account (normally the president).
+     From then on the president or the adviser adds and removes the members
+     of their own organization (ORG_MEMBER_MANAGERS); SASO can still manage
+     every account.
      ---------------------------------------------------------------------------- */
-  var ORG_ACCOUNT_LIMIT = 3;
-  var ORG_ACCOUNT_LIMIT_MAX = 10;
-  var ORG_ACCOUNT_POSITIONS = ['Adviser', 'President', 'Secretary', 'Vice President', 'Treasurer'];
+  var ORG_ACCOUNT_LIMIT = 0;          /* 0 = no limit */
+  var ORG_ACCOUNT_LIMIT_MAX = 500;
+  var ORG_ACCOUNT_POSITIONS = ['President', 'Vice President', 'Secretary', 'Treasurer', 'Auditor',
+                               'Public Information Officer', 'Business Manager', 'Representative',
+                               'Committee Head', 'Member', 'Adviser'];
+  var ORG_MEMBER_MANAGERS = ['President', 'Adviser'];
+
+  /* ---- CSPC colleges and programs ---------------------------------------------
+     As published by Camarines Sur Polytechnic Colleges (cspc.edu.ph, college
+     pages and the Nabua campus menu). Used for a member's program and college
+     on their profile. Add a program here when CSPC offers a new one. */
+  var CSPC_COLLEGES = [
+    { name: 'College of Computer Studies', acronym: 'CCS', programs: [
+      'Bachelor of Science in Computer Science',
+      'Bachelor of Science in Information Technology',
+      'Bachelor of Science in Information Systems',
+      'Bachelor of Library and Information Science' ] },
+    { name: 'College of Engineering and Architecture', acronym: 'CEA', programs: [
+      'Bachelor of Science in Civil Engineering',
+      'Bachelor of Science in Mechanical Engineering',
+      'Bachelor of Science in Electronics Engineering',
+      'Bachelor of Science in Electrical Engineering',
+      'Bachelor of Science in Computer Engineering',
+      'Bachelor of Science in Architecture' ] },
+    { name: 'College of Health Sciences', acronym: 'CHS', programs: [
+      'Bachelor of Science in Nursing',
+      'Bachelor of Science in Midwifery' ] },
+    { name: 'College of Arts and Sciences', acronym: 'CAS', programs: [
+      'Bachelor of Arts in English Language Studies',
+      'Bachelor of Science in Mathematics',
+      'Bachelor of Science in Applied Mathematics',
+      'Bachelor of Science in Development Communication',
+      'Bachelor of Public Administration',
+      'Bachelor in Human Services' ] },
+    { name: 'College of Tourism, Hospitality and Business Management', acronym: 'CTHBM', programs: [
+      'Bachelor of Science in Office Administration',
+      'Bachelor of Science in Hospitality Management',
+      'Bachelor of Science in Tourism Management',
+      'Bachelor of Science in Entrepreneurship',
+      'Bachelor of Science in Business Administration major in Financial Management' ] },
+    { name: 'College of Technological and Developmental Education', acronym: 'CTDE', programs: [
+      'Bachelor of Physical Education',
+      'Bachelor of Culture and Arts Education',
+      'Bachelor of Special Needs Education',
+      'Bachelor of Technical-Vocational Teacher Education major in Fish Processing',
+      'Bachelor of Technical-Vocational Teacher Education major in Food Service Management',
+      'Bachelor of Technical-Vocational Teacher Education major in Electronics Technology' ] },
+    { name: 'Graduate School', acronym: 'GS', programs: [
+      'Master in Business Management',
+      'Master in Information Technology',
+      'Master in Hospitality Management',
+      'Master in Nursing Education',
+      'Master of Arts in Nursing',
+      'Master of Engineering',
+      'Doctor of Philosophy in Business Management',
+      'Doctor of Philosophy in Nursing',
+      'Doctor of Philosophy in Engineering Education' ] }
+  ];
+
+  /* ---- Nature of the activity (CSPC-F-SASO-05 and -07) ------------------------
+     The checkbox list printed on both Permission to Conduct forms. */
+  var ACTIVITY_NATURE = {
+    CURRICULAR: [
+      'Educational Tours/Field trips',
+      'Participation in and/or attendance in degree program-relevant events',
+      'Field Study/Experiential Learning/Related Learning Experience'
+    ],
+    NON_CURRICULAR: [
+      'Mission-based activities (e.g., retreat, recollection, etc.)',
+      'Conventions, seminars, conferences, symposiums, trainings and teambuilding',
+      'Volunteer work including peer helper programs, relief operations, community outreach and immersion',
+      'Advocacy projects and campaigns',
+      'Participation in sports activities',
+      'Activities initiated by recognized various student groups',
+      'Interschool competitions/tournaments',
+      'Culture and arts performances and competition'
+    ]
+  };
+
+  /* The checkbox an activity of each category most often falls under; the
+     submit form preselects it and the organization can change it. */
+  var CATEGORY_NATURE = {
+    'Environmental': 'Advocacy projects and campaigns',
+    'IGP': 'Activities initiated by recognized various student groups',
+    'Leadership': 'Conventions, seminars, conferences, symposiums, trainings and teambuilding',
+    'Life Skills': 'Conventions, seminars, conferences, symposiums, trainings and teambuilding',
+    'Multi-Faith': 'Mission-based activities (e.g., retreat, recollection, etc.)',
+    'Socio-Civic': 'Activities initiated by recognized various student groups',
+    'Sports': 'Participation in sports activities',
+    'Student Publication': 'Activities initiated by recognized various student groups',
+    'Volunteer': 'Volunteer work including peer helper programs, relief operations, community outreach and immersion'
+  };
+
+  /* ---- Signatories on the SASO forms --------------------------------------------
+     Printed on the Permission to Conduct forms as they appear on the blank
+     forms SASO supplied (Rev. 3, January 2021). SASO changes them in Settings
+     when an office changes hands. */
+  var SIGNATORIES = {
+    sasDirector: { name: 'JAY L. LUZON, Ph.D.', title: 'Director, Student Affairs and Services' },
+    vpaa: { name: 'JOCELYN O. JINTALAN, DBA', title: 'VP for Academic Affairs' },
+    president: { name: 'AMADO A. OLIVA, JR., Ph.D.', title: 'President' }
+  };
 
   /* ---- Record retention (panel RSC) -------------------------------------------
      Activity and accomplishment records are kept for at least three academic
@@ -447,10 +569,11 @@ SASO.config = (function () {
      years are always on file for accreditation and re-accreditation. Records
      are never deleted automatically: once the period has passed they are only
      flagged as eligible for disposal by SASO.
-     PROTOTYPE ASSUMPTION: the academic year starts on August 1.
+     The academic year starts on July 1, as SASO's own lists of student
+     activities run July to December for the first half of a school year.
      ---------------------------------------------------------------------------- */
   var RECORD_RETENTION_YEARS = 3;
-  var ACADEMIC_YEAR_START_MONTH = 7;   /* 0-based: 7 = August */
+  var ACADEMIC_YEAR_START_MONTH = 6;   /* 0-based: 6 = July */
 
   /* ---- CHED report references (panel RSC) --------------------------------------
      The report formats below follow what CHED requires of student
@@ -469,8 +592,10 @@ SASO.config = (function () {
   /* v4: adds organization account requests. */
   /* v5: SASO demo accounts renamed to head, admin, admin1 and admin2. */
   /* v6: several accounts per organization and three academic years of records. */
-  var STORAGE_KEY = 'cspc_saso_prototype_v6';
-  var SESSION_KEY = 'cspc_saso_session_v2';
+  /* v7: personal accounts with no default limit, profiles, SASO form fields
+     and two past school years from SASO's lists of student activities. */
+  var STORAGE_KEY = 'cspc_saso_prototype_v8';
+  var SESSION_KEY = 'cspc_saso_session_v3';
 
   return {
     ROLE: ROLE, PROPOSAL: PROPOSAL, OFFICE: OFFICE,
@@ -494,6 +619,11 @@ SASO.config = (function () {
     ORG_ACCOUNT_LIMIT: ORG_ACCOUNT_LIMIT,
     ORG_ACCOUNT_LIMIT_MAX: ORG_ACCOUNT_LIMIT_MAX,
     ORG_ACCOUNT_POSITIONS: ORG_ACCOUNT_POSITIONS,
+    ORG_MEMBER_MANAGERS: ORG_MEMBER_MANAGERS,
+    CSPC_COLLEGES: CSPC_COLLEGES,
+    ACTIVITY_NATURE: ACTIVITY_NATURE,
+    CATEGORY_NATURE: CATEGORY_NATURE,
+    SIGNATORIES: SIGNATORIES,
     RECORD_RETENTION_YEARS: RECORD_RETENTION_YEARS,
     ACADEMIC_YEAR_START_MONTH: ACADEMIC_YEAR_START_MONTH,
     CHED_REFERENCE: CHED_REFERENCE,

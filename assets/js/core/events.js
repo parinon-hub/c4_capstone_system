@@ -221,10 +221,10 @@ SASO.events = (function () {
   /* Builds the pre-approval checklist for a venue type. Off-campus activities
      additionally require the CMO 63 documentation. */
   function preApprovalTemplate(venueType) {
-    var tpl = C.REQUIREMENT_TEMPLATES.PRE_APPROVAL_COMMON.slice();
-    if (venueType === C.VENUE.OFF_CAMPUS) {
-      tpl = tpl.concat(C.REQUIREMENT_TEMPLATES.PRE_APPROVAL_OFF_CAMPUS_EXTRA);
-    }
+    var T = C.REQUIREMENT_TEMPLATES;
+    var tpl = T.PRE_APPROVAL_COMMON.concat(T.PRE_APPROVAL_BUDGET);
+    if (venueType === C.VENUE.ON_CAMPUS) { tpl = tpl.concat(T.PRE_APPROVAL_ON_CAMPUS_EXTRA); }
+    if (venueType === C.VENUE.OFF_CAMPUS) { tpl = tpl.concat(T.PRE_APPROVAL_OFF_CAMPUS_EXTRA); }
     return tpl;
   }
 
@@ -257,6 +257,11 @@ SASO.events = (function () {
     });
   }
 
+  /* The fields the Permission to Conduct forms (CSPC-F-SASO-05 and -07) ask
+     for beyond the proposal itself. */
+  var PTC_FIELDS = ['natureType', 'natureItem', 'coResponsibleName', 'coResponsiblePosition',
+                    'instructors', 'transportType', 'transportRate'];
+
   function saveDraft(form, activityId) {
     var actor = SASO.auth.current();
     if (!actor || actor.role !== C.ROLE.ORG) { return null; }
@@ -279,7 +284,7 @@ SASO.events = (function () {
 
     ['title','category','venueType','venue','dateStart','dateEnd','timeStart','timeEnd',
      'expectedParticipants','participantDescription','rationale','objectives',
-     'description','budget','fundSource'].forEach(function (k) {
+     'description','budget','fundSource'].concat(PTC_FIELDS).forEach(function (k) {
       if (form[k] !== undefined) { activity[k] = form[k]; }
     });
     activity.updatedAt = now;
@@ -319,6 +324,13 @@ SASO.events = (function () {
 
     var now = new Date().toISOString();
     activity.submittedAt = now;
+    /* Panel RSC: "Submitted by: name, position", kept as it was at submission. */
+    var actor = SASO.auth.current();
+    var me = actor ? SASO.model.userById(actor.userId) : null;
+    if (actor) {
+      activity.submittedBy = { userId: actor.userId, name: actor.name,
+        position: me ? SASO.model.positionTitle(me) : SASO.model.positionTitle(actor) };
+    }
 
     /* Open the SASO leg of the approval route. */
     db().routing.push({
@@ -537,7 +549,9 @@ SASO.events = (function () {
     timeEnd: 'end time', expectedParticipants: 'expected participants',
     participantDescription: 'participant description', budget: 'budget',
     fundSource: 'fund source', rationale: 'rationale', objectives: 'objectives',
-    description: 'description'
+    description: 'description', natureType: 'nature of the activity', natureItem: 'nature of the activity',
+    coResponsibleName: 'co-responsible person', coResponsiblePosition: 'co-responsible designation',
+    instructors: 'instructors joining', transportType: 'transportation', transportRate: 'transportation rate'
   };
 
   /* How the actor is named to everyone else. */
@@ -591,7 +605,7 @@ SASO.events = (function () {
     Object.keys(EDITABLE_FIELDS).forEach(function (k) {
       if (form[k] === undefined) { return; }
       if (!sameValue(activity[k], form[k])) {
-        changed.push(EDITABLE_FIELDS[k]);
+        if (changed.indexOf(EDITABLE_FIELDS[k]) === -1) { changed.push(EDITABLE_FIELDS[k]); }
         activity[k] = form[k];
       }
     });
@@ -976,12 +990,14 @@ SASO.events = (function () {
     return { ok: true, org: org, user: user };
   }
 
-  /* ---- several accounts per organization (panel RSC) ------------------------
-     Each account is one named person (the adviser or an officer) with its own
-     username and password, so every action is traced to that person. The
-     number of accounts is capped by SASO's policy (Settings). */
+  /* ---- personal accounts (panel RSC) ----------------------------------------
+     Every member who works in the system has a personal account, tied to one
+     organization and a position. SASO's account managers manage every
+     organization's accounts; the president or adviser manages their own
+     organization's (model.canManageMembers). There is no limit unless SASO
+     sets one in Settings. */
 
-  var ACCOUNT_FIELDS = ['name', 'position', 'email', 'contact', 'username'];
+  var ACCOUNT_FIELDS = ['name', 'position', 'program', 'college', 'email', 'contact', 'username'];
 
   function usernameInUse(username, exceptUser) {
     var key = String(username || '').trim().toLowerCase();
@@ -989,15 +1005,19 @@ SASO.events = (function () {
       SASO.model.pendingAccountRequests().some(function (r) { return r.username.toLowerCase() === key; });
   }
 
+  function byWhom(actor) {
+    return actor.role === C.ROLE.SASO ? 'SASO (' + actor.name + ')' : actor.name;
+  }
+
   function addOrgAccount(orgId, form) {
     var actor = SASO.auth.current();
-    if (!SASO.model.canManageAccounts(actor)) { return { ok: false, message: 'Not permitted.' }; }
+    if (!SASO.model.canManageMembers(actor, orgId)) { return { ok: false, message: 'Not permitted.' }; }
     var org = SASO.model.orgById(orgId);
     if (!org) { return { ok: false, message: 'This organization no longer exists.' }; }
-    var limit = SASO.model.orgAccountLimit();
-    if (SASO.model.accountsForOrg(orgId).length >= limit) {
+    if (SASO.model.accountSlotsLeft(orgId) <= 0) {
+      var limit = SASO.model.orgAccountLimit();
       return { ok: false, message: org.acronym + ' already has the maximum of ' + limit +
-        ' accounts. Remove one, or raise the limit in Settings.' };
+        ' accounts set by SASO. Remove one, or ask SASO to raise the limit in Settings.' };
     }
     if (usernameInUse(form.username)) {
       return { ok: false, message: 'The username "' + form.username + '" is already in use.' };
@@ -1006,15 +1026,16 @@ SASO.events = (function () {
       id: SASO.storage.nextId('usr'), role: C.ROLE.ORG, organizationId: org.id,
       username: form.username, password: form.password,
       name: form.name, position: form.position + ', ' + org.acronym,
+      program: form.program || null, college: form.college || null,
       email: form.email || null, contact: form.contact || null,
       createdAt: new Date().toISOString(), createdBy: actor.name
     };
     db().users.push(user);
 
     notifyOrg(org.id, null, C.NOTIF.ACCOUNT_CREATED,
-      'SASO (' + actor.name + ') added a sign-in account for ' + user.name + ' (' + form.position + ').');
+      byWhom(actor) + ' added an account for ' + user.name + ' (' + form.position + ').');
     notifyAccountManagers(C.NOTIF.ACCOUNT_CREATED,
-      actor.name + ' added an account for ' + user.name + ' of ' + org.acronym + ' (' + user.username + ').',
+      byWhom(actor) + ' added an account for ' + user.name + ' of ' + org.acronym + ' (' + user.username + ').',
       'You added an account for ' + user.name + ' of ' + org.acronym + ' (' + user.username + ').', actor);
 
     SASO.storage.save();
@@ -1023,10 +1044,10 @@ SASO.events = (function () {
 
   function updateOrgAccount(userId, form) {
     var actor = SASO.auth.current();
-    if (!SASO.model.canManageAccounts(actor)) { return { ok: false, message: 'Not permitted.' }; }
     var user = SASO.model.userById(userId);
     var org = user && SASO.model.orgById(user.organizationId);
     if (!user || !org) { return { ok: false, message: 'This account no longer exists.' }; }
+    if (!SASO.model.canManageMembers(actor, org.id)) { return { ok: false, message: 'Not permitted.' }; }
     if (usernameInUse(form.username, user)) {
       return { ok: false, message: 'The username "' + form.username + '" is already in use.' };
     }
@@ -1035,11 +1056,14 @@ SASO.events = (function () {
     if (form.password) { user.password = form.password; }
     user.name = form.name;
     user.position = form.position + ', ' + org.acronym;
+    user.program = form.program || null;
+    user.college = form.college || null;
     user.email = form.email || null;
     user.contact = form.contact || null;
+    refreshSession(user);
 
     notifyAccountManagers(C.NOTIF.ACCOUNT_UPDATED,
-      actor.name + ' edited the account of ' + user.name + ' of ' + org.acronym + ' (' + user.username + ')' +
+      byWhom(actor) + ' edited the account of ' + user.name + ' of ' + org.acronym + ' (' + user.username + ')' +
         (before !== user.username ? ', formerly "' + before + '".' : '.'),
       'You edited the account of ' + user.name + ' of ' + org.acronym + ' (' + user.username + ').', actor);
 
@@ -1049,21 +1073,55 @@ SASO.events = (function () {
 
   function removeOrgAccount(userId) {
     var actor = SASO.auth.current();
-    if (!SASO.model.canManageAccounts(actor)) { return { ok: false, message: 'Not permitted.' }; }
     var user = SASO.model.userById(userId);
     var org = user && SASO.model.orgById(user.organizationId);
     if (!user || !org) { return { ok: false, message: 'This account no longer exists.' }; }
+    if (!SASO.model.canManageMembers(actor, org.id)) { return { ok: false, message: 'Not permitted.' }; }
+    if (actor.userId === user.id) {
+      return { ok: false, message: 'You cannot remove your own account. Ask SASO or another officer.' };
+    }
     var users = db().users;
     users.splice(users.indexOf(user), 1);
 
     notifyOrg(org.id, null, C.NOTIF.ACCOUNT_DELETED,
-      'SASO (' + actor.name + ') removed the sign-in account of ' + user.name + '.');
+      byWhom(actor) + ' removed the account of ' + user.name + '.');
     notifyAccountManagers(C.NOTIF.ACCOUNT_DELETED,
-      actor.name + ' removed the account of ' + user.name + ' of ' + org.acronym + ' (' + user.username + ').',
+      byWhom(actor) + ' removed the account of ' + user.name + ' of ' + org.acronym + ' (' + user.username + ').',
       'You removed the account of ' + user.name + ' of ' + org.acronym + ' (' + user.username + ').', actor);
 
     SASO.storage.save();
     return { ok: true, org: org, user: user };
+  }
+
+  /* Keeps the signed-in session's name and position in step with the account. */
+  function refreshSession(user) {
+    var s = SASO.auth.current();
+    if (!s || s.userId !== user.id) { return; }
+    s.name = user.name;
+    s.position = user.position;
+    s.username = user.username;
+    SASO.auth.store(s);
+  }
+
+  /* ---- My Profile -------------------------------------------------------------
+     A person edits their own email, contact number and password. Name,
+     position, program and college are changed by SASO or by the president or
+     adviser of the organization (Members). */
+  function updateOwnProfile(form) {
+    var actor = SASO.auth.current();
+    var user = actor && SASO.model.userById(actor.userId);
+    if (!user) { return { ok: false, message: 'Your account could not be found. Sign in again.' }; }
+    if (form.newPassword) {
+      if (form.currentPassword !== user.password) {
+        return { ok: false, field: 'pfCurrent', message: 'Your current password is incorrect.' };
+      }
+      user.password = form.newPassword;
+    }
+    user.email = form.email || null;
+    user.contact = form.contact || null;
+    user.updatedAt = new Date().toISOString();
+    SASO.storage.save();
+    return { ok: true, user: user, passwordChanged: !!form.newPassword };
   }
 
   return {
@@ -1071,6 +1129,7 @@ SASO.events = (function () {
     addOrgAccount: addOrgAccount,
     updateOrgAccount: updateOrgAccount,
     removeOrgAccount: removeOrgAccount,
+    updateOwnProfile: updateOwnProfile,
     submitAccountRequest: submitAccountRequest,
     approveAccountRequest: approveAccountRequest,
     declineAccountRequest: declineAccountRequest,

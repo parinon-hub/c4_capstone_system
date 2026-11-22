@@ -32,14 +32,24 @@ below on the login screen.
 | `admin`  | `admin123`  | Administrative Aide II | — |
 | `admin1` | `admin1123` | Administrative Aide II | — |
 | `admin2` | `admin2123` | Administrative Aide III (view-only on proposals and account requests) | — |
-| `jpcs`  | `jpcs123`  | Organization Officer | JPCS |
-| `ccs`   | `ccs123`   | Organization Officer | CCS-SC |
-| `chs`   | `chs123`   | Organization Officer | CHS-SC |
-| `ssc`   | `ssc123`   | Organization Officer | SSC |
-| `cas`   | `cas123`   | Organization Officer | CAS-SC |
-| `jpcs.adviser` | `jpcs123` | Organization Adviser | JPCS |
-| `jpcs.sec` | `jpcs123` | Organization Secretary | JPCS |
-| `ccs.adviser` | `ccs123` | Organization Adviser | CCS-SC |
+| `kmercado` | `jpcs123` | President (personal account) | JPCS - CSPC |
+| `ralmeda` | `jpcs123` | Adviser (personal account) | JPCS - CSPC |
+| `adimaano` | `jpcs123` | Secretary (personal account) | JPCS - CSPC |
+| `lfajardo` | `jpcs123` | Vice President (personal account) | JPCS - CSPC |
+| `jsantos` | `jpcs123` | Member (personal account) | JPCS - CSPC |
+| `jbautista` | `ccs123` | President (personal account) | CCS-SC |
+| `nramos` | `ccs123` | Secretary (personal account) | CCS-SC |
+| `mbernales` | `ccs123` | Adviser (personal account) | CCS-SC |
+| `balcantara` | `chs123` | President (personal account) | CHS-SC |
+| `gpenaflor` | `chs123` | Treasurer (personal account) | CHS-SC |
+| `mtanaka` | `ssc123` | President (personal account) | CSPC-SSC |
+| `eabad` | `ssc123` | Secretary (personal account) | CSPC-SSC |
+| `rcastillo` | `cas123` | President (personal account) | CAS-CSC |
+| `tlorenzo` | `cas123` | Secretary (personal account) | CAS-CSC |
+
+Organizations sign in with **personal accounts**, one per member. The
+president and the adviser manage their organization's members on **Members**;
+every account edits its own email, contact number and password on **My Profile**.
 
 **Reset demo data** lives in the user menu, top right. Use it before each fresh
 walkthrough.
@@ -337,24 +347,56 @@ automatically the first time the updated prototype is opened.
 
 ### 1. How many accounts per organization
 
-An organization may hold up to **three accounts** by default: one for each
-person who works in the system, normally the adviser and two officers
-(president and secretary). Each person has their own username and password,
-so every submission, reply and report is recorded under that person's name
-instead of a shared login.
+There is **no limit** by default. Any member who works in the system gets a
+personal account, so every submission is recorded under that person's name
+and position ("Submitted by: name, position" on the activity lists and the
+activity page, frozen at the time of submission).
 
-- **Manage Accounts** shows each organization's account holders and a count
-  such as *2 of 3*. **Manage accounts** on a row opens the organization's
-  accounts, where the Head, Administrative Aide and Coordinator add, edit or
-  remove them. A fourth account is refused until one is removed.
-- The limit is an office policy value in **Settings** (*Accounts allowed per
-  organization*, 1 to 10). Lowering it keeps existing accounts but stops new
-  ones being added.
-- The organization's **Profile** lists its accounts.
-- Sample data: JPCS has all three accounts (`jpcs`, `jpcs.adviser`,
-  `jpcs.sec`), CCS-SC two, the others one.
-- *Prototype assumption: three accounts (`ORG_ACCOUNT_LIMIT` in
-  `config.js`).*
+- SASO creates the first account (the president's). After that the
+  **president or the adviser** adds, edits and removes the organization's
+  members on **Members**, with position, program and college (CSPC's
+  colleges and programs, `CSPC_COLLEGES` in `config.js`). SASO can do the
+  same from **Manage Accounts**.
+- SASO can set a limit in **Settings** (*No limit* switch, or *Up to N
+  accounts*). Lowering it keeps existing accounts but stops new ones being
+  added.
+- Name, position, program and college are changed only by SASO, the
+  president or the adviser. A member edits their own email, contact number
+  and password on **My Profile**.
+
+### Official SASO forms (PDF)
+
+The Permission to Conduct is generated in SASO's own layouts and filled in
+from the proposal, so it no longer has to be copied by hand:
+CSPC-F-SASO-05 (on campus), CSPC-F-SASO-07 (off campus) and CSPC-F-SASO-59
+(requirements checklist). The proposal now asks for the nature of the
+activity, a co-responsible person and, off campus, the instructors joining and
+the transportation. Signatories are edited in **Settings**. Download from the
+activity page (*Permission to Conduct (PTC)*, then *Download Word*) or from the
+*Filled PTC* button beside the PTC requirement.
+
+Also generated from the proposal: the Responsibility Acceptance Slip
+(CSPC-F-SASO-14, required on and off campus) and, for off-campus activities,
+the CMO No. 63, s. 2017 documents: SASO's Order of Documentary Requirements
+(tabs A to K), the Certificate of Compliance, CHED's Report of Compliance and
+the Role of the Personnel-in-Charge. The off-campus PTC is the permit itself;
+the CMO 63 documents are the separate packet it lists as an attachment.
+
+Every form downloads as an **editable Word file (.docx)**, already filled in,
+so an officer can still correct or add to it before printing and signing
+(`assets/js/core/saso-docx.js`, built with the docx library). PDF and Print
+remain available on the documents page.
+
+### CHED and accreditation reports
+
+- **List of Student Activities**: SASO's workbook layout (header, columns,
+  month groups, a sheet per category), downloadable as Excel.
+- **Accreditation and Leveling Record**: per organization and academic year,
+  following CMO No. 9, s. 2013: documentary requirements, officers and
+  members, accomplishments, financial statement, plan of activities and
+  leveling indicators.
+- The Records Archive holds AY 2023-2024 and 2024-2025 from SASO's lists
+  (`data/activity-archive.js`, generated by `tools/convert-activity-lists.py`).
 
 ### 2. Three years of records for accreditation
 

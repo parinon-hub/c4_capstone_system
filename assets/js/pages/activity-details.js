@@ -91,6 +91,14 @@
               M.escapeHtml(org.acronym) + ' · ' + M.escapeHtml(activity.category || '-') + ' · ' +
               M.label(activity.venueType) +
             '</div>' +
+            (M.submittedByLine(activity)
+              ? '<div class="detail-edited detail-submitter"><i class="fa-solid fa-user-pen mr-1"></i>Submitted by: ' +
+                M.escapeHtml(M.submittedByLine(activity)) +
+                (activity.submittedAt ? ' · ' + M.formatDate(activity.submittedAt) : '') + '</div>'
+              : M.isImported(activity)
+                ? '<div class="detail-edited"><i class="fa-solid fa-table-list mr-1"></i>From the ' +
+                  M.escapeHtml(activity.source || 'SASO list of student activities') + '</div>'
+                : '') +
             (activity.lastEditedAt
               ? '<div class="detail-edited"><i class="fa-solid fa-pen-to-square mr-1"></i>Edited by ' +
                 M.escapeHtml(activity.lastEditedBy) +
@@ -173,7 +181,7 @@
     buttons.push('<a class="btn btn-outline-primary btn-sm mr-1 mb-1" href="' + docBase +
       '&doc=proposal"><i class="fa-solid fa-file-lines mr-1"></i>Activity Proposal</a>');
     buttons.push('<a class="btn btn-outline-primary btn-sm mr-1 mb-1" href="' + docBase +
-      '&doc=permit"><i class="fa-solid fa-stamp mr-1"></i>Permission to Conduct</a>');
+      '&doc=ptc"><i class="fa-solid fa-stamp mr-1"></i>Permission to Conduct (PTC)</a>');
     if (activity.eventStatus === C.EVENT.FINISHED) {
       buttons.push('<a class="btn btn-outline-primary btn-sm mr-1 mb-1" href="' + docBase +
         '&doc=terminal"><i class="fa-solid fa-file-circle-check mr-1"></i>Terminal Report</a>');
@@ -380,8 +388,10 @@
         field('Adviser', M.escapeHtml(org.adviser)) +
         field('Category', M.escapeHtml(activity.category)) +
         field('Venue', M.label(activity.venueType) + ': ' + M.escapeHtml(activity.venue)) +
-        field('Date', M.formatDateRange(activity.dateStart, activity.dateEnd)) +
-        field('Time', (activity.timeStart || '-') + ' to ' + (activity.timeEnd || '-')) +
+        field('Submitted by', M.submittedByLine(activity) ? M.escapeHtml(M.submittedByLine(activity)) : null) +
+        field('Nature of activity', natureText()) +
+        field('Date', M.escapeHtml(M.activityDateText(activity))) +
+        field('Time', activity.timeStart ? activity.timeStart + (activity.timeEnd ? ' to ' + activity.timeEnd : '') : null) +
         field('Expected participants', activity.expectedParticipants +
             (activity.participantDescription
               ? ' <span class="cell-sub">' + M.escapeHtml(activity.participantDescription) + '</span>' : '')) +
@@ -390,6 +400,16 @@
                 (activity.fundSource ? ' <span class="cell-sub">' +
                   M.escapeHtml(activity.fundSource) + '</span>' : '')
               : null) +
+        (activity.coResponsibleName
+          ? field('Co-responsible', M.escapeHtml(activity.coResponsibleName) +
+              (activity.coResponsiblePosition ? ' <span class="cell-sub">' + M.escapeHtml(activity.coResponsiblePosition) + '</span>' : ''))
+          : '') +
+        (activity.venueType === C.VENUE.OFF_CAMPUS
+          ? field('Instructors joining', M.escapeHtml(activity.instructors)) +
+            field('Transportation', transportText())
+          : '') +
+        (M.isImported(activity) && activity.sasoRemarks
+          ? field('SASO remarks', M.escapeHtml(activity.sasoRemarks), true) : '') +
         field('Academic year', (function () {
               var ay = M.academicYearOf(activity.dateStart);
               return 'AY ' + M.escapeHtml(ay) +
@@ -404,6 +424,28 @@
               : null, true) +
         field('Description', M.escapeHtml(activity.description), true) +
       '</dl></div></div>';
+  }
+
+  function natureText() {
+    if (!activity.natureType) { return null; }
+    return M.escapeHtml(activity.natureType === 'CURRICULAR' ? 'Curricular' : 'Non-curricular') +
+      (activity.natureItem ? ' <span class="cell-sub">' + M.escapeHtml(activity.natureItem) + '</span>' : '');
+  }
+
+  function transportText() {
+    if (!activity.transportType) { return null; }
+    var college = activity.transportType === 'COLLEGE';
+    return (college ? 'College vehicle' : 'Private vehicle') +
+      (activity.transportRate ? ' <span class="cell-sub">PHP ' + M.escapeHtml(activity.transportRate) +
+        (college ? ' per day' : ' per student') + '</span>' : '');
+  }
+
+  function importedCard() {
+    return '<div class="callout callout-info text-sm py-2"><i class="fa-solid fa-table-list mr-2"></i>' +
+      'This activity was recorded in SASO\'s list of student activities for AY ' +
+      M.escapeHtml(M.academicYearOf(activity.dateStart)) + ', before the system was in use. ' +
+      'It has no approval route or pre-approval requirements in the system; the post-activity ' +
+      'reports below show what SASO\'s list marks as submitted.</div>';
   }
 
   function historyCard() {
@@ -443,6 +485,12 @@
     /* Top to bottom: the stepper, the actions, the activity itself, then
        what it still needs. Paired cards fall back to full width when one
        of the pair has nothing to show. */
+    if (M.isImported(activity)) {
+      document.getElementById('detailRoot').innerHTML =
+        renderHeader() + importedCard() + infoCard() + postCard + history;
+      bind();
+      return;
+    }
     document.getElementById('detailRoot').innerHTML =
       renderHeader() + timeline() + actionBar() + infoCard() +
       pair(preCard, route, 'col-lg-8', 'col-lg-4') +

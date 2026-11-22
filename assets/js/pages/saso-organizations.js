@@ -49,7 +49,7 @@
       '<div class="card-body p-0" id="tableHost"></div>' +
     '</div>';
 
-  var ay = M.db().organizations[0];
+  var ay = M.organizations()[0];
   document.getElementById('ayLabel').textContent =
     'Academic Year ' + (ay ? ay.accreditationAY : '');
 
@@ -132,7 +132,7 @@
 
   function renderTiles() {
     var a = M.accreditationSummary();
-    var profiles = M.db().organizations.map(profile);
+    var profiles = M.organizations().map(profile);
     var withOutstanding = profiles.filter(function (p) { return p.outstanding > 0; }).length;
     var withOverdue = profiles.filter(function (p) { return p.overdue > 0; }).length;
 
@@ -159,7 +159,7 @@
   function rows() {
     var q = state.search.toLowerCase();
 
-    var list = M.db().organizations.map(profile).filter(function (p) {
+    var list = M.organizations().map(profile).filter(function (p) {
       var o = p.org;
       if (state.level && o.accreditationLevel !== state.level) { return false; }
       if (state.compliance === 'outstanding' && !p.outstanding) { return false; }

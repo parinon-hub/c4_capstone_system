@@ -102,7 +102,7 @@
     '</div>';
 
   if (isSaso) {
-    L.fillSelect('fOrg', M.db().organizations.map(function (o) {
+    L.fillSelect('fOrg', M.organizations().map(function (o) {
       return { value: o.id, label: o.acronym };
     }), 'All organizations');
   }

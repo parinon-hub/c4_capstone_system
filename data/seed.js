@@ -61,28 +61,75 @@ SASO.buildSeed = function () {
 
   var users = [
     { id:'usr-1', username:'head', password:'head123', name:'Head',
-      position:'Head SASO Administrative Aide II', role:C.ROLE.SASO, organizationId:null },
+      position:'Head SASO Administrative Aide II', role:C.ROLE.SASO, organizationId:null,
+      email:'saso.head@example.com', contact:'(054) 288-4421 loc. 122' },
     { id:'usr-2', username:'admin', password:'admin123', name:'Admin',
-      position:'Administrative Aide II', role:C.ROLE.SASO, organizationId:null },
+      position:'Administrative Aide II', role:C.ROLE.SASO, organizationId:null,
+      email:'saso.admin@example.com', contact:'(054) 288-4421 loc. 122' },
     { id:'usr-8', username:'admin1', password:'admin1123', name:'Admin 1',
-      position:'Administrative Aide II', role:C.ROLE.SASO, organizationId:null },
+      position:'Administrative Aide II', role:C.ROLE.SASO, organizationId:null,
+      email:'saso.admin1@example.com', contact:'(054) 288-4421 loc. 122' },
     { id:'usr-9', username:'admin2', password:'admin2123', name:'Admin 2',
-      position:'Administrative Aide III', role:C.ROLE.SASO, organizationId:null },
+      position:'Administrative Aide III', role:C.ROLE.SASO, organizationId:null,
+      email:'saso.admin2@example.com', contact:'(054) 288-4421 loc. 122' },
 
-    { id:'usr-3', username:'jpcs', password:'jpcs123', name:'K. Mercado', position:'President, JPCS - CSPC',      role:C.ROLE.ORG, organizationId:'org-1' },
-    { id:'usr-4', username:'ccs',  password:'ccs123',  name:'N. Ramos',   position:'Secretary, CCS-SC',           role:C.ROLE.ORG, organizationId:'org-2' },
-    { id:'usr-5', username:'chs',  password:'chs123',  name:'B. Alcantara',position:'President, CHS-SC',          role:C.ROLE.ORG, organizationId:'org-3' },
-    { id:'usr-6', username:'ssc',  password:'ssc123',  name:'M. Tanaka',  position:'President, CSPC-SSC',         role:C.ROLE.ORG, organizationId:'org-4' },
-    { id:'usr-7', username:'cas',  password:'cas123',  name:'T. Lorenzo', position:'Secretary, CAS-CSC',          role:C.ROLE.ORG, organizationId:'org-5' },
+    /* Personal accounts (panel RSC). The old shared logins (jpcs, ccs, chs,
+       ssc, cas) became the personal account of the officer who used them.
+       Every organization has a president, who with the adviser manages the
+       organization's members. There is no limit on the number of accounts
+       unless SASO sets one in Settings. All people are fictional. */
 
-    /* Panel RSC: an organization holds up to three accounts (Settings), one per
-       person. JPCS has all three (adviser, president, secretary); CCS-SC two. */
-    { id:'usr-10', username:'jpcs.adviser', password:'jpcs123', name:'Prof. R. Almeda', position:'Adviser, JPCS - CSPC',
-      email:'ralmeda@example.com', role:C.ROLE.ORG, organizationId:'org-1' },
-    { id:'usr-11', username:'jpcs.sec', password:'jpcs123', name:'A. Dimaano', position:'Secretary, JPCS - CSPC',
-      email:'adimaano@example.com', role:C.ROLE.ORG, organizationId:'org-1' },
-    { id:'usr-12', username:'ccs.adviser', password:'ccs123', name:'Prof. M. Bernales', position:'Adviser, CCS-SC',
-      email:'mbernales@example.com', role:C.ROLE.ORG, organizationId:'org-2' }
+    /* JPCS - CSPC (College of Computer Studies) */
+    { id:'usr-3', username:'kmercado', password:'jpcs123', name:'K. Mercado', position:'President, JPCS - CSPC',
+      program:'Bachelor of Science in Information Technology', college:'College of Computer Studies',
+      email:'kmercado@example.com', contact:'0917 100 0003', role:C.ROLE.ORG, organizationId:'org-1' },
+    { id:'usr-10', username:'ralmeda', password:'jpcs123', name:'Prof. R. Almeda', position:'Adviser, JPCS - CSPC',
+      program:null, college:'College of Computer Studies',
+      email:'ralmeda@example.com', contact:'0917 100 0010', role:C.ROLE.ORG, organizationId:'org-1' },
+    { id:'usr-11', username:'adimaano', password:'jpcs123', name:'A. Dimaano', position:'Secretary, JPCS - CSPC',
+      program:'Bachelor of Science in Information Systems', college:'College of Computer Studies',
+      email:'adimaano@example.com', contact:'0917 100 0011', role:C.ROLE.ORG, organizationId:'org-1' },
+    { id:'usr-13', username:'lfajardo', password:'jpcs123', name:'L. Fajardo', position:'Vice President, JPCS - CSPC',
+      program:'Bachelor of Science in Computer Science', college:'College of Computer Studies',
+      email:'lfajardo@example.com', contact:'0917 100 0013', role:C.ROLE.ORG, organizationId:'org-1' },
+    { id:'usr-14', username:'jsantos', password:'jpcs123', name:'J. Santos', position:'Member, JPCS - CSPC',
+      program:'Bachelor of Science in Computer Science', college:'College of Computer Studies',
+      email:'jsantos@example.com', contact:'0917 100 0014', role:C.ROLE.ORG, organizationId:'org-1' },
+
+    /* CCS-SC */
+    { id:'usr-15', username:'jbautista', password:'ccs123', name:'J. Bautista', position:'President, CCS-SC',
+      program:'Bachelor of Science in Information Technology', college:'College of Computer Studies',
+      email:'jbautista@example.com', contact:'0917 100 0015', role:C.ROLE.ORG, organizationId:'org-2' },
+    { id:'usr-4', username:'nramos', password:'ccs123', name:'N. Ramos', position:'Secretary, CCS-SC',
+      program:'Bachelor of Science in Computer Science', college:'College of Computer Studies',
+      email:'nramos@example.com', contact:'0917 100 0004', role:C.ROLE.ORG, organizationId:'org-2' },
+    { id:'usr-12', username:'mbernales', password:'ccs123', name:'Prof. M. Bernales', position:'Adviser, CCS-SC',
+      program:null, college:'College of Computer Studies',
+      email:'mbernales@example.com', contact:'0917 100 0012', role:C.ROLE.ORG, organizationId:'org-2' },
+
+    /* CHS-SC */
+    { id:'usr-5', username:'balcantara', password:'chs123', name:'B. Alcantara', position:'President, CHS-SC',
+      program:'Bachelor of Science in Nursing', college:'College of Health Sciences',
+      email:'balcantara@example.com', contact:'0917 100 0005', role:C.ROLE.ORG, organizationId:'org-3' },
+    { id:'usr-16', username:'gpenaflor', password:'chs123', name:'G. Pe\u00f1aflor', position:'Treasurer, CHS-SC',
+      program:'Bachelor of Science in Midwifery', college:'College of Health Sciences',
+      email:'gpenaflor@example.com', contact:'0917 100 0016', role:C.ROLE.ORG, organizationId:'org-3' },
+
+    /* CSPC-SSC */
+    { id:'usr-6', username:'mtanaka', password:'ssc123', name:'M. Tanaka', position:'President, CSPC-SSC',
+      program:'Bachelor of Science in Civil Engineering', college:'College of Engineering and Architecture',
+      email:'mtanaka@example.com', contact:'0917 100 0006', role:C.ROLE.ORG, organizationId:'org-4' },
+    { id:'usr-17', username:'eabad', password:'ssc123', name:'E. Abad', position:'Secretary, CSPC-SSC',
+      program:'Bachelor of Science in Office Administration', college:'College of Tourism, Hospitality and Business Management',
+      email:'eabad@example.com', contact:'0917 100 0017', role:C.ROLE.ORG, organizationId:'org-4' },
+
+    /* CAS-CSC */
+    { id:'usr-18', username:'rcastillo', password:'cas123', name:'R. Castillo', position:'President, CAS-CSC',
+      program:'Bachelor of Science in Development Communication', college:'College of Arts and Sciences',
+      email:'rcastillo@example.com', contact:'0917 100 0018', role:C.ROLE.ORG, organizationId:'org-5' },
+    { id:'usr-7', username:'tlorenzo', password:'cas123', name:'T. Lorenzo', position:'Secretary, CAS-CSC',
+      program:'Bachelor of Arts in English Language Studies', college:'College of Arts and Sciences',
+      email:'tlorenzo@example.com', contact:'0917 100 0007', role:C.ROLE.ORG, organizationId:'org-5' }
   ];
 
   var activities = [], requirements = [], comments = [],
@@ -91,12 +138,12 @@ SASO.buildSeed = function () {
   /* ---- builders ----------------------------------------------------------- */
 
   function addRequirements(activityId, venueType, phase, fallback, states, remarksMap) {
-    var tpl;
+    var tpl, T = C.REQUIREMENT_TEMPLATES;
     if (phase === C.PHASE.PRE_APPROVAL) {
-      tpl = C.REQUIREMENT_TEMPLATES.PRE_APPROVAL_COMMON.slice();
-      if (venueType === C.VENUE.OFF_CAMPUS) {
-        tpl = tpl.concat(C.REQUIREMENT_TEMPLATES.PRE_APPROVAL_OFF_CAMPUS_EXTRA);
-      }
+      /* Same checklist as SASO.events.preApprovalTemplate(). */
+      tpl = T.PRE_APPROVAL_COMMON.concat(T.PRE_APPROVAL_BUDGET);
+      if (venueType === C.VENUE.ON_CAMPUS) { tpl = tpl.concat(T.PRE_APPROVAL_ON_CAMPUS_EXTRA); }
+      if (venueType === C.VENUE.OFF_CAMPUS) { tpl = tpl.concat(T.PRE_APPROVAL_OFF_CAMPUS_EXTRA); }
     } else {
       tpl = C.REQUIREMENT_TEMPLATES.POST_ACTIVITY.slice();
     }
@@ -138,7 +185,19 @@ SASO.buildSeed = function () {
       timestamp:hoursAgo(hrs), read:!!read });
   }
 
+  /* Who submitted each demo proposal, and the co-responsible officer named on
+     its Permission to Conduct. */
+  var SUBMITTER = {
+    'org-1': ['usr-3', 'K. Mercado', 'President', 'A. Dimaano', 'Secretary'],
+    'org-2': ['usr-4', 'N. Ramos', 'Secretary', 'J. Bautista', 'President'],
+    'org-3': ['usr-5', 'B. Alcantara', 'President', 'G. Pe\u00f1aflor', 'Treasurer'],
+    'org-4': ['usr-6', 'M. Tanaka', 'President', 'E. Abad', 'Secretary'],
+    'org-5': ['usr-7', 'T. Lorenzo', 'Secretary', 'R. Castillo', 'President']
+  };
+
   function activity(o) {
+    var sub = SUBMITTER[o.org] || [];
+    if (o.by) { sub = o.by; }
     activities.push({
       id:o.id, organizationId:o.org, title:o.title, category:o.category,
       venueType:o.venueType, venue:o.venue,
@@ -150,7 +209,13 @@ SASO.buildSeed = function () {
       proposalStatus:o.proposalStatus, eventStatus:o.eventStatus,
       reportDeadline:o.reportDeadline||null,
       createdAt:o.createdAt, submittedAt:o.submittedAt||null,
-      approvedAt:o.approvedAt||null, updatedAt:o.updatedAt
+      approvedAt:o.approvedAt||null, updatedAt:o.updatedAt,
+      submittedBy: o.submittedAt && sub[0] ? { userId:sub[0], name:sub[1], position:sub[2] } : null,
+      natureType: o.natureType || 'NON_CURRICULAR',
+      natureItem: o.natureItem || C.CATEGORY_NATURE[o.category] || null,
+      coResponsibleName: sub[3] || null, coResponsiblePosition: sub[4] || null,
+      instructors: o.instructors || null,
+      transportType: o.transportType || null, transportRate: o.transportRate || null
     });
   }
 
@@ -221,6 +286,9 @@ SASO.buildSeed = function () {
   notify(C.ROLE.SASO,null,'act-3',C.NOTIF.COMMENT_POSTED,'JPCS - CSPC replied on JPCS General Assembly.',21,true);
 
   activity({ id:'act-11', org:'org-1', title:'JPCS Industry Immersion Visit', category:'Life Skills',
+    by:['usr-11', 'A. Dimaano', 'Secretary', 'K. Mercado', 'President'],
+    natureType:'CURRICULAR', natureItem:'Educational Tours/Field trips',
+    instructors:'Prof. R. Almeda; Prof. T. Vergara', transportType:'COLLEGE', transportRate:'3,500',
     venueType:C.VENUE.OFF_CAMPUS, venue:'Naga City IT Park', dateStart:dateOnly(-62), participants:45,
     participantDescription:'Third and fourth year CCS students', budget:'22,000', fundSource:'JPCS Fund, participant share',
     rationale:'Members requested exposure to current industry practice from local practitioners.',
@@ -271,6 +339,7 @@ SASO.buildSeed = function () {
   /* ===================== CHS-SC =========================================== */
 
   activity({ id:'act-6', org:'org-3', title:'Health Awareness Week', category:'Volunteer',
+    instructors:'Dr. L. Sarmiento', transportType:'PRIVATE', transportRate:'50',
     venueType:C.VENUE.OFF_CAMPUS, venue:'CSPC Quadrangle and Barangay San Jose',
     dateStart:dateOnly(-9), dateEnd:dateOnly(-5), participants:500,
     participantDescription:'CHS students and barangay residents', budget:'48,000', fundSource:'CHS-SC Fund, external partners',
@@ -433,7 +502,7 @@ SASO.buildSeed = function () {
   outcome('act-5', 141,
     'Twenty-four capstone groups presented across three parallel sessions. Faculty panels gave written feedback to each group.',
     'Session B started 30 minutes late because of a projector fault in AVR 1.', 650);
-  reportComment('act-5', 'Narrative Report with Documentation', U.ccs,
+  reportComment('act-5', 'Narrative Report with Documentation', U.nramos,
     'Good day, Ma\u2019am. Attached are the narrative report, evaluation summary, financial report and liquidation for the Research Colloquium.', 660);
   notify(C.ROLE.SASO,null,'act-5',C.NOTIF.TR_SUBMITTED,'CCS-SC submitted Narrative Report with Documentation for CCS Research Colloquium.',660,true);
   notify(C.ROLE.SASO,null,'act-5',C.NOTIF.TR_SUBMITTED,'CCS-SC submitted Financial Report for CCS Research Colloquium.',640,true);
@@ -457,7 +526,7 @@ SASO.buildSeed = function () {
     null, 460);
   reportComment('act-9', 'Financial Report', U.admin,
     'The Financial Report lists PHP 1,500 for sound system rental but no official receipt is attached. Please resubmit with the receipt.', 400);
-  reportComment('act-9', 'Financial Report', U.cas,
+  reportComment('act-9', 'Financial Report', U.tlorenzo,
     'Noted, Sir. The supplier has issued the receipt; we resubmitted the report together with the liquidation.', 330);
   notify(C.ROLE.ORG,'org-5','act-9',C.NOTIF.TR_RETURNED,'Financial Report for CAS Literary Night needs revision: attach the official receipt for sound system rental.',400,true);
   notify(C.ROLE.SASO,null,'act-9',C.NOTIF.TR_SUBMITTED,'CAS-CSC resubmitted Financial Report for CAS Literary Night.',330,true);
@@ -495,7 +564,7 @@ SASO.buildSeed = function () {
   outcome('act-6', 468,
     'Free blood pressure, blood sugar and BMI screening for 312 residents of Barangay San Jose, plus four health talks on campus.',
     'The outreach day was shortened by two hours due to rain.', 65);
-  reportComment('act-6', 'Narrative Report with Documentation', U.chs,
+  reportComment('act-6', 'Narrative Report with Documentation', U.balcantara,
     'Good morning, Ma\u2019am. We have submitted the narrative report. The evaluation summary follows once all forms are encoded.', 70);
   reportComment('act-6', 'Financial Report', U.admin,
     'Returned: the total does not match the receipts. Please reconcile before the deadline today.', 20);
@@ -583,52 +652,46 @@ SASO.buildSeed = function () {
     description:'Half-day tree planting with the municipal environment office.',
     summary:'One hundred twelve volunteers planted 520 seedlings with the municipal environment office.' });
 
-  /* Two academic years ago */
-  pastActivity({ id:'act-h7', org:'org-1', days:-760, title:'JPCS Hackathon', category:'Life Skills',
-    venue:'CCS Computer Laboratories 1 and 2', participants:90, actual:84, who:'CCS students', budget:'12,500', fund:'JPCS - CSPC Chapter Fund', length:1,
-    rationale:'The chapter holds a yearly hackathon to build problem-solving and teamwork.',
-    objectives:['Build working prototypes for campus problems in 24 hours'],
-    description:'Twenty-four hour hackathon with mentors and judging.',
-    summary:'Eighty-four participants in 18 teams; three prototypes adopted by the college.' });
-  pastActivity({ id:'act-h8', org:'org-2', days:-790, title:'CCS Freshmen Orientation', category:'Leadership',
-    venue:'CSPC AVR 1', participants:300, actual:288, who:'First-year CCS students', budget:'4,000', fund:'CCS-SC Fund',
-    rationale:'First-year students need an orientation on college policies and organizations.',
-    objectives:['Orient first-year students on college policies'],
-    description:'Half-day orientation program.',
-    summary:'Two hundred eighty-eight first-year students oriented.' });
-  pastActivity({ id:'act-h9', org:'org-3', days:-720, title:'Community Health Caravan', category:'Volunteer',
-    venueType:C.VENUE.OFF_CAMPUS, venue:'Barangay Sta. Cruz, Nabua', participants:300, actual:322, who:'CHS students and barangay residents',
-    budget:'35,000', fund:'CHS-SC Fund, external partners',
-    rationale:'The college conducts community health outreach as part of its extension program.',
-    objectives:['Provide free health screening to barangay residents'],
-    description:'One-day caravan with screening and health talks.',
-    summary:'Three hundred twenty-two residents screened; 41 referred to the rural health unit.' });
-  pastActivity({ id:'act-h10', org:'org-4', days:-745, title:'SSC Intramural Sportsfest', category:'Sports',
-    venue:'CSPC Sports Complex', participants:1100, actual:1065, who:'All colleges', budget:'130,000', fund:'CSPC-SSC Fund', length:4,
-    rationale:'The annual intramurals are a mandated institutional activity promoting student wellness.',
-    objectives:['Promote physical wellness and sportsmanship'],
-    description:'Five-day institution-wide meet.',
-    summary:'One thousand sixty-five athletes and officials across nine sporting events.' });
-  pastActivity({ id:'act-h11', org:'org-5', days:-700, title:'CAS Literary Folio Launch', category:'Student Publication',
-    venue:'CSPC AVR 2', participants:160, actual:149, who:'CAS students', budget:'8,000', fund:'CAS-CSC Fund',
-    rationale:'The council publishes an annual folio of student writing.',
-    objectives:['Launch the annual student literary folio'],
-    description:'Evening launch with readings by contributors.',
-    summary:'Folio of 46 works launched; 149 attendees.' });
+  /* ---- AY 2023-2024 and AY 2024-2025: SASO's own records ---------------------
+     The two earlier school years come from SASO's workbooks "List of Student
+     Activities 2023 (July - December)" and "... 2024 (July - December)"
+     (data/activity-archive.js). They are records only (imported): they show
+     in the Records Archive and the reports, never in the live queues.
+     Organizations that are not on the current roster are added as
+     archive-only records; JPCS, CCS-SC, CHS-SC, CSPC-SSC and CAS-CSC keep
+     their own ids, so their three-year history is complete. */
 
-  /* Three academic years ago */
-  pastActivity({ id:'act-h12', org:'org-1', days:-1110, title:'JPCS Tech Talk Series', category:'Life Skills',
-    venue:'CSPC AVR 1', participants:150, actual:141, who:'CCS students', budget:'3,000', fund:'JPCS - CSPC Chapter Fund',
-    rationale:'Members asked for talks from alumni working in the industry.',
-    objectives:['Connect members with alumni practitioners'],
-    description:'Afternoon series of three talks by alumni.',
-    summary:'Three alumni talks attended by 141 members.' });
-  pastActivity({ id:'act-h13', org:'org-4', days:-1080, title:'General Student Assembly', category:'Leadership',
-    venue:'CSPC Gymnasium', participants:1500, actual:1410, who:'All students', budget:'10,000', fund:'CSPC-SSC Fund',
-    rationale:'The council reports to the student body once a year.',
-    objectives:['Present the council accomplishment report to the student body'],
-    description:'Morning assembly with an open forum.',
-    summary:'One thousand four hundred ten students attended; the accomplishment report was presented.' });
+  (SASO.ARCHIVE ? SASO.ARCHIVE.orgs : []).forEach(function (o) {
+    organizations.push({ id:o.id, name:o.name, acronym:o.acronym, entityType:C.ENTITY[o.entityType] || C.ENTITY.STUDENT_ORG,
+      college:o.college || '', adviser:'', accreditationLevel:null, accreditationType:C.ACCREDITATION_TYPE.NOT_APPLICABLE,
+      accreditationAY:null, accreditationExpires:null, archiveOnly:true });
+  });
+
+  (SASO.ARCHIVE ? SASO.ARCHIVE.activities : []).forEach(function (r) {
+    var endDay = new Date(r.dateEnd + 'T09:00:00');
+    var deadline = new Date(endDay.getTime()); deadline.setDate(deadline.getDate() + C.TERMINAL_REPORT_DEADLINE_DAYS);
+    activities.push({
+      id:r.id, organizationId:r.org, title:r.title, category:r.category, categorySource:r.categorySource,
+      venueType:r.venueType, venue:r.venue, dateStart:r.dateStart, dateEnd:r.dateEnd, dateText:r.dateText || null,
+      timeStart:r.timeStart || null, timeEnd:null,
+      expectedParticipants:r.participants || null, participantDescription:r.who || null,
+      rationale:null, objectives:[], description:null,
+      budget:r.budget || null, fundSource:r.fund || null, sasoRemarks:r.remarks || null,
+      proposalStatus:C.PROPOSAL.APPROVED, eventStatus:C.EVENT.FINISHED,
+      reportDeadline:deadline.toISOString().slice(0, 10),
+      createdAt:r.dateStart + 'T08:00:00', submittedAt:null, approvedAt:null, updatedAt:r.dateEnd + 'T17:00:00',
+      submittedBy:null, sponsor:r.sponsor, imported:true, source:r.source
+    });
+    Object.keys(r.reports).forEach(function (name) {
+      var st = r.reports[name][0], on = r.reports[name][1];
+      if (st === 'NA') { return; }   /* "N/A" in SASO's list: not required for this activity */
+      var ok = st === 'APPROVED';
+      requirements.push({ id:nextId('req'), activityId:r.id, phase:C.PHASE.POST_ACTIVITY, name:name,
+        mandatory:true, source:'SASO', status:ok ? C.REQUIREMENT.APPROVED : C.REQUIREMENT.NOT_SUBMITTED,
+        fileName:null, submittedAt:ok ? (on || null) : null, reviewedAt:ok ? (on || null) : null,
+        reviewedBy:ok ? 'SASO' : null, remarks:null, requestedBySaso:false });
+    });
+  });
 
   /* Past its retention period: kept and flagged, never deleted automatically. */
   pastActivity({ id:'act-h14', org:'org-2', days:-1650, title:'CCS IT Quiz Bee', category:'Life Skills',
@@ -767,7 +830,7 @@ SASO.buildSeed = function () {
   /* Declined: the chapter already has an account. */
   var dup = accountRequest({ n:'0001', status:C.ACCOUNT_REQUEST.DECLINED, hrs:240, reviewedHrs:220,
     reviewedBy:'C. Bermudo',
-    remarks:'JPCS - CSPC is already registered (username jpcs). Officer accounts are added by SASO under the existing organization, up to three per organization. Please ask SASO to add yours instead of filing a new organization request.',
+    remarks:'JPCS - CSPC is already registered (username jpcs). Each officer and member has a personal account under the existing organization: ask your president or SASO to add yours instead of filing a new organization request.',
     name:'Junior Philippine Computer Society - CSPC Chapter', acronym:'JPCS-CSPC2', college:'College of Computer Studies',
     adviser:'Prof. R. Almeda', officer:'L. Fajardo', position:'Vice President', email:'lfajardo@example.com',
     username:'jpcs.vp', password:'request123', proof:'JPCS_Recognition_2025.pdf' });
@@ -787,7 +850,7 @@ SASO.buildSeed = function () {
   notifyManagers(C.NOTIF.ACCOUNT_REQUESTED, 'JTPS (Junior Tourism Professionals Society) requested an organization account: ' + tour.ref + '.', 5, tour.id, null);
 
   return {
-    meta:{ seededAt:new Date().toISOString(), version:6 },
+    meta:{ seededAt:new Date().toISOString(), version:8 },
     /* Office policy values. Seeded from what SASO stated; adjustable in
        Settings so the prototype can be shown against a different policy. */
     settings:{
@@ -795,7 +858,8 @@ SASO.buildSeed = function () {
       proposalAlertDays: C.PROPOSAL_WAITING_ALERT_DAYS,
       accreditationAlertDays: 60,
       orgAccountLimit: C.ORG_ACCOUNT_LIMIT,
-      retentionYears: C.RECORD_RETENTION_YEARS
+      retentionYears: C.RECORD_RETENTION_YEARS,
+      signatories: JSON.parse(JSON.stringify(C.SIGNATORIES))
     },
     organizations:organizations, users:users, activities:activities,
     requirements:requirements, comments:comments, notifications:notifications,

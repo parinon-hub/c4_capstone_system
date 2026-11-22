@@ -67,7 +67,7 @@
     ],
     filters: [
       { key: 'org', label: 'Organization', all: 'All organizations', resets: ['activity'],
-        options: M.db().organizations.map(function (o) { return { value: o.id, label: o.acronym }; }) },
+        options: M.organizations().map(function (o) { return { value: o.id, label: o.acronym }; }) },
       /* The activity list narrows to the chosen organization. */
       { key: 'activity', label: 'Activity', all: 'All activities',
         options: function () {

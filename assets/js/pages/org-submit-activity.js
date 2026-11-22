@@ -67,6 +67,19 @@
     return '<option value="' + C.VENUE[k] + '">' + C.LABEL[C.VENUE[k]] + '</option>';
   }).join('');
 
+  /* ---- Permission to Conduct details -------------------------------------------- */
+
+  var ptc = null;
+  function renderPtc(a) {
+    document.getElementById('ptcHost').innerHTML = SASO.ptcFields.html('w', a || { venueType: el.venueType.value });
+    ptc = SASO.ptcFields.bind('w', {
+      category: function () { return el.category.value; },
+      venueType: function () { return el.venueType.value; }
+    });
+    ptc.refresh();
+  }
+  el.category.addEventListener('change', function () { if (ptc) { ptc.refresh(); } });
+
   /* ---- objectives ---------------------------------------------------------- */
 
   function renderObjectives() {
@@ -198,7 +211,8 @@
   /* ---- form <-> state ------------------------------------------------------- */
 
   function readForm() {
-    return {
+    var extra = SASO.ptcFields.read('w');
+    var form = {
       title: el.title.value.trim(),
       category: el.category.value,
       venueType: el.venueType.value,
@@ -215,6 +229,8 @@
       budget: el.budget.value.trim() || null,
       fundSource: el.fundSource.value.trim() || null
     };
+    Object.keys(extra).forEach(function (k) { form[k] = extra[k]; });
+    return form;
   }
 
   function fillForm(a) {
@@ -234,6 +250,7 @@
     el.fundSource.value = a.fundSource || '';
     objectives = (a.objectives && a.objectives.length) ? a.objectives.slice() : [''];
     renderObjectives();
+    renderPtc(a);
   }
 
   /* ---- validation ------------------------------------------------------------ */
@@ -360,6 +377,7 @@
   /* Changing the venue type rebuilds the checklist. */
   el.venueType.addEventListener('change', function () {
     renderRoute();
+    if (ptc) { ptc.refresh(); }
     if (draft) {
       SASO.events.syncRequirements(draft.id, el.venueType.value);
       draft.venueType = el.venueType.value;
@@ -404,6 +422,7 @@
   } else {
     el.venueType.value = C.VENUE.ON_CAMPUS;
     renderObjectives();
+    renderPtc(null);
   }
 
   renderRoute();

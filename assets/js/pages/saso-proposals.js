@@ -103,7 +103,7 @@
     ],
     filters: [
       { key: 'org', label: 'Organization', all: 'All organizations',
-        options: M.db().organizations.map(function (o) { return { value: o.id, label: o.acronym }; }) },
+        options: M.organizations().map(function (o) { return { value: o.id, label: o.acronym }; }) },
       /* "In pipeline" only offers the statuses still moving toward approval. */
       { key: 'status', label: 'Status', all: 'All statuses',
         options: function () {
@@ -227,7 +227,7 @@
           '<td><a href="activity-details.html?id=' + a.id + '" class="cell-primary">' +
             M.escapeHtml(a.title) + '</a>' +
             '<span class="cell-sub">' + M.escapeHtml(a.category || '-') + ' · ' +
-            M.label(a.venueType) + '</span></td>' +
+            M.label(a.venueType) + '</span>' + M.submittedByHtml(a) + '</td>' +
           '<td class="text-nowrap text-muted text-sm">' +
             (a.submittedAt ? M.formatDate(a.submittedAt) : '-') + '</td>' +
           '<td class="text-nowrap">' + M.formatDate(L.pickedDate(a, state)) + '</td>' +

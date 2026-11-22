@@ -147,6 +147,7 @@ SASO.proposalActions = (function () {
                 textarea('eObjectives', (a.objectives || []).join('\n'), 3), 12) +
               field('eDescription', 'Description', textarea('eDescription', a.description, 2), 12) +
             '</div>' +
+            (SASO.ptcFields ? SASO.ptcFields.html('e', a, true) : '') +
             '<p class="text-sm text-muted mb-3" id="eVenueNote"></p>' +
             '<div class="form-group mb-0">' +
               '<label for="eReason">Reason for the change' +
@@ -171,6 +172,14 @@ SASO.proposalActions = (function () {
 
     /* Explain the requirement consequence of changing venue type. */
     var venueNote = document.getElementById('eVenueNote');
+    var ptc = SASO.ptcFields ? SASO.ptcFields.bind('e', {
+      category: function () { return document.getElementById('eCategory').value; },
+      venueType: function () { return document.getElementById('eVenueType').value; }
+    }) : null;
+    if (ptc) {
+      document.getElementById('eCategory').addEventListener('change', ptc.refresh);
+      document.getElementById('eVenueType').addEventListener('change', ptc.refresh);
+    }
     document.getElementById('eVenueType').addEventListener('change', function () {
       var toOff = this.value === C.VENUE.OFF_CAMPUS;
       var wasOff = a.venueType === C.VENUE.OFF_CAMPUS;
@@ -213,7 +222,7 @@ SASO.proposalActions = (function () {
       }
 
       var participants = parseInt(val('eParticipants'), 10);
-      var result = E.editProposal(activityId, {
+      var changes = {
         title: val('eTitle'),
         category: val('eCategory'),
         venueType: val('eVenueType'),
@@ -231,7 +240,12 @@ SASO.proposalActions = (function () {
           .map(function (o) { return o.trim(); })
           .filter(function (o) { return o.length; }),
         description: val('eDescription')
-      }, reason);
+      };
+      if (SASO.ptcFields) {
+        var extra = SASO.ptcFields.read('e');
+        Object.keys(extra).forEach(function (k) { changes[k] = extra[k]; });
+      }
+      var result = E.editProposal(activityId, changes, reason);
 
       $m.modal('hide');
       if (!result) {

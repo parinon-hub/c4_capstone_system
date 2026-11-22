@@ -25,7 +25,8 @@ SASO.model = (function () {
     proposalAlertDays: C.PROPOSAL_WAITING_ALERT_DAYS,
     accreditationAlertDays: 60,
     orgAccountLimit: C.ORG_ACCOUNT_LIMIT,
-    retentionYears: C.RECORD_RETENTION_YEARS
+    retentionYears: C.RECORD_RETENTION_YEARS,
+    signatories: C.SIGNATORIES
   };
 
   function settings() {
@@ -51,6 +52,21 @@ SASO.model = (function () {
     return current;
   }
 
+  /* The roster: organizations SASO currently recognizes. Organizations that
+     appear only in the past lists of student activities (archiveOnly) are
+     kept for their records but are not on the roster. */
+  function organizations(opts) {
+    var all = db().organizations;
+    return opts && opts.all ? all.slice() : all.filter(function (o) { return !o.archiveOnly; });
+  }
+
+  /* Organizations with records in an academic year, plus the roster. */
+  function organizationsForYear(ay) {
+    var ids = {};
+    activitiesInYear(ay).forEach(function (a) { ids[a.organizationId] = true; });
+    return db().organizations.filter(function (o) { return !o.archiveOnly || ids[o.id]; });
+  }
+
   function orgById(id) {
     return db().organizations.filter(function (o) { return o.id === id; })[0] || null;
   }
@@ -68,6 +84,7 @@ SASO.model = (function () {
 
   function accreditationLabel(org) {
     if (!org) { return '-'; }
+    if (!org.accreditationLevel) { return 'Not on file'; }
     if (org.accreditationLevel === C.ACCREDITATION_LEVEL.RECOGNIZED) {
       return C.LABEL.RECOGNIZED;
     }
@@ -80,7 +97,8 @@ SASO.model = (function () {
   }
 
   function isAccredited(org) {
-    return !!org && org.accreditationLevel !== C.ACCREDITATION_LEVEL.RECOGNIZED;
+    return !!org && !!org.accreditationLevel &&
+      org.accreditationLevel !== C.ACCREDITATION_LEVEL.RECOGNIZED;
   }
 
   /* BR-16 — an entity may request an activity if it appears on the SASO
@@ -109,7 +127,7 @@ SASO.model = (function () {
 
   /* Counts for the SASO dashboard strip. */
   function accreditationSummary() {
-    var orgs = db().organizations;
+    var orgs = organizations();
     var byLevel = {};
     Object.keys(C.ACCREDITATION_LEVEL).forEach(function (k) { byLevel[k] = 0; });
     orgs.forEach(function (o) { byLevel[o.accreditationLevel] += 1; });
@@ -131,11 +149,19 @@ SASO.model = (function () {
     return db().activities.filter(function (a) { return a.id === id; })[0] || null;
   }
 
+  /* Activities copied from SASO's past lists of student activities are
+     records only: they never enter the live queues (proposals, requirements,
+     terminal reports, dashboards). They are read through the Records Archive
+     and the reports, which use everyActivity() and activitiesInYear(). */
+  function isImported(activity) { return !!(activity && activity.imported); }
+
   function activitiesFor(orgId) {
-    return db().activities.filter(function (a) { return a.organizationId === orgId; });
+    return db().activities.filter(function (a) { return a.organizationId === orgId && !a.imported; });
   }
 
-  function allActivities() { return db().activities.slice(); }
+  function allActivities() { return db().activities.filter(function (a) { return !a.imported; }); }
+
+  function everyActivity() { return db().activities.slice(); }
 
   /* Every requirement in the system, joined to its activity and organization.
      This is the view the cross-activity Requirements module works from. */
@@ -147,7 +173,9 @@ SASO.model = (function () {
         activity: act,
         organization: act ? orgById(act.organizationId) : null
       };
-    }).filter(function (row) { return !!row.activity && !!row.organization; });
+    }).filter(function (row) {
+      return !!row.activity && !!row.organization && !row.activity.imported;
+    });
   }
 
   /* Requirements SASO is waiting on, or the organization still owes. */
@@ -375,7 +403,7 @@ SASO.model = (function () {
     var stages = countByStage(acts);
 
     return {
-      organizations: db().organizations.length,
+      organizations: organizations().length,
       withSaso: acts.filter(isWithSaso).length,
       forReview: acts.filter(function (a) {
         return a.proposalStatus === C.PROPOSAL.FOR_REVIEW;
@@ -695,12 +723,86 @@ SASO.model = (function () {
     });
   }
 
+  /* 0 means no limit (the default). */
   function orgAccountLimit() {
-    return Number(settings().orgAccountLimit) || C.ORG_ACCOUNT_LIMIT;
+    var n = Number(settings().orgAccountLimit);
+    return n > 0 ? Math.floor(n) : 0;
   }
 
+  function hasAccountLimit() { return orgAccountLimit() > 0; }
+
   function accountSlotsLeft(orgId) {
+    if (!hasAccountLimit()) { return Infinity; }
     return Math.max(0, orgAccountLimit() - accountsForOrg(orgId).length);
+  }
+
+  /* "3 accounts" or "3 of 10 accounts", for badges and headings. */
+  function accountCountLabel(orgId) {
+    var n = accountsForOrg(orgId).length;
+    return hasAccountLimit() ? n + ' of ' + orgAccountLimit() : String(n);
+  }
+
+  /* "President, JPCS - CSPC" -> "President". */
+  function positionTitle(user) {
+    if (!user) { return ''; }
+    var p = user.position || '';
+    var org = user.organizationId ? orgById(user.organizationId) : null;
+    var suffix = org ? ', ' + org.acronym : '';
+    return suffix && p.slice(-suffix.length) === suffix ? p.slice(0, -suffix.length) : p;
+  }
+
+  /* Whether the signed-in account may add, edit and remove the accounts of
+     an organization: SASO's account managers for every organization, and the
+     president or adviser of that organization for their own. */
+  function canManageMembers(session, orgId) {
+    if (!session) { return false; }
+    if (session.role === C.ROLE.SASO) { return canManageAccounts(session); }
+    if (session.organizationId !== orgId) { return false; }
+    var me = userById(session.userId);
+    var title = positionTitle(me).toLowerCase();
+    return C.ORG_MEMBER_MANAGERS.some(function (p) { return title === p.toLowerCase(); });
+  }
+
+  /* ---- who submitted (panel RSC) -------------------------------------------
+     Recorded on the activity when it is submitted, with the position the
+     person held then, so a later change of officers does not rewrite it. */
+  function submittedByLine(activity) {
+    if (!activity) { return ''; }
+    if (activity.submittedBy && activity.submittedBy.name) {
+      return activity.submittedBy.name +
+        (activity.submittedBy.position ? ', ' + activity.submittedBy.position : '');
+    }
+    return '';
+  }
+
+  /* "Submitted by: name, position" as a sub-line for lists. */
+  function submittedByHtml(activity) {
+    var line = submittedByLine(activity);
+    return line ? '<span class="cell-sub cell-submitter"><i class="fa-solid fa-user-pen mr-1"></i>Submitted by: ' +
+      escapeHtml(line) + '</span>' : '';
+  }
+
+  /* ---- colleges and programs ----------------------------------------------- */
+  function collegeNames() { return C.CSPC_COLLEGES.map(function (c) { return c.name; }); }
+
+  function programsOf(college) {
+    var c = C.CSPC_COLLEGES.filter(function (x) { return x.name === college; })[0];
+    return c ? c.programs.slice() : [];
+  }
+
+  function collegeOfProgram(program) {
+    var c = C.CSPC_COLLEGES.filter(function (x) { return x.programs.indexOf(program) !== -1; })[0];
+    return c ? c.name : '';
+  }
+
+  function signatories() {
+    var s = settings().signatories || {};
+    var out = {};
+    Object.keys(C.SIGNATORIES).forEach(function (k) {
+      var v = s[k] || {};
+      out[k] = { name: v.name || C.SIGNATORIES[k].name, title: v.title || C.SIGNATORIES[k].title };
+    });
+    return out;
   }
 
   function userById(id) {
@@ -778,6 +880,13 @@ SASO.model = (function () {
     return conducted && isRetained(academicYearOf(activity.dateStart));
   }
 
+  /* The date as SASO wrote it for records copied from its lists
+     ("August 7-8 & 14-18, 2023"); the date range otherwise. */
+  function activityDateText(a) {
+    if (!a) { return '-'; }
+    return a.dateText || formatDateRange(a.dateStart, a.dateEnd);
+  }
+
   function activitiesInYear(ay, orgId) {
     return db().activities.filter(function (a) {
       if (a.proposalStatus === C.PROPOSAL.DRAFT) { return false; }
@@ -841,6 +950,21 @@ SASO.model = (function () {
     db: db,
     settings: settings,
     saveSettings: saveSettings,
+    organizations: organizations,
+    organizationsForYear: organizationsForYear,
+    isImported: isImported,
+    everyActivity: everyActivity,
+    hasAccountLimit: hasAccountLimit,
+    accountCountLabel: accountCountLabel,
+    positionTitle: positionTitle,
+    canManageMembers: canManageMembers,
+    submittedByLine: submittedByLine,
+    submittedByHtml: submittedByHtml,
+    collegeNames: collegeNames,
+    programsOf: programsOf,
+    collegeOfProgram: collegeOfProgram,
+    signatories: signatories,
+    activityDateText: activityDateText,
     orgById: orgById,
     orgAcronym: orgAcronym,
     accreditationLabel: accreditationLabel,

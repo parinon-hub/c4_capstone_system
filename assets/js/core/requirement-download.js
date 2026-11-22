@@ -5,7 +5,11 @@
    organization can get the form, fill it in and attach it back. The
    prototype has no real SASO forms, so the download is a Word-compatible
    template carrying the requirement's name, the organization and the
-   activity, with blank fields to complete.
+   activity, with blank fields to complete. SASO's own forms are different:
+   the Permission to Conduct (CSPC-F-SASO-05 or -07), the Responsibility
+   Acceptance Slip (CSPC-F-SASO-14) and, off campus, the CMO No. 63 documents
+   download already filled in from the proposal, as an editable Word file
+   (saso-docx.js), or as a PDF when the Word library is not loaded.
    ========================================================================= */
 
 window.SASO = window.SASO || {};
@@ -15,7 +19,26 @@ SASO.requirementDownload = (function () {
 
   var M = SASO.model;
 
+  /* Requirements that have an official SASO form. */
+  var FORM_LABEL = [
+    [/^Permission to Conduct/, 'Filled PTC'],
+    [/^Responsibility Acceptance Slip/, 'Filled slip'],
+    [/^CMO 63/, 'CMO 63 forms']
+  ];
+  function formLabel(name) {
+    if (!SASO.sasoForms) { return null; }
+    var hit = FORM_LABEL.filter(function (f) { return f[0].test(name || ''); })[0];
+    return hit ? hit[1] : null;
+  }
+
   function button(requirementName) {
+    var label = formLabel(requirementName);
+    if (label) {
+      return '<button type="button" class="btn btn-sm btn-outline-success mr-1 mb-0" ' +
+        'data-download="' + M.escapeHtml(requirementName) + '" ' +
+        'title="Download the SASO form filled in from this proposal">' +
+        '<i class="fa-solid fa-file-word mr-1"></i>' + label + '</button>';
+    }
     return '<button type="button" class="btn btn-sm btn-outline-secondary mr-1 mb-0" ' +
       'data-download="' + M.escapeHtml(requirementName) + '" ' +
       'title="Download a blank ' + M.escapeHtml(requirementName) + ' form">' +
@@ -73,7 +96,20 @@ SASO.requirementDownload = (function () {
     root.querySelectorAll('[data-download]').forEach(function (b) {
       b.addEventListener('click', function () {
         var ctx = context() || {};
-        download(this.getAttribute('data-download'), ctx.org, ctx.activity);
+        var name = this.getAttribute('data-download');
+        var key = SASO.sasoForms && ctx.activity ? SASO.sasoForms.formForRequirement(name, ctx.activity) : null;
+        if (key) {
+          var b = this;
+          b.disabled = true;
+          var save = SASO.sasoDocx && SASO.sasoDocx.available()
+            ? SASO.sasoDocx.download(key, ctx.activity) : SASO.sasoForms.downloadPdf(key, ctx.activity);
+          save.then(function () {
+            b.disabled = false;
+            if (SASO.layout && SASO.layout.toast) { SASO.layout.toast(SASO.sasoForms.FORMS[key].label + ' saved, filled in from the proposal. Edit it if needed, print, sign and attach it back.'); }
+          }, function () { b.disabled = false; download(name, ctx.org, ctx.activity); });
+          return;
+        }
+        download(name, ctx.org, ctx.activity);
       });
     });
   }

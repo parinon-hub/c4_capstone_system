@@ -59,11 +59,21 @@
                   'id="sAccred" value="' + st.accreditationAlertDays + '">' +
               '</div>' +
               '<div class="form-group">' +
-                '<label for="sAccounts" class="text-sm">Accounts allowed per organization</label>' +
-                '<input type="number" min="1" max="' + C.ORG_ACCOUNT_LIMIT_MAX + '" class="form-control form-control-sm" ' +
-                  'id="sAccounts" value="' + st.orgAccountLimit + '">' +
-                '<small class="form-text text-muted">One account per person, each with its own ' +
-                  'username and password: normally the adviser and two officers. Lowering the ' +
+                '<label class="text-sm d-block">Accounts per organization</label>' +
+                '<div class="custom-control custom-switch mb-2">' +
+                  '<input type="checkbox" class="custom-control-input" id="sNoLimit"' +
+                    (M.hasAccountLimit() ? '' : ' checked') + '>' +
+                  '<label class="custom-control-label text-sm" for="sNoLimit">No limit</label>' +
+                '</div>' +
+                '<div class="input-group input-group-sm' + (M.hasAccountLimit() ? '' : ' d-none') + '" id="sAccountsGroup" style="max-width:16rem">' +
+                  '<div class="input-group-prepend"><span class="input-group-text">Up to</span></div>' +
+                  '<input type="number" min="1" max="' + C.ORG_ACCOUNT_LIMIT_MAX + '" class="form-control" ' +
+                    'id="sAccounts" value="' + (M.orgAccountLimit() || 10) + '">' +
+                  '<div class="input-group-append"><span class="input-group-text">accounts</span></div>' +
+                '</div>' +
+                '<small class="form-text text-muted">Every member signs in with a personal account ' +
+                  '(own username and password) tied to the organization and a position. There is no ' +
+                  'limit by default; switch it off to set a maximum per organization. Lowering the ' +
                   'number keeps existing accounts but stops new ones being added.</small>' +
               '</div>' +
               '<div class="form-group">' +
@@ -75,6 +85,21 @@
                   'deleted automatically; see Records Archive.</small>' +
               '</div>' +
               '<button type="button" class="btn btn-primary btn-sm" id="btnSave">Save policy</button>' +
+            '</div>' +
+          '</div>' +
+
+          /* ---- signatories on the SASO forms ---- */
+          '<div class="card">' +
+            '<div class="card-header"><h3 class="card-title">Signatories on SASO forms</h3></div>' +
+            '<div class="card-body">' +
+              '<p class="text-muted text-sm">Printed on the Permission to Conduct forms ' +
+                '(CSPC-F-SASO-05 and -07) that organizations download already filled in. ' +
+                'Change a name here when the office changes hands.</p>' +
+              signatoryRow('sasDirector', 'Recommending approval (SASO)') +
+              signatoryRow('vpaa', 'VPAA') +
+              signatoryRow('president', 'President (off-campus approval)') +
+              '<button type="button" class="btn btn-primary btn-sm mr-1" id="btnSaveSig">Save signatories</button>' +
+              '<button type="button" class="btn btn-light btn-sm" id="btnResetSig">Restore the names on the SASO forms</button>' +
             '</div>' +
           '</div>' +
 
@@ -135,7 +160,10 @@
             '<div class="card-header"><h3 class="card-title">Requirement checklists</h3>' +
               '<div class="card-tools"><span class="card-subtitle">Read only</span></div></div>' +
             '<div class="card-body p-0">' +
-              checklist('Pre-approval (all activities)', C.REQUIREMENT_TEMPLATES.PRE_APPROVAL_COMMON) +
+              checklist('Pre-approval (all activities)', C.REQUIREMENT_TEMPLATES.PRE_APPROVAL_COMMON
+                .concat(C.REQUIREMENT_TEMPLATES.PRE_APPROVAL_BUDGET)) +
+              checklist('Pre-approval (on-campus only, CSPC-F-SASO-59)',
+                        C.REQUIREMENT_TEMPLATES.PRE_APPROVAL_ON_CAMPUS_EXTRA) +
               checklist('Pre-approval (off-campus only)',
                         C.REQUIREMENT_TEMPLATES.PRE_APPROVAL_OFF_CAMPUS_EXTRA) +
               checklist('Post-activity', C.REQUIREMENT_TEMPLATES.POST_ACTIVITY) +
@@ -150,7 +178,8 @@
             '<div class="card-header"><h3 class="card-title">Demonstration data</h3></div>' +
             '<div class="card-body">' +
               '<div class="review-meta mb-3">' +
-                '<div><span class="cell-sub">Organizations</span>' + db.organizations.length + '</div>' +
+                '<div><span class="cell-sub">Organizations</span>' + M.organizations().length +
+                  ' on the roster, ' + (db.organizations.length - M.organizations().length) + ' in past records</div>' +
                 '<div><span class="cell-sub">Activities</span>' + db.activities.length + '</div>' +
                 '<div><span class="cell-sub">Requirements</span>' + db.requirements.length + '</div>' +
                 '<div><span class="cell-sub">Notifications</span>' + db.notifications.length + '</div>' +
@@ -160,7 +189,9 @@
               '</div>' +
               '<p class="text-muted text-sm">Organization names and accreditation levels follow ' +
                 'the CSPC roster for AY ' + (db.organizations[0] || {}).accreditationAY + '. ' +
-                'Advisers, officers, activities and all compliance records are simulated.</p>' +
+                'AY 2023-2024 and AY 2024-2025 are SASO\u2019s own lists of student activities ' +
+                '(July to December 2023 and 2024). Advisers, officers, the current year\u2019s ' +
+                'activities and their compliance records are simulated.</p>' +
               '<button type="button" class="btn btn-outline-warning btn-sm" id="btnReset">' +
                 '<i class="fa-solid fa-rotate mr-1"></i>Reset demonstration data</button>' +
             '</div>' +
@@ -176,8 +207,10 @@
                 'authentication, email or SMS delivery.</td></tr>' +
               '<tr><th>Simulated</th><td>Document upload records a filename only. Login compares ' +
                 'plain-text credentials in the browser.</td></tr>' +
-              '<tr><th>Printed documents</th><td>Reconstructions from the documents SASO ' +
-                'described, not the official CSPC forms.</td></tr>' +
+              '<tr><th>Printed documents</th><td>The Permission to Conduct forms (CSPC-F-SASO-05, ' +
+                '-07) and the on-campus requirements checklist (CSPC-F-SASO-59) follow the blank ' +
+                'forms SASO supplied. The activity proposal and terminal report sheets are the ' +
+                'researchers\u2019 layouts.</td></tr>' +
             '</tbody></table></div>' +
           '</div>' +
         '</div>' +
@@ -223,6 +256,18 @@
     });
   }
 
+  function signatoryRow(key, label) {
+    var sig = M.signatories()[key];
+    return '<div class="form-row">' +
+      '<div class="form-group col-md-6"><label for="sig_' + key + '_name" class="text-sm">' + label + ': name</label>' +
+        '<input type="text" class="form-control form-control-sm" id="sig_' + key + '_name" value="' +
+          M.escapeHtml(sig.name) + '"></div>' +
+      '<div class="form-group col-md-6"><label for="sig_' + key + '_title" class="text-sm">Title</label>' +
+        '<input type="text" class="form-control form-control-sm" id="sig_' + key + '_title" value="' +
+          M.escapeHtml(sig.title) + '"></div>' +
+    '</div>';
+  }
+
   function checklist(title, items) {
     return '<div class="req-group">' +
       '<div class="req-group-head"><div><span class="cell-primary">' + title + '</span></div></div>' +
@@ -243,14 +288,15 @@
       var deadline = Number(document.getElementById('sDeadline').value);
       var alertDays = Number(document.getElementById('sAlert').value);
       var accred = Number(document.getElementById('sAccred').value);
-      var accounts = Number(document.getElementById('sAccounts').value);
+      var noLimit = document.getElementById('sNoLimit').checked;
+      var accounts = noLimit ? 0 : Number(document.getElementById('sAccounts').value);
       var retention = Number(document.getElementById('sRetention').value);
 
       if (!(deadline > 0) || !(alertDays > 0) || !(accred > 0)) {
         SASO.layout.toast('Enter a number greater than zero for each value.', 'danger');
         return;
       }
-      if (!(accounts >= 1 && accounts <= C.ORG_ACCOUNT_LIMIT_MAX) || Math.floor(accounts) !== accounts) {
+      if (!noLimit && (!(accounts >= 1 && accounts <= C.ORG_ACCOUNT_LIMIT_MAX) || Math.floor(accounts) !== accounts)) {
         SASO.layout.toast('Accounts per organization must be a whole number from 1 to ' +
           C.ORG_ACCOUNT_LIMIT_MAX + '.', 'danger');
         return;
@@ -269,6 +315,31 @@
         retentionYears: retention
       });
       SASO.layout.toast('Policy saved.');
+      render();
+    });
+
+    document.getElementById('sNoLimit').addEventListener('change', function () {
+      document.getElementById('sAccountsGroup').classList.toggle('d-none', this.checked);
+    });
+
+    document.getElementById('btnSaveSig').addEventListener('click', function () {
+      var sig = {};
+      var missing = false;
+      Object.keys(C.SIGNATORIES).forEach(function (k) {
+        var name = document.getElementById('sig_' + k + '_name').value.trim();
+        var title = document.getElementById('sig_' + k + '_title').value.trim();
+        if (!name || !title) { missing = true; }
+        sig[k] = { name: name, title: title };
+      });
+      if (missing) { SASO.layout.toast('Enter a name and a title for each signatory.', 'danger'); return; }
+      M.saveSettings({ signatories: sig });
+      SASO.layout.toast('Signatories saved. New PTC forms will carry these names.');
+      render();
+    });
+
+    document.getElementById('btnResetSig').addEventListener('click', function () {
+      M.saveSettings({ signatories: JSON.parse(JSON.stringify(C.SIGNATORIES)) });
+      SASO.layout.toast('Signatories restored to the names on the SASO forms.');
       render();
     });
 
