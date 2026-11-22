@@ -301,9 +301,11 @@
             '<a class="btn btn-sm btn-outline-primary mr-1" href="' +
               (isSaso ? '../saso/' : '../org/') + 'activity-details.html?id=' + activity.id +
               '">Back to activity</a>' +
-            (def.form ? '<button type="button" class="btn btn-sm btn-success mr-1" id="btnPdf">' +
-              '<i class="fa-solid fa-file-pdf mr-1"></i>Download PDF</button>' : '') +
-            '<button type="button" class="btn btn-sm btn-primary" id="btnPrint">' +
+            (def.form ? '<button type="button" class="btn btn-sm btn-primary mr-1" id="btnDocx">' +
+              '<i class="fa-solid fa-file-word mr-1"></i>Download Word (editable)</button>' +
+              '<button type="button" class="btn btn-sm btn-outline-danger mr-1" id="btnPdf">' +
+              '<i class="fa-solid fa-file-pdf mr-1"></i>PDF</button>' : '') +
+            '<button type="button" class="btn btn-sm btn-outline-primary" id="btnPrint">' +
               '<i class="fa-solid fa-print mr-1"></i>Print</button>' +
           '</div>' +
         '</div>' +
@@ -324,7 +326,7 @@
                 ? 'Order of documentary requirements, Certificate and Report of Compliance and Role of the ' +
                   'Personnel-in-Charge (' + F.FORMS[docType].code + '), filled in from the proposal. '
                 : 'SASO form ' + F.FORMS[docType].code + ', filled in from the proposal. ') +
-              'Print it or save it as PDF, then sign it.'
+              'Download it as Word to edit it, or as PDF, then print and sign it.'
               : 'Summary sheet generated from the activity record.') + '</span>' +
         '</div>' +
 
@@ -337,6 +339,24 @@
     document.getElementById('btnPrint').addEventListener('click', function () {
       window.print();
     });
+    var word = document.getElementById('btnDocx');
+    if (word) {
+      word.addEventListener('click', function () {
+        var b = this;
+        if (!SASO.sasoDocx || !SASO.sasoDocx.available()) {
+          SASO.layout.toast('The Word download needs an internet connection. Use PDF or Print instead.', 'danger');
+          return;
+        }
+        b.disabled = true;
+        SASO.sasoDocx.download(docType, activity).then(function () {
+          b.disabled = false;
+          SASO.layout.toast('Word file saved: ' + SASO.sasoDocx.fileName(docType, activity));
+        }, function () {
+          b.disabled = false;
+          SASO.layout.toast('The Word file could not be made. Use PDF or Print instead.', 'danger');
+        });
+      });
+    }
     var pdf = document.getElementById('btnPdf');
     if (pdf) {
       pdf.addEventListener('click', function () {

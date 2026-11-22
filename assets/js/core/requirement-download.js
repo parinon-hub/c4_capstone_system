@@ -8,7 +8,8 @@
    activity, with blank fields to complete. SASO's own forms are different:
    the Permission to Conduct (CSPC-F-SASO-05 or -07), the Responsibility
    Acceptance Slip (CSPC-F-SASO-14) and, off campus, the CMO No. 63 documents
-   download already filled in from the proposal, as a PDF (saso-forms.js).
+   download already filled in from the proposal, as an editable Word file
+   (saso-docx.js), or as a PDF when the Word library is not loaded.
    ========================================================================= */
 
 window.SASO = window.SASO || {};
@@ -36,7 +37,7 @@ SASO.requirementDownload = (function () {
       return '<button type="button" class="btn btn-sm btn-outline-success mr-1 mb-0" ' +
         'data-download="' + M.escapeHtml(requirementName) + '" ' +
         'title="Download the SASO form filled in from this proposal">' +
-        '<i class="fa-solid fa-file-pdf mr-1"></i>' + label + '</button>';
+        '<i class="fa-solid fa-file-word mr-1"></i>' + label + '</button>';
     }
     return '<button type="button" class="btn btn-sm btn-outline-secondary mr-1 mb-0" ' +
       'data-download="' + M.escapeHtml(requirementName) + '" ' +
@@ -100,9 +101,11 @@ SASO.requirementDownload = (function () {
         if (key) {
           var b = this;
           b.disabled = true;
-          SASO.sasoForms.downloadPdf(key, ctx.activity).then(function () {
+          var save = SASO.sasoDocx && SASO.sasoDocx.available()
+            ? SASO.sasoDocx.download(key, ctx.activity) : SASO.sasoForms.downloadPdf(key, ctx.activity);
+          save.then(function () {
             b.disabled = false;
-            if (SASO.layout && SASO.layout.toast) { SASO.layout.toast(SASO.sasoForms.FORMS[key].label + ' saved as PDF. Print it, sign it and attach it back.'); }
+            if (SASO.layout && SASO.layout.toast) { SASO.layout.toast(SASO.sasoForms.FORMS[key].label + ' saved, filled in from the proposal. Edit it if needed, print, sign and attach it back.'); }
           }, function () { b.disabled = false; download(name, ctx.org, ctx.activity); });
           return;
         }

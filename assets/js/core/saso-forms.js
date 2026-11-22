@@ -505,5 +505,9 @@ SASO.sasoForms = (function () {
   }
 
   return { FORMS: FORMS, formsFor: formsFor, ptcKey: ptcKey, build: build, downloadPdf: downloadPdf,
-           fileName: fileName, formForRequirement: formForRequirement };
+           fileName: fileName, formForRequirement: formForRequirement,
+           /* Shared with saso-docx.js, which writes the same forms as Word files. */
+           helpers: { time12: time12, reqSubmitted: reqSubmitted, leg: leg, responsible: responsible,
+                      prepared: prepared, president: president, personnel: personnel,
+                      CERTIFY: CERTIFY, COMPLIANCE_ROWS: COMPLIANCE_ROWS } };
 })();

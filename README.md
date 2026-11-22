@@ -372,7 +372,7 @@ CSPC-F-SASO-05 (on campus), CSPC-F-SASO-07 (off campus) and CSPC-F-SASO-59
 (requirements checklist). The proposal now asks for the nature of the
 activity, a co-responsible person and, off campus, the instructors joining and
 the transportation. Signatories are edited in **Settings**. Download from the
-activity page (*Permission to Conduct (PTC)*, then *Download PDF*) or from the
+activity page (*Permission to Conduct (PTC)*, then *Download Word*) or from the
 *Filled PTC* button beside the PTC requirement.
 
 Also generated from the proposal: the Responsibility Acceptance Slip
@@ -381,6 +381,11 @@ the CMO No. 63, s. 2017 documents: SASO's Order of Documentary Requirements
 (tabs A to K), the Certificate of Compliance, CHED's Report of Compliance and
 the Role of the Personnel-in-Charge. The off-campus PTC is the permit itself;
 the CMO 63 documents are the separate packet it lists as an attachment.
+
+Every form downloads as an **editable Word file (.docx)**, already filled in,
+so an officer can still correct or add to it before printing and signing
+(`assets/js/core/saso-docx.js`, built with the docx library). PDF and Print
+remain available on the documents page.
 
 ### CHED and accreditation reports
 
