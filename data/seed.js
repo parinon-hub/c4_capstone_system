@@ -850,7 +850,7 @@ SASO.buildSeed = function () {
   notifyManagers(C.NOTIF.ACCOUNT_REQUESTED, 'JTPS (Junior Tourism Professionals Society) requested an organization account: ' + tour.ref + '.', 5, tour.id, null);
 
   return {
-    meta:{ seededAt:new Date().toISOString(), version:7 },
+    meta:{ seededAt:new Date().toISOString(), version:8 },
     /* Office policy values. Seeded from what SASO stated; adjustable in
        Settings so the prototype can be shown against a different policy. */
     settings:{

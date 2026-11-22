@@ -62,7 +62,7 @@ SASO.ptcFields = (function () {
             '" placeholder="e.g. Vice President"></div>' +
       '</div>' +
       '<div class="ptc-offcampus' + (off ? '' : ' d-none') + '" id="' + prefix + 'OffBlock">' +
-        '<div class="form-group"><label for="' + prefix + 'Instructors" class="text-sm">Instructors / faculty joining the activity</label>' +
+        '<div class="form-group"><label for="' + prefix + 'Instructors" class="text-sm">Instructors / personnel-in-charge joining the activity</label>' +
           '<input type="text" class="' + cls + '" id="' + prefix + 'Instructors" value="' + esc(a.instructors || '') +
             '" placeholder="e.g. Engr. Ramon Almeda, Ms. Liza Ocampo"></div>' +
         '<div class="form-row">' +

@@ -280,7 +280,12 @@ SASO.config = (function () {
     PRE_APPROVAL_BUDGET: [
       { name: 'Budget Proposal / Source of Funds',        mandatory: false, source: 'SASO' }
     ],
+    /* SASO's Order of Documentary Requirements for local off-campus
+       activities starts with the Responsibility Acceptance Slip and the PTC,
+       then the CMO No. 63 documents (Certificate and Report of Compliance and
+       tabs A to K), which are filed together as one packet. */
     PRE_APPROVAL_OFF_CAMPUS_EXTRA: [
+      { name: 'Responsibility Acceptance Slip',           mandatory: true,  source: 'SASO' },
       { name: 'CMO 63 Documentary Requirements',          mandatory: true,  source: 'SASO' }
     ],
     POST_ACTIVITY: [
@@ -589,7 +594,7 @@ SASO.config = (function () {
   /* v6: several accounts per organization and three academic years of records. */
   /* v7: personal accounts with no default limit, profiles, SASO form fields
      and two past school years from SASO's lists of student activities. */
-  var STORAGE_KEY = 'cspc_saso_prototype_v7';
+  var STORAGE_KEY = 'cspc_saso_prototype_v8';
   var SESSION_KEY = 'cspc_saso_session_v3';
 
   return {

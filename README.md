@@ -375,6 +375,13 @@ the transportation. Signatories are edited in **Settings**. Download from the
 activity page (*Permission to Conduct (PTC)*, then *Download PDF*) or from the
 *Filled PTC* button beside the PTC requirement.
 
+Also generated from the proposal: the Responsibility Acceptance Slip
+(CSPC-F-SASO-14, required on and off campus) and, for off-campus activities,
+the CMO No. 63, s. 2017 documents: SASO's Order of Documentary Requirements
+(tabs A to K), the Certificate of Compliance, CHED's Report of Compliance and
+the Role of the Personnel-in-Charge. The off-campus PTC is the permit itself;
+the CMO 63 documents are the separate packet it lists as an attachment.
+
 ### CHED and accreditation reports
 
 - **List of Student Activities**: SASO's workbook layout (header, columns,

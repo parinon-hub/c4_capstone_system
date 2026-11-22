@@ -274,9 +274,14 @@
   var DOCS = {};
   DOCS[ptcKey] = { label: 'Permission to Conduct', icon: 'fa-stamp', form: true,
                    build: function () { return F.build(ptcKey, activity); }, available: true };
+  DOCS.slip = { label: 'Responsibility Acceptance Slip', icon: 'fa-signature', form: true,
+                build: function () { return F.build('slip', activity); }, available: true };
   if (activity.venueType !== C.VENUE.OFF_CAMPUS) {
     DOCS.checklist = { label: 'Requirements Checklist', icon: 'fa-list-check', form: true,
                        build: function () { return F.build('checklist', activity); }, available: true };
+  } else {
+    DOCS.cmo63 = { label: 'CMO 63 Documents', icon: 'fa-bus', form: true,
+                   build: function () { return F.build('cmo63', activity); }, available: true };
   }
   DOCS.proposal = { label: 'Activity Proposal', icon: 'fa-file-lines', build: proposalDoc, available: true };
   DOCS.terminal = { label: 'Terminal Report', icon: 'fa-file-circle-check', build: terminalDoc,
@@ -304,7 +309,7 @@
         '</div>' +
 
         '<div class="card-body border-bottom py-2 no-print">' +
-          '<div class="btn-group btn-group-sm" id="docTabs">' +
+          '<div class="btn-group btn-group-sm flex-wrap" id="docTabs">' +
             Object.keys(DOCS).map(function (k) {
               var d = DOCS[k];
               return '<button type="button" class="btn btn-outline-primary' +
@@ -315,7 +320,10 @@
             }).join('') +
           '</div>' +
           '<span class="text-muted text-sm ml-3">' +
-            (def.form ? 'SASO form ' + F.FORMS[docType].code + ', filled in from the proposal. ' +
+            (def.form ? (docType === 'cmo63'
+                ? 'Order of documentary requirements, Certificate and Report of Compliance and Role of the ' +
+                  'Personnel-in-Charge (' + F.FORMS[docType].code + '), filled in from the proposal. '
+                : 'SASO form ' + F.FORMS[docType].code + ', filled in from the proposal. ') +
               'Print it or save it as PDF, then sign it.'
               : 'Summary sheet generated from the activity record.') + '</span>' +
         '</div>' +

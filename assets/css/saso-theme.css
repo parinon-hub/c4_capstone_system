@@ -1653,7 +1653,7 @@ a.notif-message:hover { color: var(--cspc-navy); text-decoration: underline; }
   font-family: Calibri, Carlito, "Segoe UI", Arial, sans-serif; font-size: 12.5px; line-height: 1.3;
   position: relative; display: flex; flex-direction: column;
 }
-.sf-offscreen { position: fixed; left: -10000px; top: 0; }
+.sf-offscreen { position: absolute; left: -10000px; top: 0; width: 794px; }
 .sf-head { display: flex; align-items: center; }
 .sf-seal { width: 62px; height: auto; margin-right: 10px; }
 .sf-inst { font-family: Arial, sans-serif; font-size: 12px; line-height: 1.2; }
@@ -1748,3 +1748,38 @@ a.notif-message:hover { color: var(--cspc-navy); text-decoration: underline; }
 .sal-table th { white-space: normal; vertical-align: middle; text-align: center; }
 .sal-table td { font-size: 0.75rem; }
 .cell-sub.cell-submitter { white-space: nowrap; }
+/* Responsibility Acceptance Slip and the CMO No. 63 documents */
+.sf-u { text-decoration: underline; margin: 14px 0 26px; }
+.sf-slip { font-size: 15px; }
+.sf-slip-date { width: 34%; margin-left: auto; text-align: center; margin-bottom: 20px; }
+.sf-slip-date .sf-fill { display: block; min-width: 0; }
+.sf-slip-body { text-align: justify; line-height: 2.1; }
+.sf-fill-lg { min-width: 220px; font-weight: 700; }
+.sf-slip-sign { width: 38%; margin: 30px 0 0 auto; }
+.sf-slip-attest { display: flex; justify-content: space-between; margin-top: 30px; }
+.sf-slip-attest > div { width: 38%; }
+.sf-slip .sf-foot { margin-top: 40px; }
+.sf-cmo { font-size: 13px; }
+.sf-head-center { justify-content: center; }
+.sf-cmo-for { text-align: center; font-size: 11.5px; color: #333; margin: 4px 0 8px; }
+.sf-order th, .sf-basic th, .sf-comp th { border: 1.2px solid #111; padding: 4px 6px; text-align: center; font-weight: 700; }
+.sf-order td, .sf-comp td { padding: 2px 6px; }
+.sf-sub { font-style: italic; padding-left: 22px; }
+.sf-cmo-check { width: 30%; border-bottom: 1px solid #111; height: 34px; }
+.sf-italic-title { font-style: italic; margin-bottom: 18px; }
+.sf-cmo-body { text-align: justify; line-height: 1.6; margin: 10px 0; }
+.sf-cmo-grid { display: flex; flex-wrap: wrap; justify-content: space-between; margin-top: 18px; }
+.sf-cmo-sig { width: 46%; margin-bottom: 18px; }
+.sf-cmo-sig-name { margin-top: 30px; font-weight: 700; min-height: 18px; }
+.sf-cmo-sig-line { border-top: 1px solid #111; width: 80%; }
+.sf-notary { margin-top: 10px; line-height: 1.6; }
+.sf-ched-head { line-height: 1.3; margin-bottom: 8px; }
+.sf-cmo-hei { display: flex; justify-content: space-between; width: 88%; font-size: 12px; }
+.sf-basic th, .sf-basic td { font-size: 11px; }
+.sf-comp td { font-size: 11.5px; }
+.sf-cmo-grid-4 .sf-cmo-sig { margin-bottom: 8px; }
+.sf-cmo-grid-4 .sf-cmo-sig-name { margin-top: 18px; }
+.sf-role { margin: 6px 0 14px 18px; padding-left: 18px; line-height: 1.6; list-style: disc; }
+.sf-holder .sf-page + .sf-page { margin-top: 12px; }
+@media print { .sf-holder .sf-page + .sf-page { page-break-before: always; margin-top: 0; } }
+.sf-offscreen .sf-page { height: 1122px; min-height: 0; overflow: hidden; }
