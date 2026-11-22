@@ -114,7 +114,7 @@
   }
 
   function renderOrgChart() {
-    var orgs = M.db().organizations;
+    var orgs = M.organizations();
 
     function countWhere(orgId, predicate) {
       return M.dashboardActivities(orgId).filter(predicate).length;
@@ -281,7 +281,7 @@
   }
 
   function showRoster() {
-    var orgs = M.db().organizations.slice().sort(function (x, y) {
+    var orgs = M.organizations().slice().sort(function (x, y) {
       return x.acronym.localeCompare(y.acronym);
     });
 

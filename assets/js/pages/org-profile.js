@@ -96,20 +96,24 @@
         '</div>' +
 
         '<div class="card">' +
-          '<div class="card-header"><h3 class="card-title">Organization accounts</h3>' +
-            '<div class="card-tools"><span class="badge badge-info status-badge">' + accounts.length +
-              ' of ' + limit + '</span></div></div>' +
+          '<div class="card-header"><h3 class="card-title">Member accounts</h3>' +
+            '<div class="card-tools"><span class="badge badge-info status-badge">' +
+              M.escapeHtml(M.accountCountLabel(org.id)) + '</span></div></div>' +
           '<div class="card-body p-0"><table class="table table-sm mb-0"><tbody>' +
             accounts.map(function (u) {
               return '<tr><td><span class="cell-primary">' + M.escapeHtml(u.name) +
                 (u.id === session.userId ? ' <span class="badge badge-info status-badge">You</span>' : '') +
-                '</span><span class="cell-sub">' + M.escapeHtml(u.position) + '</span></td>' +
+                '</span><span class="cell-sub">' + M.escapeHtml(M.positionTitle(u)) + '</span></td>' +
                 '<td class="text-right"><code>' + M.escapeHtml(u.username) + '</code></td></tr>';
             }).join('') +
           '</tbody></table></div>' +
           '<div class="card-footer text-muted text-sm">' +
             'Each person has their own sign-in, so what they submit is recorded under their name. ' +
-            'SASO adds and removes accounts, up to ' + limit + ' per organization.' +
+            (M.hasAccountLimit()
+              ? 'The president, the adviser or SASO adds accounts, up to ' + limit + ' per organization.'
+              : 'The president, the adviser or SASO adds accounts; there is no limit per organization.') +
+            (M.canManageMembers(session, org.id)
+              ? ' Manage them on <a href="' + SASO.layout.href('pages/org/members.html') + '">Members</a>.' : '') +
           '</div>' +
         '</div>' +
 

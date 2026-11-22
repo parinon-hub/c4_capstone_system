@@ -67,7 +67,7 @@
     ],
     filters: [
       { key: 'org', label: 'Organization', all: 'All organizations',
-        options: M.db().organizations.map(function (o) { return { value: o.id, label: o.acronym }; }) },
+        options: M.organizations().map(function (o) { return { value: o.id, label: o.acronym }; }) },
       { key: 'stage', label: 'Stage', all: 'All stages',
         /* Drafts never reach SASO, so there is nothing to filter for. */
         options: STAGE_ORDER.filter(function (k) { return k !== C.STAGE.DRAFT; })
@@ -151,7 +151,7 @@
           '<td><a href="activity-details.html?id=' + a.id + '" class="cell-primary">' +
             M.escapeHtml(a.title) + '</a>' +
             '<span class="cell-sub">' + M.label(a.venueType) + ' · ' +
-            M.escapeHtml(a.venue || '-') + '</span></td>' +
+            M.escapeHtml(a.venue || '-') + '</span>' + M.submittedByHtml(a) + '</td>' +
           '<td class="text-sm">' + M.escapeHtml(a.category || '-') + '</td>' +
           '<td class="text-nowrap">' + M.formatDate(L.pickedDate(a, state)) + '</td>' +
           '<td class="text-center">' + (a.expectedParticipants || '-') + '</td>' +

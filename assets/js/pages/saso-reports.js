@@ -32,6 +32,7 @@
     period: 'custom',
     from: '', to: '',
     ay: M.currentAcademicYear(),
+    half: 'first',
     org: '', category: '', stage: '',
     generated: null
   };
@@ -45,8 +46,10 @@
     return true;
   }
 
+  /* Includes the activities from SASO's past lists, so reports cover every
+     academic year on record. */
   function baseActivities() {
-    return M.allActivities().filter(function (a) {
+    return M.everyActivity().filter(function (a) {
       if (a.proposalStatus === C.PROPOSAL.DRAFT) { return false; }
       if (state.org && a.organizationId !== state.org) { return false; }
       if (state.category && a.category !== state.category) { return false; }
@@ -81,6 +84,24 @@
     /* Panel RSC: reports in the formats CHED requires (core/ched-reports.js).
        Both cover one academic year and carry Prepared by, Noted by and
        Approved by. */
+    ched_list: {
+      label: 'List of Student Activities (SASO format, Excel)',
+      hint: 'SASO\u2019s own list: organization, on/off campus, activity, date, venue, time, participants, ' +
+            'the three post-activity reports, budget and liquidation, grouped by month, with a sheet per ' +
+            'category. Downloads as an Excel workbook.',
+      ched: true, half: true,
+      build: function () { return SASO.ched.studentActivities(state.ay, state.half, state.org || null); }
+    },
+
+    ched_accreditation: {
+      label: 'Accreditation and Leveling Record (CMO No. 9, s. 2013)',
+      hint: 'One organization\u2019s documentary requirements for accreditation and leveling: officers and ' +
+            'members with program and college, accomplishments, financial statement, plan of activities ' +
+            'and leveling indicators. Choose an organization and an academic year.',
+      ched: true, needsOrg: true,
+      build: function () { return SASO.ched.accreditation(state.org, state.ay); }
+    },
+
     ched_annual: {
       label: 'Annual Accomplishment Report (CHED format)',
       hint: 'One organization\u2019s activities for an academic year, with objectives, participants, ' +
@@ -365,6 +386,13 @@
               ' to ' + M.formatDate(M.academicYearRange(state.ay).to) + '</small>' +
           '</div>' +
 
+          (REPORTS[state.type].half
+            ? '<div class="form-group"><label for="fHalf" class="text-sm">Semester</label>' +
+                '<select class="form-control form-control-sm" id="fHalf">' +
+                  [['first', 'July - December'], ['second', 'January - June'], ['all', 'Whole academic year']].map(function (h) {
+                    return '<option value="' + h[0] + '"' + (state.half === h[0] ? ' selected' : '') + '>' + h[1] + '</option>';
+                  }).join('') + '</select></div>'
+            : '') +
           '<div class="form-row' + (isChed() ? ' d-none' : '') + '">' +
             '<div class="form-group col-6">' +
               '<label for="fFrom" class="text-sm">From</label>' +
@@ -393,8 +421,10 @@
         '</div>' +
       '</div>';
 
-    SASO.listview.fillSelect('fOrg', M.db().organizations.map(function (o) {
-      return { value: o.id, label: o.acronym };
+    SASO.listview.fillSelect('fOrg', M.organizationsForYear(state.ay).slice().sort(function (a, b) {
+      return a.acronym.localeCompare(b.acronym);
+    }).map(function (o) {
+      return { value: o.id, label: o.acronym + (o.archiveOnly ? ' (past records)' : '') };
     }), 'All organizations', state.org);
 
     SASO.listview.fillSelect('fCategory', C.ACTIVITY_CATEGORIES.map(function (c) {
@@ -440,6 +470,9 @@
       renderControls();
     });
 
+    var half = document.getElementById('fHalf');
+    if (half) { half.addEventListener('change', function () { state.half = this.value; }); }
+
     document.getElementById('fAY').addEventListener('change', function () {
       state.ay = this.value;
       applyPeriod('ay');
@@ -463,7 +496,7 @@
 
     document.getElementById('btnGenerate').addEventListener('click', function () {
       if (REPORTS[state.type].needsOrg && !state.org) {
-        SASO.layout.toast('Choose an organization for the Annual Accomplishment Report.', 'warning');
+        SASO.layout.toast('Choose an organization for this report.', 'warning');
         return;
       }
       state.generated = { type: state.type, at: new Date().toISOString() };
@@ -599,25 +632,7 @@
   /* CHED-format reports: same letterhead and print layout, with the three
      signatories (Prepared by, Noted by, Approved by). */
   function renderChed(host, rep) {
-    host.innerHTML =
-      '<div class="card">' +
-        '<div class="card-header no-print">' +
-          '<h3 class="card-title">Preview</h3>' +
-          '<div class="card-tools">' +
-            '<button type="button" class="btn btn-sm btn-outline-primary mr-1" id="btnExport">' +
-              '<i class="fa-solid fa-file-csv mr-1"></i>Export CSV</button>' +
-            '<button type="button" class="btn btn-sm btn-primary" id="btnPrint">' +
-              '<i class="fa-solid fa-print mr-1"></i>Print</button>' +
-          '</div>' +
-        '</div>' +
-        '<div class="card-body"><div class="report-doc" id="reportDoc">' + SASO.ched.render(rep) + '</div></div>' +
-      '</div>';
-    if (SASO.layout.enhanceTopScroll) { SASO.layout.enhanceTopScroll(host); }
-    document.getElementById('btnPrint').addEventListener('click', function () { window.print(); });
-    document.getElementById('btnExport').addEventListener('click', function () {
-      SASO.ched.downloadCsv(rep);
-      SASO.layout.toast('CSV exported.');
-    });
+    SASO.ched.mount(host, rep);
   }
 
   /* ---- CSV export ---------------------------------------------------------------------

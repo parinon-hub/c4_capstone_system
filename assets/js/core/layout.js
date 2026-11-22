@@ -40,7 +40,8 @@ SASO.layout = (function () {
       { key: 'terminal',     label: 'Terminal Reports', icon: 'fa-file-circle-check', href: 'pages/org/terminal-reports.html', badge: 'terminal' },
       { key: 'records',      label: 'Records Archive',  icon: 'fa-box-archive',       href: 'pages/org/records.html' },
       { key: 'notifications',label: 'Notifications',    icon: 'fa-bell',              href: 'pages/org/notifications.html', badge: 'notifications' },
-      { key: 'profile',      label: 'Profile',          icon: 'fa-id-badge',          href: 'pages/org/profile.html' }
+      { key: 'members',      label: 'Members',          icon: 'fa-users',             href: 'pages/org/members.html' },
+      { key: 'profile',      label: 'Organization Profile', icon: 'fa-id-badge',      href: 'pages/org/profile.html' }
     ]
   };
 
@@ -76,6 +77,9 @@ SASO.layout = (function () {
     'pages/documents/print.html': 0,
     'pages/saso/settings.html': 0,
     'pages/org/profile.html': 0,
+    'pages/org/members.html': 0,
+    'pages/org/my-profile.html': 0,
+    'pages/saso/my-profile.html': 0,
     'pages/saso/records.html': 0,
     'pages/org/records.html': 0,
     'pages/saso/trash.html': 0,
@@ -173,7 +177,8 @@ SASO.layout = (function () {
           '<div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center">' +
             '<div class="user-avatar">' + initials(session.name) + '</div>' +
             '<div class="info">' +
-              '<a href="#" class="d-block">' + SASO.model.escapeHtml(session.name) + '</a>' +
+              '<a href="' + base + myProfilePath() + '" class="d-block" title="My Profile">' +
+                SASO.model.escapeHtml(session.name) + '</a>' +
               '<small>' + SASO.model.escapeHtml(org ? org.acronym : 'SASO') + '</small>' +
             '</div>' +
           '</div>' +
@@ -232,7 +237,11 @@ SASO.layout = (function () {
               SASO.model.escapeHtml(session.name.split(' ')[0]) + '</span>' +
             '</a>' +
             '<div class="dropdown-menu dropdown-menu-right">' +
-              '<span class="dropdown-header">' + SASO.model.escapeHtml(session.position) + '</span>' +
+              '<span class="dropdown-header">' + SASO.model.escapeHtml(session.name) + '<br>' +
+                SASO.model.escapeHtml(session.position) + '</span>' +
+              '<div class="dropdown-divider"></div>' +
+              '<a href="' + base + myProfilePath() + '" class="dropdown-item">' +
+                '<i class="fa-solid fa-user-gear mr-2"></i>My Profile</a>' +
               '<div class="dropdown-divider"></div>' +
               '<a href="#" class="dropdown-item" id="btnResetDemo">' +
                 '<i class="fa-solid fa-rotate mr-2"></i>Reset demo data</a>' +
@@ -243,6 +252,10 @@ SASO.layout = (function () {
           '</li>' +
         '</ul>' +
       '</nav>';
+  }
+
+  function myProfilePath() {
+    return session.role === C.ROLE.SASO ? 'pages/saso/my-profile.html' : 'pages/org/my-profile.html';
   }
 
   function renderHeader(title, breadcrumb) {

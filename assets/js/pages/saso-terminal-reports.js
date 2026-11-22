@@ -58,7 +58,7 @@
       '<div class="card-body p-0" id="tableHost"></div>' +
     '</div>';
 
-  SASO.listview.fillSelect('fOrg', M.db().organizations.map(function (o) {
+  SASO.listview.fillSelect('fOrg', M.organizations().map(function (o) {
     return { value: o.id, label: o.acronym };
   }), 'All organizations');
 

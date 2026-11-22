@@ -63,7 +63,7 @@ SASO.orgAccountForm = (function () {
     var isRequest = mode === 'request';
     var keepPassword = mode === 'edit' && !(opts && opts.newAccount);
     var colleges = [];
-    M.db().organizations.forEach(function (o) {
+    M.organizations().forEach(function (o) {
       if (o.college && colleges.indexOf(o.college) === -1) { colleges.push(o.college); }
     });
 

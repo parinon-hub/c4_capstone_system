@@ -263,10 +263,25 @@ a:hover { color: var(--cspc-navy); }
 }
 
 .stat-tile .stat-icon {
-  float: right;
+  position: absolute;
+  top: 0.85rem;
+  right: 0.9rem;
   font-size: 1.25rem;
   color: var(--cspc-line);
 }
+
+/* Every tile in a row is the same height, whatever its label wraps to, and the
+   number and label line up from one tile to the next. */
+.stat-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-right: 2.6rem;
+  min-height: 5.25rem;
+}
+.row > [class*="col"] > .stat-tile { height: calc(100% - 1rem); }
+.stat-tile .stat-label { line-height: 1.3; }
 
 .stat-tile.is-attention  { border-left-color: var(--cspc-gold); }
 .stat-tile.is-overdue    { border-left-color: #c0392b; }
@@ -927,6 +942,7 @@ a.notif-message:hover { color: var(--cspc-navy); text-decoration: underline; }
   .stat-tile .stat-value { font-size: 1.375rem; }
   .stat-tile .stat-label { font-size: 0.6875rem; }
   .stat-tile .stat-icon { display: none; }
+  .stat-tile { padding-right: 0.8rem; min-height: 4.5rem; }
 
   .urgent-list li { flex: 1 1 100%; border-right: 0; border-bottom: 1px solid var(--cspc-line); }
   .urgent-list li:last-child { border-bottom: 0; }
@@ -1610,3 +1626,125 @@ a.notif-message:hover { color: var(--cspc-navy); text-decoration: underline; }
   display: inline-block; margin-left: 0.5rem; padding: 0 0.45rem;
   border-radius: 999px; background: #dfe7f1; font-size: 0.6875rem;
 }
+
+/* ---------------------------------------------------------------------------
+   My Profile
+   --------------------------------------------------------------------------- */
+.profile-head .user-avatar-lg {
+  width: 3.5rem;
+  height: 3.5rem;
+  font-size: 1.15rem;
+  background: var(--cspc-navy);
+  color: #fff;
+  margin-right: 1rem;
+}
+.profile-head .h5 { color: var(--cspc-ink); font-weight: 700; }
+.cell-sub.cell-submitter { color: var(--cspc-navy); }
+.ptc-fields { border-top: 1px solid var(--cspc-line); padding-top: 0.9rem; margin-top: 0.25rem; }
+.ptc-fields-title { font-size: 0.8125rem; font-weight: 700; color: var(--cspc-navy); margin-bottom: 0.6rem; }
+
+/* ---------------------------------------------------------------------------
+   SASO official forms (saso-forms.js): CSPC-F-SASO-05, -07 and -59.
+   One A4 page at 96 dpi, so the screen, the print and the PDF match.
+   --------------------------------------------------------------------------- */
+.sf-page {
+  width: 794px; min-height: 1123px; box-sizing: border-box;
+  padding: 34px 56px 26px; margin: 0 auto; background: #fff; color: #111;
+  font-family: Calibri, Carlito, "Segoe UI", Arial, sans-serif; font-size: 12.5px; line-height: 1.3;
+  position: relative; display: flex; flex-direction: column;
+}
+.sf-offscreen { position: fixed; left: -10000px; top: 0; }
+.sf-head { display: flex; align-items: center; }
+.sf-seal { width: 62px; height: auto; margin-right: 10px; }
+.sf-inst { font-family: Arial, sans-serif; font-size: 12px; line-height: 1.2; }
+.sf-college { font-weight: 700; font-size: 13px; }
+.sf-rule { border-bottom: 3px solid #1f5fb3; margin: 4px 0 6px; position: relative; height: 4px; }
+.sf-code { position: absolute; right: 0; top: -6px; background: #fff; padding-left: 6px; font: 700 11px Arial, sans-serif; }
+.sf-title { text-align: center; font-weight: 700; font-size: 16px; margin-top: 6px; }
+.sf-title-lg { font-family: Arial, sans-serif; font-size: 19px; line-height: 1.25; margin: 10px 0 22px; }
+.sf-office-title { text-align: center; font: 700 14px Arial, sans-serif; margin-top: 8px; }
+.sf-prepared { text-align: right; font-weight: 700; margin: 2px 0 4px; }
+.sf-fill { display: inline-block; min-width: 150px; border-bottom: 1px solid #111; padding: 0 4px; font-weight: 400; text-align: center; }
+.sf-fill-sm { min-width: 70px; }
+.sf-fill-md { min-width: 70px; margin-left: 8px; }
+.sf-nature-title { font-style: italic; font-weight: 700; font-size: 13px; }
+.sf-nature { display: flex; gap: 24px; margin-bottom: 4px; }
+.sf-nature .sf-col { flex: 1; }
+.sf-check { display: flex; align-items: flex-start; gap: 4px; margin: 1px 0; }
+.sf-check b { display: flex; gap: 4px; }
+.sf-italic { font-style: italic; }
+.sf-box {
+  flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+  width: 13px; height: 13px; border: 1.2px solid #111; font-size: 11px; line-height: 1; margin-top: 1px; font-style: normal;
+}
+.sf-box.is-on { color: #0b3a7a; font-weight: 700; }
+.sf-grid { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.sf-grid td { border: 1.2px solid #111; vertical-align: top; padding: 4px 7px; }
+.sf-label { font-weight: 700; }
+.sf-value { min-height: 22px; padding: 2px 0 2px 4px; }
+.sf-value-inline { font-weight: 400; }
+.sf-small { font-size: 11px; color: #333; }
+.sf-ol { margin: 0; padding-left: 18px; }
+.sf-certify { text-align: justify; margin: 0 0 30px; }
+.sf-sig { margin-top: 18px; }
+.sf-sig-row { display: flex; border-bottom: 1px solid #111; min-height: 18px; }
+.sf-sig-name { flex: 1.6; text-align: center; font-weight: 700; }
+.sf-sig-des { flex: 1; text-align: center; }
+.sf-sig-cap { display: flex; font-weight: 700; font-size: 12px; }
+.sf-sig-cap span:first-child { flex: 1.6; text-align: center; }
+.sf-sig-cap span + span { flex: 1; text-align: center; }
+.sf-mt { margin-top: 12px; }
+.sf-noted { width: 62%; margin: 20px auto 0; text-align: center; }
+.sf-noted-name { border-bottom: 1px solid #111; min-height: 18px; font-weight: 700; }
+.sf-noted-cap { font-weight: 700; font-size: 12px; }
+.sf-office { padding-bottom: 6px; }
+.sf-signer { text-align: center; margin: 26px 0 10px; }
+.sf-signer-name { font-weight: 700; text-decoration: underline; }
+.sf-remarks { min-height: 40px; font-size: 11.5px; }
+.sf-split { border-top: 1.2px solid #111; margin: 6px -7px; }
+.sf-decide { font-weight: 700; font-size: 14px; margin: 10px 0 0 18px; line-height: 1.5; }
+.sf-attach { margin: 6px 0 0 6px; }
+.sf-attach .sf-check { margin-left: 26px; }
+.sf-copynote { display: flex; gap: 18px; font-weight: 700; font-style: italic; font-size: 11px; margin: 6px 0 0 6px; }
+.sf-getpermit { font-weight: 700; font-style: italic; font-size: 11px; margin: 8px 0 0 6px; }
+.sf-foot {
+  margin-top: auto; border-top: 3px solid #1f5fb3; padding-top: 4px;
+  display: flex; justify-content: space-between; font: 700 11px Arial, sans-serif;
+}
+.sf-page-59 { font-family: Arial, sans-serif; font-size: 15px; }
+.sf-line { display: flex; align-items: flex-end; gap: 6px; margin: 4px 0; }
+.sf-grow { flex: 1; text-align: left; }
+.sf-req { margin: 8px 0 0 30px; padding-left: 20px; }
+.sf-req li { margin: 3px 0; }
+.sf-req li span:first-child { display: inline-block; min-width: 300px; }
+.sf-others { margin: 4px 0 0 50px; }
+.sf-block { display: block; min-height: 22px; margin-top: 8px; text-align: left; }
+.sf-checked { width: 55%; margin: 26px 0 30px 140px; }
+.sf-center { text-align: center; }
+.doc-sheet .sf-page { box-shadow: 0 1px 6px rgba(0,0,0,0.12); }
+@media print { .doc-sheet .sf-page { box-shadow: none; } }
+.doc-sheet.sf-holder { max-width: none; overflow-x: auto; background: #f1f3f6; padding: 12px 0; }
+@media print {
+  .doc-sheet.sf-holder { background: none; padding: 0; overflow: visible; }
+  .sf-holder .sf-page { width: 100%; min-height: 268mm; padding: 0; }
+}
+/* The off-campus form carries more rows, so it is set tighter to stay on one page. */
+.sf-page { min-height: 1122px; }
+.sf-off { font-size: 11.5px; padding-top: 24px; padding-bottom: 18px; line-height: 1.22; }
+.sf-off .sf-certify { margin-bottom: 8px; }
+.sf-off .sf-sig { margin-top: 10px; }
+.sf-off .sf-noted { margin-top: 14px; }
+.sf-off .sf-signer { margin: 10px 0 4px; }
+.sf-off .sf-remarks { min-height: 18px; }
+.sf-off .sf-decide { margin-top: 4px; font-size: 13px; line-height: 1.35; }
+.sf-off .sf-value { min-height: 14px; }
+.sf-off .sf-grid td { padding: 3px 7px; }
+.sf-off .sf-title { margin-top: 2px; }
+
+/* List of Student Activities: SASO's workbook header and wide table. */
+.report-doc.doc-sheet.is-wide { max-width: none; }
+.sal-head { text-align: center; font-size: 0.8125rem; line-height: 1.35; margin-bottom: 0.5rem; }
+.sal-head .sal-strong { font-weight: 700; }
+.sal-table th { white-space: normal; vertical-align: middle; text-align: center; }
+.sal-table td { font-size: 0.75rem; }
+.cell-sub.cell-submitter { white-space: nowrap; }

@@ -41,8 +41,11 @@
   var state = {
     ay: years.indexOf(params.get('ay')) !== -1 ? params.get('ay') : M.currentAcademicYear(),
     org: isSaso ? (params.get('org') || '') : session.organizationId,
+    q: '',
+    page: 1,
     report: null
   };
+  var PAGE_SIZE = 25;
 
   document.getElementById('pageRoot').innerHTML =
     '<div class="callout callout-info text-sm py-2 no-print"><i class="fa-solid fa-box-archive mr-2"></i>' +
@@ -54,9 +57,11 @@
       '<div class="card-header"><h3 class="card-title">Academic year</h3></div>' +
       '<div class="card-body py-2">' +
         '<div class="form-row align-items-end">' +
-          '<div class="form-group col-lg-8 mb-2"><div class="btn-group btn-group-sm flex-wrap" id="ayTabs"></div></div>' +
+          '<div class="form-group col-md-4 mb-2"><label for="fAY" class="text-sm mb-1">Academic year</label>' +
+            '<select class="form-control form-control-sm" id="fAY"></select>' +
+            '<small class="form-text text-muted" id="ayRange"></small></div>' +
           (isSaso
-            ? '<div class="form-group col-lg-4 mb-2"><label for="fOrg" class="text-sm mb-1">Organization</label>' +
+            ? '<div class="form-group col-md-4 mb-2"><label for="fOrg" class="text-sm mb-1">Organization</label>' +
                 '<select class="form-control form-control-sm" id="fOrg"></select></div>'
             : '') +
         '</div>' +
@@ -67,18 +72,37 @@
     '<div class="card no-print">' +
       '<div class="card-header"><h3 class="card-title" id="listTitle">Activities</h3>' +
         '<div class="card-tools" id="reportButtons"></div></div>' +
+      '<div class="card-body border-bottom py-2">' +
+        '<input type="search" class="form-control form-control-sm" id="fSearch" ' +
+          'placeholder="Search activity, organization or venue"></div>' +
       '<div class="card-body p-0" id="listHost"></div>' +
+      '<div class="card-footer d-flex align-items-center" id="listPager"></div>' +
     '</div>' +
     '<div id="reportHost"></div>';
 
-  if (isSaso) {
-    SASO.listview.fillSelect('fOrg', M.db().organizations.map(function (o) {
-      return { value: o.id, label: o.acronym };
+  function fillOrgs() {
+    if (!isSaso) { return; }
+    var orgs = M.organizationsForYear(state.ay).slice().sort(function (a, b) {
+      return a.acronym.localeCompare(b.acronym);
+    });
+    if (state.org && !orgs.some(function (o) { return o.id === state.org; })) { state.org = ''; }
+    SASO.listview.fillSelect('fOrg', orgs.map(function (o) {
+      return { value: o.id, label: o.acronym + (o.archiveOnly ? ' (past records)' : '') };
     }), 'All organizations', state.org);
+  }
+
+  if (isSaso) {
     document.getElementById('fOrg').addEventListener('change', function () {
-      state.org = this.value; state.report = null; render();
+      state.org = this.value; state.page = 1; state.report = null; render();
     });
   }
+  document.getElementById('fAY').addEventListener('change', function () {
+    state.ay = this.value; state.page = 1; state.report = null; render();
+  });
+  document.getElementById('fSearch').addEventListener('input', function () {
+    state.q = this.value.trim().toLowerCase(); state.page = 1; renderList(currentActs);
+  });
+  var currentActs = [];
 
   function retentionBadge(ay) {
     return M.isRetained(ay)
@@ -87,20 +111,15 @@
   }
 
   function renderTabs() {
-    var windowYears = M.accreditationWindow();
-    document.getElementById('ayTabs').innerHTML = years.map(function (ay) {
+    var sel = document.getElementById('fAY');
+    sel.innerHTML = years.map(function (ay) {
       var n = M.activitiesInYear(ay, state.org || null).length;
-      var inWindow = windowYears.indexOf(ay) !== -1;
-      return '<button type="button" class="btn btn-outline-primary' + (state.ay === ay ? ' active' : '') +
-        '" data-ay="' + ay + '" title="' + (inWindow ? 'Within the accreditation look-back' : 'Earlier year') + '">' +
-        'AY ' + ay + (ay === M.currentAcademicYear() ? ' (current)' : '') +
-        ' <span class="badge badge-light ml-1">' + n + '</span>' +
-        (M.isRetained(ay) ? '' : ' <i class="fa-solid fa-box-archive ml-1" aria-label="Retention period met"></i>') +
-        '</button>';
+      return '<option value="' + ay + '"' + (state.ay === ay ? ' selected' : '') + '>AY ' + ay +
+        (ay === M.currentAcademicYear() ? ' (current)' : '') + ' · ' + n + ' record' + (n === 1 ? '' : 's') +
+        (M.isRetained(ay) ? '' : ' · retention met') + '</option>';
     }).join('');
-    document.querySelectorAll('#ayTabs [data-ay]').forEach(function (b) {
-      b.addEventListener('click', function () { state.ay = this.getAttribute('data-ay'); state.report = null; render(); });
-    });
+    var range = M.academicYearRange(state.ay);
+    document.getElementById('ayRange').textContent = M.formatDate(range.from) + ' to ' + M.formatDate(range.to);
 
     var until = M.retainUntil(state.ay);
     document.getElementById('retentionLine').innerHTML = retentionBadge(state.ay) + ' ' +
@@ -141,11 +160,15 @@
 
     var buttons = [];
     if (state.org) {
-      buttons.push('<button type="button" class="btn btn-sm btn-primary" data-report="annual">' +
+      buttons.push('<button type="button" class="btn btn-sm btn-primary mr-1" data-report="annual">' +
         '<i class="fa-solid fa-file-lines mr-1"></i>Annual Accomplishment Report</button>');
+      buttons.push('<button type="button" class="btn btn-sm btn-outline-primary mr-1" data-report="accreditation">' +
+        '<i class="fa-solid fa-award mr-1"></i>Accreditation and Leveling</button>');
     }
+    buttons.push('<button type="button" class="btn btn-sm btn-outline-success mr-1" data-report="list">' +
+      '<i class="fa-solid fa-file-excel mr-1"></i>List of Student Activities</button>');
     if (isSaso) {
-      buttons.push('<button type="button" class="btn btn-sm btn-outline-primary ml-1" data-report="institutional">' +
+      buttons.push('<button type="button" class="btn btn-sm btn-outline-primary" data-report="institutional">' +
         '<i class="fa-solid fa-landmark mr-1"></i>Report on Student Organizations and Activities</button>');
     }
     document.getElementById('reportButtons').innerHTML = buttons.join('');
@@ -154,27 +177,43 @@
     });
 
     var host = document.getElementById('listHost');
+    var pager = document.getElementById('listPager');
+    if (state.q) {
+      acts = acts.filter(function (a) {
+        return [a.title, a.venue, a.category, M.orgAcronym(a.organizationId), (M.orgById(a.organizationId) || {}).name]
+          .join(' ').toLowerCase().indexOf(state.q) !== -1;
+      });
+    }
     if (!acts.length) {
+      pager.innerHTML = '';
       host.innerHTML = '<div class="empty-state"><i class="fa-regular fa-folder-open"></i>' +
-        '<h6>No records for AY ' + esc(state.ay) + '</h6><p>Choose another academic year' +
-        (isSaso ? ' or organization' : '') + '.</p></div>';
+        '<h6>No records for AY ' + esc(state.ay) + (state.q ? ' match your search' : '') +
+        '</h6><p>Choose another academic year' + (isSaso ? ' or organization' : '') + '.</p></div>';
       return;
     }
+    var paged = SASO.listview.paginate(acts, state, PAGE_SIZE);
+    SASO.listview.renderPager('listPager', acts.length, paged.pages, state, PAGE_SIZE, function () {
+      renderList(currentActs);
+      document.getElementById('listTitle').scrollIntoView({ block: 'start' });
+    });
     host.innerHTML = '<div class="table-responsive"><table class="table table-hover">' +
       '<thead><tr>' + (isSaso ? '<th>Organization</th>' : '') +
         '<th>Activity</th><th>Date</th><th>Venue</th><th>Stage</th><th>Post-activity reports</th><th>Kept until</th>' +
       '</tr></thead><tbody>' +
-      acts.map(function (a) {
+      paged.slice.map(function (a) {
+        var imported = M.isImported(a);
         var reqs = M.requirementsFor(a.id, C.PHASE.POST_ACTIVITY);
         var mandatory = reqs.filter(function (r) { return r.mandatory; });
         var ok = mandatory.filter(function (r) { return r.status === C.REQUIREMENT.APPROVED; }).length;
         return '<tr>' +
           (isSaso ? '<td><span class="cell-primary">' + esc(M.orgAcronym(a.organizationId)) + '</span></td>' : '') +
           '<td><a class="cell-primary" href="' + SASO.layout.href(base + 'activity-details.html?id=' + a.id) + '">' +
-            esc(a.title) + '</a><span class="cell-sub">' + esc(a.category) + '</span></td>' +
-          '<td class="text-sm text-nowrap">' + M.formatDateRange(a.dateStart, a.dateEnd) + '</td>' +
+            esc(a.title) + '</a><span class="cell-sub">' + esc(a.category) +
+            (imported ? ' · <span class="badge badge-light border" title="' + esc(a.source || 'SASO list of student activities') +
+              '">From SASO list</span>' : '') + '</span></td>' +
+          '<td class="text-sm">' + esc(M.activityDateText(a)) + '</td>' +
           '<td class="text-sm">' + esc(a.venue) + '<span class="cell-sub">' + M.label(a.venueType) + '</span></td>' +
-          '<td>' + M.badge(M.stageOf(a)) + '</td>' +
+          '<td>' + (imported ? '<span class="badge badge-success status-badge">Conducted</span>' : M.badge(M.stageOf(a))) + '</td>' +
           '<td class="text-sm">' + (reqs.length ? ok + ' of ' + mandatory.length + ' accepted' : '<span class="text-muted">Not yet due</span>') + '</td>' +
           '<td class="text-sm text-nowrap">' + M.formatDate(M.retainUntil(state.ay)) +
             (M.isProtectedRecord(a) ? '<span class="cell-sub"><i class="fa-solid fa-lock mr-1"></i>Cannot be deleted</span>' : '') +
@@ -184,30 +223,21 @@
 
   function renderReport(scroll) {
     var host = document.getElementById('reportHost');
-    if (!state.report || (state.report === 'annual' && !state.org)) { host.innerHTML = ''; return; }
-    var rep = state.report === 'annual' ? SASO.ched.annual(state.org, state.ay) : SASO.ched.institutional(state.ay);
-    host.innerHTML = '<div class="card">' +
-      '<div class="card-header no-print"><h3 class="card-title">' + esc(rep.title.charAt(0) + rep.title.slice(1).toLowerCase()) + '</h3>' +
-        '<div class="card-tools">' +
-          '<button type="button" class="btn btn-sm btn-outline-primary mr-1" id="btnCsv"><i class="fa-solid fa-file-csv mr-1"></i>Export CSV</button>' +
-          '<button type="button" class="btn btn-sm btn-primary" id="btnPrint"><i class="fa-solid fa-print mr-1"></i>Print</button>' +
-        '</div></div>' +
-      '<div class="card-body"><div class="report-doc doc-sheet" id="reportDoc">' + SASO.ched.render(rep) + '</div></div>' +
-    '</div>';
-    document.getElementById('btnPrint').addEventListener('click', function () {
-      document.body.classList.add('printing-report');
-      window.print();
-      document.body.classList.remove('printing-report');
-    });
-    document.getElementById('btnCsv').addEventListener('click', function () {
-      SASO.ched.downloadCsv(rep);
-      SASO.layout.toast('CSV exported.');
-    });
+    var needsOrg = state.report === 'annual' || state.report === 'accreditation';
+    if (!state.report || (needsOrg && !state.org)) { host.innerHTML = ''; return; }
+    var rep = state.report === 'annual' ? SASO.ched.annual(state.org, state.ay)
+      : state.report === 'accreditation' ? SASO.ched.accreditation(state.org, state.ay)
+      : state.report === 'list' ? SASO.ched.studentActivities(state.ay, 'all', state.org || null)
+      : SASO.ched.institutional(state.ay);
+    var title = rep.title.charAt(0) + rep.title.slice(1).toLowerCase();
+    SASO.ched.mount(host, rep, { title: title });
     if (scroll) { host.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   }
 
   function render() {
+    fillOrgs();
     var acts = M.activitiesInYear(state.ay, state.org || null);
+    currentActs = acts;
     renderTabs();
     renderTiles(acts);
     renderList(acts);

@@ -287,7 +287,8 @@
         return groupRow + '<tr class="' + rowClass + '">' +
           '<td><span class="cell-primary">' + M.escapeHtml(a.title || 'Untitled draft') + '</span>' +
             '<span class="cell-sub">' + M.escapeHtml(a.category || '-') + ' · ' +
-              M.label(a.venueType) + ' · ' + M.escapeHtml(a.venue || '-') + '</span></td>' +
+              M.label(a.venueType) + ' · ' + M.escapeHtml(a.venue || '-') + '</span>' +
+            M.submittedByHtml(a) + '</td>' +
           '<td class="text-nowrap">' + M.formatDate(L.pickedDate(a, state)) + '</td>' +
           '<td>' + M.badge(a.proposalStatus) +
             (M.isInApprovalRoute(a)

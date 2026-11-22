@@ -56,12 +56,15 @@ SASO.auth = (function () {
       loginAt: new Date().toISOString()
     };
 
+    store(session);
+    return { ok: true, session: session };
+  }
+
+  function store(session) {
     try {
       window.sessionStorage.setItem(KEY, JSON.stringify(session));
       window.localStorage.setItem(KEY, JSON.stringify(session));
     } catch (e) { /* memory-only fallback */ }
-
-    return { ok: true, session: session };
   }
 
   function logout(base) {
@@ -105,6 +108,7 @@ SASO.auth = (function () {
   return {
     current: current,
     login: login,
+    store: store,
     logout: logout,
     guard: guard,
     homeFor: homeFor,
