@@ -147,7 +147,7 @@
 
     var tiles = [
       { value: all.length, label: 'In the trash bin', icon: 'fa-trash-can' },
-      { value: soon.length, label: 'Permanently deleted within ' + SOON_DAYS + ' days',
+      { value: soon.length, label: 'Deleted within ' + SOON_DAYS + ' days',
         icon: 'fa-hourglass-end', mod: soon.length ? 'is-overdue' : '' },
       { value: byOrg.length, label: isSaso ? 'Deleted by organizations' : 'Deleted by you',
         icon: 'fa-people-group' },

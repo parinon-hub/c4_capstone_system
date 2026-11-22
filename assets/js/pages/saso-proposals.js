@@ -131,7 +131,7 @@
     var tiles = [
       { value: withSaso.length, label: 'With SASO', icon: 'fa-file-pen',
         mod: withSaso.length ? 'is-attention' : '', status: '' },
-      { value: needsDoc.length, label: 'Awaiting the organization', icon: 'fa-circle-exclamation',
+      { value: needsDoc.length, label: 'Awaiting organization', icon: 'fa-circle-exclamation',
         mod: '', status: C.PROPOSAL.REQUIREMENTS_NEEDED },
       { value: inRoute.length, label: 'In approval route', icon: 'fa-arrow-right-arrow-left',
         mod: '', status: '' },

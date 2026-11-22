@@ -44,10 +44,10 @@
     }).length;
     var advisers = users.filter(function (u) { return M.positionTitle(u).toLowerCase() === 'adviser'; }).length;
     var list = [
-      { v: users.length, l: 'Personal accounts', i: 'fa-id-card' },
+      { v: users.length, l: 'Accounts', i: 'fa-id-card' },
       { v: officers, l: 'Officers', i: 'fa-user-tie' },
       { v: users.length - officers - advisers, l: 'Members', i: 'fa-users' },
-      { v: M.hasAccountLimit() ? M.accountSlotsLeft(org.id) : 'No limit', l: 'Accounts that can still be added', i: 'fa-user-plus' }
+      { v: M.hasAccountLimit() ? M.accountSlotsLeft(org.id) : 'No limit', l: 'Can still be added', i: 'fa-user-plus' }
     ];
     document.getElementById('tiles').innerHTML = list.map(function (t) {
       return '<div class="col-6 col-md"><div class="stat-tile">' +
