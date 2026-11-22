@@ -430,11 +430,46 @@ SASO.config = (function () {
   var ACCOUNT_MANAGERS = ['head', 'admin', 'admin1'];
   var ACCOUNT_REQUEST = { PENDING: 'PENDING', APPROVED: 'APPROVED', DECLINED: 'DECLINED' };
 
+  /* ---- Accounts per organization (panel RSC) --------------------------------
+     How many sign-in accounts an organization may hold. Each account belongs
+     to one named person with its own username and password, so every action
+     in the system is traced to that person rather than to a shared login.
+     PROTOTYPE ASSUMPTION: three accounts, for the adviser and two officers
+     (president and secretary). SASO can change the number in Settings.
+     ---------------------------------------------------------------------------- */
+  var ORG_ACCOUNT_LIMIT = 3;
+  var ORG_ACCOUNT_LIMIT_MAX = 10;
+  var ORG_ACCOUNT_POSITIONS = ['Adviser', 'President', 'Secretary', 'Vice President', 'Treasurer'];
+
+  /* ---- Record retention (panel RSC) -------------------------------------------
+     Activity and accomplishment records are kept for at least three academic
+     years after the year they belong to, so an organization's last three
+     years are always on file for accreditation and re-accreditation. Records
+     are never deleted automatically: once the period has passed they are only
+     flagged as eligible for disposal by SASO.
+     PROTOTYPE ASSUMPTION: the academic year starts on August 1.
+     ---------------------------------------------------------------------------- */
+  var RECORD_RETENTION_YEARS = 3;
+  var ACADEMIC_YEAR_START_MONTH = 7;   /* 0-based: 7 = August */
+
+  /* ---- CHED report references (panel RSC) --------------------------------------
+     The report formats below follow what CHED requires of student
+     organization records: CMO No. 9, s. 2013 (Enhanced Policies and
+     Guidelines on Student Affairs and Services) for the accreditation,
+     monitoring and evaluation of student organizations and their activities,
+     and CMO No. 63, s. 2017 for local off-campus activities.
+     ---------------------------------------------------------------------------- */
+  var CHED_REFERENCE = {
+    SAS: 'CHED Memorandum Order No. 9, s. 2013',
+    OFF_CAMPUS: 'CHED Memorandum Order No. 63, s. 2017'
+  };
+
   /* v3: adds the trash bin and per-staff notifications. Bumping the key loads
      the new sample data automatically instead of reusing an older store. */
   /* v4: adds organization account requests. */
   /* v5: SASO demo accounts renamed to head, admin, admin1 and admin2. */
-  var STORAGE_KEY = 'cspc_saso_prototype_v5';
+  /* v6: several accounts per organization and three academic years of records. */
+  var STORAGE_KEY = 'cspc_saso_prototype_v6';
   var SESSION_KEY = 'cspc_saso_session_v2';
 
   return {
@@ -456,6 +491,12 @@ SASO.config = (function () {
     TRASH_RETENTION_DAYS: TRASH_RETENTION_DAYS,
     ACCOUNT_MANAGERS: ACCOUNT_MANAGERS,
     ACCOUNT_REQUEST: ACCOUNT_REQUEST,
+    ORG_ACCOUNT_LIMIT: ORG_ACCOUNT_LIMIT,
+    ORG_ACCOUNT_LIMIT_MAX: ORG_ACCOUNT_LIMIT_MAX,
+    ORG_ACCOUNT_POSITIONS: ORG_ACCOUNT_POSITIONS,
+    RECORD_RETENTION_YEARS: RECORD_RETENTION_YEARS,
+    ACADEMIC_YEAR_START_MONTH: ACADEMIC_YEAR_START_MONTH,
+    CHED_REFERENCE: CHED_REFERENCE,
     STORAGE_KEY: STORAGE_KEY, SESSION_KEY: SESSION_KEY
   };
 })();

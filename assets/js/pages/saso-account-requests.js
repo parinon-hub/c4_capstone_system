@@ -94,10 +94,12 @@
       { value: c.APPROVED, label: 'Approved', icon: 'fa-user-check', mod: 'is-complete' },
       { value: c.DECLINED, label: 'Declined', icon: 'fa-user-xmark' },
       { value: M.db().organizations.filter(function (o) { return M.accountForOrg(o.id); }).length,
-        label: 'Organizations with accounts', icon: 'fa-people-group' }
+        label: 'Organizations with accounts', icon: 'fa-people-group' },
+      { value: M.db().users.filter(function (u) { return u.role === C.ROLE.ORG; }).length,
+        label: 'Organization accounts (up to ' + M.orgAccountLimit() + ' each)', icon: 'fa-id-card' }
     ];
     document.getElementById('tiles').innerHTML = tiles.map(function (t) {
-      return '<div class="col-6 col-md-3"><div class="stat-tile ' + (t.mod || '') + '">' +
+      return '<div class="col-6 col-md"><div class="stat-tile ' + (t.mod || '') + '">' +
         '<i class="fa-solid ' + t.icon + ' stat-icon"></i>' +
         '<span class="stat-value">' + t.value + '</span>' +
         '<span class="stat-label">' + t.label + '</span>' +
@@ -127,11 +129,12 @@
   function accountRows() {
     var q = accState.search.toLowerCase();
     var list = M.db().organizations.map(function (o) {
-      return { org: o, user: M.accountForOrg(o.id) };
+      return { org: o, user: M.accountForOrg(o.id), users: M.accountsForOrg(o.id) };
     }).filter(function (r) {
       if (!q) { return true; }
-      var u = r.user || {};
-      var hay = [r.org.acronym, r.org.name, u.name, u.username, u.email].join(' ').toLowerCase();
+      var hay = [r.org.acronym, r.org.name].concat(r.users.map(function (u) {
+        return [u.name, u.username, u.email, u.position].join(' ');
+      })).join(' ').toLowerCase();
       return hay.indexOf(q) !== -1;
     });
     return L.sort(list, accState, function (r) { return r.org.acronym; });
@@ -152,35 +155,43 @@
     host.innerHTML = '<div class="table-responsive"><table class="table table-hover">' +
       '<thead><tr>' +
         L.header('Organization') +
-        L.header('Account holder') +
-        L.header('Contact') +
-        L.header('Username') +
+        L.header('Account holders') +
+        L.header('Usernames') +
+        L.header('Accounts') +
         '<th></th>' +
       '</tr></thead><tbody>' +
       paged.slice.map(function (r) {
-        var o = r.org, u = r.user;
+        var o = r.org, us = r.users;
+        var limit = M.orgAccountLimit();
+        var full = us.length >= limit;
         return '<tr>' +
           '<td><span class="cell-primary">' + M.escapeHtml(o.acronym) + '</span>' +
             '<span class="cell-sub">' + M.escapeHtml(o.name) + '</span></td>' +
-          (u
-            ? '<td class="text-sm">' + M.escapeHtml(u.name) +
-                '<span class="cell-sub">' + M.escapeHtml(u.position) + '</span></td>' +
-              '<td class="text-sm">' + (u.email ? M.escapeHtml(u.email) : '<span class="text-muted">-</span>') +
-                (u.contact ? '<span class="cell-sub">' + M.escapeHtml(u.contact) + '</span>' : '') + '</td>' +
-              '<td><code>' + M.escapeHtml(u.username) + '</code></td>'
-            : '<td colspan="3" class="text-sm text-muted"><i class="fa-solid fa-user-slash mr-1"></i>' +
-                'No sign-in account' + (canAct ? '. Use Edit to create one.' : '.') + '</td>') +
+          (us.length
+            ? '<td class="text-sm">' + us.map(function (u) {
+                  return '<div class="mb-1">' + M.escapeHtml(u.name) +
+                    '<span class="cell-sub">' + M.escapeHtml(u.position) + '</span></div>';
+                }).join('') + '</td>' +
+              '<td class="text-sm">' + us.map(function (u) {
+                  return '<div class="mb-1"><code>' + M.escapeHtml(u.username) + '</code>' +
+                    '<span class="cell-sub">&nbsp;</span></div>';
+                }).join('') + '</td>'
+            : '<td colspan="2" class="text-sm text-muted"><i class="fa-solid fa-user-slash mr-1"></i>' +
+                'No sign-in account' + (canAct ? '. Use Manage accounts to add one.' : '.') + '</td>') +
+          '<td class="text-nowrap"><span class="badge badge-' + (full ? 'secondary' : 'info') +
+            ' status-badge" title="Accounts used out of the limit set in Settings">' +
+            us.length + ' of ' + limit + '</span>' +
+            (full ? '<span class="cell-sub">Limit reached</span>' : '') + '</td>' +
           '<td class="text-right text-nowrap">' +
             (canAct
               ? '<button type="button" class="btn btn-sm btn-outline-secondary ml-1" data-edit-org="' + o.id + '" ' +
-                  'title="Edit account" aria-label="Edit ' + M.escapeHtml(o.acronym) + ' account">' +
-                  '<i class="fa-solid fa-pen-to-square"></i></button>' +
-                (u
-                  ? '<button type="button" class="btn btn-sm btn-outline-danger ml-1" data-delete-org="' + o.id + '" ' +
-                      'title="Delete account" aria-label="Delete ' + M.escapeHtml(o.acronym) + ' account">' +
-                      '<i class="fa-solid fa-trash-can"></i></button>'
-                  : '')
+                  'title="Edit organization details" aria-label="Edit ' + M.escapeHtml(o.acronym) + ' details">' +
+                  '<i class="fa-solid fa-pen-to-square"></i></button>'
               : '') +
+            '<button type="button" class="btn btn-sm btn-outline-primary ml-1" data-accounts-org="' + o.id + '" ' +
+              'title="' + (canAct ? 'Manage accounts' : 'View accounts') + '" aria-label="' +
+              (canAct ? 'Manage ' : 'View ') + M.escapeHtml(o.acronym) + ' accounts">' +
+              '<i class="fa-solid fa-users-gear mr-1"></i>' + (canAct ? 'Manage accounts' : 'View') + '</button>' +
           '</td>' +
         '</tr>';
       }).join('') + '</tbody></table></div>';
@@ -189,26 +200,194 @@
     host.querySelectorAll('[data-edit-org]').forEach(function (b) {
       b.addEventListener('click', function () { F.openEditDialog(this.getAttribute('data-edit-org'), renderAll); });
     });
-    host.querySelectorAll('[data-delete-org]').forEach(function (b) {
-      b.addEventListener('click', function () { confirmDelete(this.getAttribute('data-delete-org')); });
+    host.querySelectorAll('[data-accounts-org]').forEach(function (b) {
+      b.addEventListener('click', function () { openAccountsDialog(this.getAttribute('data-accounts-org')); });
     });
   }
 
-  function confirmDelete(orgId) {
+  /* ---- accounts of one organization (panel RSC) ---------------------------------------
+     Lists every account the organization holds, one per named person, and lets
+     the Head, Aide and Coordinator add, edit or remove them up to the limit
+     set in Settings. */
+
+  var USERNAME_RE = /^[a-z0-9._-]{3,20}$/i;
+  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function positionOf(user, org) {
+    var suffix = ', ' + org.acronym;
+    var p = user.position || '';
+    return p.slice(-suffix.length) === suffix ? p.slice(0, -suffix.length) : p;
+  }
+
+  function openAccountsDialog(orgId, editingId) {
     var org = M.orgById(orgId);
-    var user = M.accountForOrg(orgId);
-    if (!org || !user) { return; }
-    SASO.layout.confirmDialog({
-      title: 'Delete the ' + org.acronym + ' account',
-      body: 'The username "' + user.username + '" will no longer be able to sign in. ' + org.acronym +
-            ' stays on the roster with all its activities and records, and you can give it a new ' +
-            'account later with Edit.',
-      confirmLabel: 'Delete account', variant: 'danger'
-    }, function () {
-      var result = E.deleteOrganizationAccount(orgId);
-      if (!result.ok) { SASO.layout.toast(result.message, 'danger'); return; }
-      SASO.layout.toast('The ' + org.acronym + ' account was deleted.', 'warning');
-      renderAll();
+    if (!org) { return; }
+    var id = 'orgAccountsModal';
+    var wasOpen = !!document.getElementById(id);
+    var old = document.getElementById(id);
+    if (old) { old.remove(); }
+
+    var users = M.accountsForOrg(orgId);
+    var limit = M.orgAccountLimit();
+    var editing = editingId ? M.userById(editingId) : null;
+    var showForm = canAct && (editing || users.length < limit);
+    var esc = M.escapeHtml;
+
+    function f(fid, label, control, cols, req, help) {
+      return '<div class="form-group col-md-' + cols + '"><label for="' + fid + '" class="text-sm">' + label +
+        (req ? ' <span class="text-danger">*</span>' : '') + '</label>' + control +
+        '<div class="invalid-feedback" data-error-for="' + fid + '"></div>' +
+        (help ? '<small class="form-text text-muted">' + help + '</small>' : '') + '</div>';
+    }
+    function inp(fid, type, ph, value) {
+      return '<input type="' + type + '" class="form-control form-control-sm" id="' + fid + '"' +
+        (ph ? ' placeholder="' + esc(ph) + '"' : '') + (value ? ' value="' + esc(value) + '"' : '') +
+        ' autocomplete="off">';
+    }
+
+    var rowsHtml = users.length
+      ? '<table class="table table-sm mb-0"><thead><tr><th>Name</th><th>Position</th><th>Username</th>' +
+          '<th>Contact</th><th></th></tr></thead><tbody>' +
+          users.map(function (u, i) {
+            return '<tr' + (editing && editing.id === u.id ? ' class="table-active"' : '') + '>' +
+              '<td class="text-sm"><span class="cell-primary">' + esc(u.name) + '</span>' +
+                (i === 0 ? '<span class="cell-sub">Main account</span>' : '') + '</td>' +
+              '<td class="text-sm">' + esc(positionOf(u, org)) + '</td>' +
+              '<td><code>' + esc(u.username) + '</code></td>' +
+              '<td class="text-sm">' + (u.email ? esc(u.email) : '<span class="text-muted">-</span>') +
+                (u.contact ? '<span class="cell-sub">' + esc(u.contact) + '</span>' : '') + '</td>' +
+              '<td class="text-right text-nowrap">' +
+                (canAct
+                  ? '<button type="button" class="btn btn-xs btn-outline-secondary ml-1" data-acc-edit="' + u.id + '" ' +
+                      'title="Edit account" aria-label="Edit ' + esc(u.name) + '"><i class="fa-solid fa-pen-to-square"></i></button>' +
+                    '<button type="button" class="btn btn-xs btn-outline-danger ml-1" data-acc-remove="' + u.id + '" ' +
+                      'title="Remove account" aria-label="Remove ' + esc(u.name) + '"><i class="fa-solid fa-trash-can"></i></button>'
+                  : '') +
+              '</td></tr>';
+          }).join('') + '</tbody></table>'
+      : '<div class="empty-state py-3"><i class="fa-solid fa-user-slash"></i><h6>No accounts yet</h6>' +
+          '<p>' + esc(org.acronym) + ' cannot sign in until SASO adds an account.</p></div>';
+
+    var positions = C.ORG_ACCOUNT_POSITIONS;
+    var formHtml = !showForm ? '' :
+      '<div class="border-top pt-3 mt-3" id="accForm">' +
+        '<h6 class="oa-section"><i class="fa-solid ' + (editing ? 'fa-user-pen' : 'fa-user-plus') + ' mr-2"></i>' +
+          (editing ? 'Edit the account of ' + esc(editing.name) : 'Add an account') + '</h6>' +
+        '<div class="form-row">' +
+          f('accName', 'Full name', inp('accName', 'text', 'e.g. J. Dela Cruz', editing && editing.name), 6, true) +
+          f('accPosition', 'Position', inp('accPosition', 'text', 'e.g. Adviser',
+              editing ? positionOf(editing, org) : '').replace('autocomplete="off">', 'autocomplete="off" list="accPositions">') +
+            '<datalist id="accPositions">' + positions.map(function (p) { return '<option value="' + esc(p) + '">'; }).join('') +
+            '</datalist>', 6, true) +
+          f('accEmail', 'Email address', inp('accEmail', 'email', 'name@example.com', editing && editing.email), 6, false) +
+          f('accContact', 'Contact number', inp('accContact', 'tel', 'e.g. 0917 000 0000', editing && editing.contact), 6, false) +
+          f('accUsername', 'Username', inp('accUsername', 'text', 'e.g. ' + org.acronym.toLowerCase().replace(/[^a-z0-9]+/g, '') + '.adviser',
+              editing && editing.username), 12, true, '3 to 20 characters: letters, numbers, dot, dash or underscore.') +
+          f('accPassword', editing ? 'New password' : 'Password',
+            inp('accPassword', 'password', editing ? 'Leave blank to keep the current one' : 'At least 6 characters'), 6, !editing) +
+          f('accPassword2', editing ? 'Confirm new password' : 'Confirm password', inp('accPassword2', 'password', ''), 6, !editing) +
+        '</div>' +
+        '<div class="alert alert-danger text-sm py-2 mb-2 d-none" id="accError"></div>' +
+        '<div class="text-right">' +
+          (editing ? '<button type="button" class="btn btn-light btn-sm mr-1" id="accCancel">Cancel edit</button>' : '') +
+          '<button type="button" class="btn btn-primary btn-sm" id="accSave">' +
+            '<i class="fa-solid ' + (editing ? 'fa-floppy-disk' : 'fa-user-plus') + ' mr-1"></i>' +
+            (editing ? 'Save account' : 'Add account') + '</button>' +
+        '</div>' +
+      '</div>';
+
+    var fullNote = canAct && !editing && users.length >= limit
+      ? '<div class="callout callout-warning text-sm py-2 mt-3 mb-0">' + esc(org.acronym) +
+          ' has reached the limit of ' + limit + ' accounts. Remove an account to add another, ' +
+          'or change the limit in Settings.</div>'
+      : '';
+
+    document.body.insertAdjacentHTML('beforeend',
+      '<div class="modal fade" id="' + id + '" tabindex="-1">' +
+        '<div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content">' +
+          '<div class="modal-header">' +
+            '<h5 class="modal-title"><i class="fa-solid fa-users-gear mr-2 text-muted"></i>' +
+              esc(org.acronym) + ' accounts <span class="badge badge-info status-badge ml-1">' +
+              users.length + ' of ' + limit + '</span></h5>' +
+            '<button type="button" class="close" data-dismiss="modal">&times;</button></div>' +
+          '<div class="modal-body">' +
+            '<div class="callout callout-info text-sm py-2 mb-3">An organization may hold up to <strong>' + limit +
+              ' accounts</strong>, one for each person who works in the system: normally the adviser ' +
+              'and two officers. Each person signs in with their own username and password, so every ' +
+              'submission, reply and report is recorded under that person\u2019s name.</div>' +
+            rowsHtml + fullNote + formHtml +
+          '</div>' +
+          '<div class="modal-footer"><button type="button" class="btn btn-light" data-dismiss="modal">Close</button></div>' +
+        '</div></div></div>');
+
+    var $m = window.jQuery('#' + id);
+    if (wasOpen) { $m.removeClass('fade'); }
+    $m.modal('show');
+    $m.on('hidden.bs.modal', function () { if (!$m.data('reopening')) { $m.remove(); renderAll(); } });
+
+    function reopen(nextEditing) {
+      $m.data('reopening', true);
+      $m.modal('hide');
+      $m.remove();
+      window.jQuery('.modal-backdrop').remove();
+      document.body.classList.remove('modal-open');
+      openAccountsDialog(orgId, nextEditing);
+    }
+
+    var root = document.getElementById(id);
+    root.querySelectorAll('[data-acc-edit]').forEach(function (b) {
+      b.addEventListener('click', function () { reopen(this.getAttribute('data-acc-edit')); });
+    });
+    root.querySelectorAll('[data-acc-remove]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var u = M.userById(this.getAttribute('data-acc-remove'));
+        if (!u) { return; }
+        /* Confirmed in place: a second dialog over this one would hide it. */
+        var cell = this.parentNode;
+        cell.innerHTML = '<span class="text-sm text-danger mr-1">Remove? ' + esc(u.username) +
+          ' will no longer sign in.</span>' +
+          '<button type="button" class="btn btn-xs btn-danger" data-acc-yes>Remove</button>' +
+          '<button type="button" class="btn btn-xs btn-light ml-1" data-acc-no>Keep</button>';
+        cell.querySelector('[data-acc-no]').addEventListener('click', function () { reopen(editingId || null); });
+        cell.querySelector('[data-acc-yes]').addEventListener('click', function () {
+          var result = E.removeOrgAccount(u.id);
+          if (!result.ok) { SASO.layout.toast(result.message, 'danger'); return; }
+          SASO.layout.toast('The account of ' + u.name + ' was removed. ' + org.acronym +
+            ' keeps all its records.', 'warning');
+          reopen(null);
+        });
+      });
+    });
+    var cancel = document.getElementById('accCancel');
+    if (cancel) { cancel.addEventListener('click', function () { reopen(null); }); }
+
+    var save = document.getElementById('accSave');
+    if (!save) { return; }
+    var form = document.getElementById('accForm');
+    F.bindLiveClear(form);
+    save.addEventListener('click', function () {
+      function v(fid) { return String(document.getElementById(fid).value || '').trim(); }
+      var data = { name: v('accName'), position: v('accPosition'), email: v('accEmail'),
+                   contact: v('accContact'), username: v('accUsername'),
+                   password: document.getElementById('accPassword').value,
+                   password2: document.getElementById('accPassword2').value };
+      var e = {};
+      if (!data.name) { e.accName = 'Enter the person\u2019s full name.'; }
+      if (!data.position) { e.accPosition = 'Enter the position, for example Adviser.'; }
+      if (data.email && !EMAIL_RE.test(data.email)) { e.accEmail = 'Enter a valid email address.'; }
+      if (!data.username) { e.accUsername = 'Choose a username.'; }
+      else if (!USERNAME_RE.test(data.username)) { e.accUsername = 'Use 3 to 20 letters, numbers, dot, dash or underscore.'; }
+      if (editing && !data.password && !data.password2) { /* keeps the current password */ }
+      else if (!data.password || data.password.length < 6) { e.accPassword = 'Use at least 6 characters.'; }
+      if (data.password2 !== data.password) { e.accPassword2 = 'Passwords do not match.'; }
+      var box = document.getElementById('accError');
+      box.classList.add('d-none');
+      if (!F.showErrors(form, e)) { box.textContent = 'Please correct the highlighted fields.'; box.classList.remove('d-none'); return; }
+      var result = editing ? E.updateOrgAccount(editing.id, data) : E.addOrgAccount(orgId, data);
+      if (!result.ok) { box.textContent = result.message; box.classList.remove('d-none'); return; }
+      SASO.layout.toast(editing ? 'Account of ' + result.user.name + ' saved.'
+        : 'Account added. "' + result.user.username + '" can sign in now.');
+      reopen(null);
     });
   }
 

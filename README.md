@@ -37,6 +37,9 @@ below on the login screen.
 | `chs`   | `chs123`   | Organization Officer | CHS-SC |
 | `ssc`   | `ssc123`   | Organization Officer | SSC |
 | `cas`   | `cas123`   | Organization Officer | CAS-SC |
+| `jpcs.adviser` | `jpcs123` | Organization Adviser | JPCS |
+| `jpcs.sec` | `jpcs123` | Organization Secretary | JPCS |
+| `ccs.adviser` | `ccs123` | Organization Adviser | CCS-SC |
 
 **Reset demo data** lives in the user menu, top right. Use it before each fresh
 walkthrough.
@@ -323,6 +326,79 @@ render greyed with a phase tag, and any link pointing at them resolves to
 `pages/coming-soon.html` instead of a broken URL. As each phase lands, set its entry to `0` in the
 `PAGES` map in `layout.js` — sidebar rendering and link resolution both read
 from that one map.
+
+---
+
+## Panel revisions after the final defense
+
+Three of the panel's software recommendations are implemented in the
+prototype. The storage key moved to `v6`, so the new sample data loads
+automatically the first time the updated prototype is opened.
+
+### 1. How many accounts per organization
+
+An organization may hold up to **three accounts** by default: one for each
+person who works in the system, normally the adviser and two officers
+(president and secretary). Each person has their own username and password,
+so every submission, reply and report is recorded under that person's name
+instead of a shared login.
+
+- **Manage Accounts** shows each organization's account holders and a count
+  such as *2 of 3*. **Manage accounts** on a row opens the organization's
+  accounts, where the Head, Administrative Aide and Coordinator add, edit or
+  remove them. A fourth account is refused until one is removed.
+- The limit is an office policy value in **Settings** (*Accounts allowed per
+  organization*, 1 to 10). Lowering it keeps existing accounts but stops new
+  ones being added.
+- The organization's **Profile** lists its accounts.
+- Sample data: JPCS has all three accounts (`jpcs`, `jpcs.adviser`,
+  `jpcs.sec`), CCS-SC two, the others one.
+- *Prototype assumption: three accounts (`ORG_ACCOUNT_LIMIT` in
+  `config.js`).*
+
+### 2. Three years of records for accreditation
+
+Every activity belongs to an academic year (August 1 to July 31,
+`ACADEMIC_YEAR_START_MONTH` in `config.js`). Activity and accomplishment
+records are kept for **at least three academic years** after the year they
+belong to, so an organization's last three years are always on file.
+
+- **Records Archive** (both portals) lists the records of each academic year,
+  shows how long that year must still be kept, and prints the reports below.
+  SASO can filter by organization; an organization sees its own records.
+- A conducted activity **cannot be deleted** while its retention period runs.
+  No record is ever deleted automatically: a year past its period is only
+  flagged *Retention period met*, for SASO to decide.
+- The retention period is in **Settings** (minimum three academic years).
+- **Reports** has an *Academic Year* period.
+- Dashboards count the current academic year (plus anything older that is
+  still open), so three years of history do not inflate the figures.
+- Sample data: completed activities from the two previous academic years and
+  the one before, plus one older record that is past its retention period.
+
+### 3. Reports in the formats CHED requires
+
+Two reports follow the record CHED requires for student organizations and
+their activities under **CMO No. 9, s. 2013** (accreditation, monitoring and
+evaluation of student organizations) and **CMO No. 63, s. 2017** (local
+off-campus activities). Both are defined once in `core/ched-reports.js`.
+
+- **Annual Accomplishment Report** for one organization and one academic
+  year: organization details and standing, then each activity's title,
+  nature, date, venue, objectives, participants, budget and source of fund,
+  outcome and post-activity reports, with a summary.
+  Signed *Prepared by* (officer), *Noted by* (adviser), *Approved by*
+  (Head of SASO).
+- **Report on Student Organizations and Activities** for the institution:
+  the roster with each organization's standing, activities by category (on
+  campus, off campus and online), and the list of activities conducted.
+  Signed *Prepared by*, *Noted by* (Head of SASO), *Approved by* (College
+  President).
+- Both are in **Reports** (choose the CHED-format type) and in the **Records
+  Archive**, with Print and Export CSV.
+- *These layouts are built from the CHED issuances. When SASO provides the
+  exact template it submits to the CHED Regional Office, match the columns
+  in `core/ched-reports.js`.*
 
 ---
 

@@ -20,16 +20,25 @@ SASO.model = (function () {
 
   /* Office policy values. Falls back to the config defaults for stores seeded
      before Settings existed. */
+  var SETTING_DEFAULTS = {
+    reportDeadlineDays: C.TERMINAL_REPORT_DEADLINE_DAYS,
+    proposalAlertDays: C.PROPOSAL_WAITING_ALERT_DAYS,
+    accreditationAlertDays: 60,
+    orgAccountLimit: C.ORG_ACCOUNT_LIMIT,
+    retentionYears: C.RECORD_RETENTION_YEARS
+  };
+
   function settings() {
     var data = db();
-    if (!data.settings) {
-      data.settings = {
-        reportDeadlineDays: C.TERMINAL_REPORT_DEADLINE_DAYS,
-        proposalAlertDays: C.PROPOSAL_WAITING_ALERT_DAYS,
-        accreditationAlertDays: 60
-      };
-      SASO.storage.save();
-    }
+    var changed = false;
+    if (!data.settings) { data.settings = {}; changed = true; }
+    Object.keys(SETTING_DEFAULTS).forEach(function (k) {
+      if (data.settings[k] === undefined || data.settings[k] === null) {
+        data.settings[k] = SETTING_DEFAULTS[k];
+        changed = true;
+      }
+    });
+    if (changed) { SASO.storage.save(); }
     return data.settings;
   }
 
@@ -349,8 +358,20 @@ SASO.model = (function () {
     return out;
   }
 
+  /* Dashboards show the current academic year, plus anything from an earlier
+     year that is still open. Closed records of earlier years live in the
+     Records Archive, so three years of history do not inflate the counts. */
+  function dashboardActivities(orgId) {
+    var ay = currentAcademicYear();
+    return (orgId ? activitiesFor(orgId) : allActivities()).filter(function (a) {
+      if (academicYearOf(a.dateStart) === ay) { return true; }
+      var st = stageOf(a);
+      return st !== C.STAGE.COMPLETED && st !== C.STAGE.CLOSED;
+    });
+  }
+
   function sasoStats() {
-    var acts = allActivities();
+    var acts = dashboardActivities();
     var stages = countByStage(acts);
 
     return {
@@ -376,7 +397,7 @@ SASO.model = (function () {
   }
 
   function orgStats(orgId) {
-    var acts = activitiesFor(orgId);
+    var acts = dashboardActivities(orgId);
     var stages = countByStage(acts);
 
     return {
@@ -658,8 +679,111 @@ SASO.model = (function () {
     return o ? o.accreditationAY : '';
   }
 
+  /* The first account on file is the one SASO created with the organization;
+     the forms that edit "the organization's account" edit this one. */
   function accountForOrg(orgId) {
-    return db().users.filter(function (u) { return u.organizationId === orgId; })[0] || null;
+    return accountsForOrg(orgId)[0] || null;
+  }
+
+  /* ---- accounts per organization (panel RSC) ---------------------------------
+     An organization may hold up to settings().orgAccountLimit accounts, one
+     per named person (adviser and officers), each with its own credentials. */
+
+  function accountsForOrg(orgId) {
+    return db().users.filter(function (u) {
+      return u.role === C.ROLE.ORG && u.organizationId === orgId;
+    });
+  }
+
+  function orgAccountLimit() {
+    return Number(settings().orgAccountLimit) || C.ORG_ACCOUNT_LIMIT;
+  }
+
+  function accountSlotsLeft(orgId) {
+    return Math.max(0, orgAccountLimit() - accountsForOrg(orgId).length);
+  }
+
+  function userById(id) {
+    return db().users.filter(function (u) { return u.id === id; })[0] || null;
+  }
+
+  /* ---- academic years and record retention (panel RSC) ------------------------
+     An activity belongs to the academic year of its start date. Its records
+     are kept for at least settings().retentionYears academic years after that
+     year ends, and are never deleted automatically. */
+
+  function academicYearOf(value) {
+    if (!value) { return ''; }
+    var d = new Date(value);
+    var y = d.getFullYear();
+    var start = d.getMonth() >= C.ACADEMIC_YEAR_START_MONTH ? y : y - 1;
+    return start + '-' + (start + 1);
+  }
+
+  function currentAcademicYear() { return academicYearOf(new Date()); }
+
+  /* '2025-2026' -> { from: '2025-08-01', to: '2026-07-31' } */
+  function academicYearRange(ay) {
+    var start = parseInt(String(ay).slice(0, 4), 10);
+    var m = C.ACADEMIC_YEAR_START_MONTH;
+    function iso(d) {
+      return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+    }
+    return { from: iso(new Date(start, m, 1)), to: iso(new Date(start + 1, m, 0)) };
+  }
+
+  function shiftAcademicYear(ay, n) {
+    var start = parseInt(String(ay).slice(0, 4), 10) + n;
+    return start + '-' + (start + 1);
+  }
+
+  /* Every academic year that has records, plus the current one, newest first. */
+  function academicYears() {
+    var list = [currentAcademicYear()];
+    db().activities.forEach(function (a) {
+      var ay = academicYearOf(a.dateStart);
+      if (ay && list.indexOf(ay) === -1) { list.push(ay); }
+    });
+    return list.sort().reverse();
+  }
+
+  function retentionYears() {
+    return Math.max(C.RECORD_RETENTION_YEARS, Number(settings().retentionYears) || 0);
+  }
+
+  /* The last day the records of an academic year must be kept. */
+  function retainUntil(ay) {
+    return academicYearRange(shiftAcademicYear(ay, retentionYears())).to;
+  }
+
+  function isRetained(ay) {
+    return new Date(retainUntil(ay) + 'T23:59:59') >= new Date();
+  }
+
+  /* The academic years an accreditation review looks back on: the current
+     year and the ones before it, as many as the retention period. */
+  function accreditationWindow() {
+    var cur = currentAcademicYear();
+    var out = [];
+    for (var i = 0; i < retentionYears(); i += 1) { out.push(shiftAcademicYear(cur, -i)); }
+    return out;
+  }
+
+  /* A conducted activity is an accomplishment record: it can no longer be
+     deleted while its retention period runs. */
+  function isProtectedRecord(activity) {
+    if (!activity) { return false; }
+    var conducted = activity.eventStatus === C.EVENT.FINISHED ||
+                    activity.eventStatus === C.EVENT.ONGOING;
+    return conducted && isRetained(academicYearOf(activity.dateStart));
+  }
+
+  function activitiesInYear(ay, orgId) {
+    return db().activities.filter(function (a) {
+      if (a.proposalStatus === C.PROPOSAL.DRAFT) { return false; }
+      if (orgId && a.organizationId !== orgId) { return false; }
+      return academicYearOf(a.dateStart) === ay;
+    }).sort(function (x, y) { return new Date(x.dateStart) - new Date(y.dateStart); });
   }
 
   /* ---- formatting --------------------------------------------------------- */
@@ -753,6 +877,7 @@ SASO.model = (function () {
     daysWaiting: daysWaiting,
     refreshOverdue: refreshOverdue,
     sasoStats: sasoStats,
+    dashboardActivities: dashboardActivities,
     orgStats: orgStats,
     urgentActions: urgentActions,
     nonCompliance: nonCompliance,
@@ -781,6 +906,21 @@ SASO.model = (function () {
     acronymTaken: acronymTaken,
     currentAY: currentAY,
     accountForOrg: accountForOrg,
+    accountsForOrg: accountsForOrg,
+    orgAccountLimit: orgAccountLimit,
+    accountSlotsLeft: accountSlotsLeft,
+    userById: userById,
+    academicYearOf: academicYearOf,
+    currentAcademicYear: currentAcademicYear,
+    academicYearRange: academicYearRange,
+    shiftAcademicYear: shiftAcademicYear,
+    academicYears: academicYears,
+    retentionYears: retentionYears,
+    retainUntil: retainUntil,
+    isRetained: isRetained,
+    accreditationWindow: accreditationWindow,
+    isProtectedRecord: isProtectedRecord,
+    activitiesInYear: activitiesInYear,
     formatDate: formatDate,
     formatDateRange: formatDateRange,
     relativeTime: relativeTime,

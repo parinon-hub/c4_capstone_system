@@ -21,9 +21,13 @@
   if (!session) { return; }
 
   var org = SASO.auth.organization();
-  var acts = M.activitiesFor(org.id).filter(function (a) {
-    return a.proposalStatus !== C.PROPOSAL.DRAFT;
-  });
+  /* The activity record covers the current academic year; earlier years are
+     kept in the Records Archive (panel RSC: three years on file). */
+  var thisAY = M.currentAcademicYear();
+  var acts = M.activitiesInYear(thisAY, org.id);
+  var accounts = M.accountsForOrg(org.id);
+  var limit = M.orgAccountLimit();
+  var windowYears = M.accreditationWindow();
   var outstanding = M.outstandingRequirements(org.id);
   var overdue = acts.filter(function (a) {
     return M.terminalStatus(a) === C.TERMINAL.OVERDUE;
@@ -65,7 +69,7 @@
         '<div class="card">' +
           '<div class="card-header"><h3 class="card-title">Activity record</h3>' +
             '<div class="card-tools"><span class="card-subtitle">AY ' +
-              M.escapeHtml(org.accreditationAY) + '</span></div></div>' +
+              M.escapeHtml(thisAY) + '</span></div></div>' +
           '<div class="card-body">' +
             '<div class="review-meta mb-0">' +
               '<div><span class="cell-sub">Activities submitted</span>' + acts.length + '</div>' +
@@ -80,6 +84,32 @@
                     M.escapeHtml(r.cat) + ' · ' + r.n + '</span>';
                 }).join('') + '</div>'
               : '') +
+          '</div>' +
+          '<div class="card-footer text-sm">' +
+            '<i class="fa-solid fa-box-archive mr-1 text-muted"></i>Records on file: ' +
+            windowYears.map(function (ay) {
+              return 'AY ' + ay + ' (' + M.activitiesInYear(ay, org.id).length + ')';
+            }).join(', ') +
+            '. <a href="records.html">Open the Records Archive</a> to view earlier years and print ' +
+            'the Annual Accomplishment Report.' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="card">' +
+          '<div class="card-header"><h3 class="card-title">Organization accounts</h3>' +
+            '<div class="card-tools"><span class="badge badge-info status-badge">' + accounts.length +
+              ' of ' + limit + '</span></div></div>' +
+          '<div class="card-body p-0"><table class="table table-sm mb-0"><tbody>' +
+            accounts.map(function (u) {
+              return '<tr><td><span class="cell-primary">' + M.escapeHtml(u.name) +
+                (u.id === session.userId ? ' <span class="badge badge-info status-badge">You</span>' : '') +
+                '</span><span class="cell-sub">' + M.escapeHtml(u.position) + '</span></td>' +
+                '<td class="text-right"><code>' + M.escapeHtml(u.username) + '</code></td></tr>';
+            }).join('') +
+          '</tbody></table></div>' +
+          '<div class="card-footer text-muted text-sm">' +
+            'Each person has their own sign-in, so what they submit is recorded under their name. ' +
+            'SASO adds and removes accounts, up to ' + limit + ' per organization.' +
           '</div>' +
         '</div>' +
 

@@ -103,7 +103,7 @@
   }
 
   function renderActivities() {
-    var acts = M.activitiesFor(org.id).sort(function (a, b) {
+    var acts = M.dashboardActivities(org.id).sort(function (a, b) {
       return new Date(b.updatedAt) - new Date(a.updatedAt);
     });
     var host = document.getElementById('activitiesTable');

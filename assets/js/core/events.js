@@ -621,6 +621,8 @@ SASO.events = (function () {
     var actor = SASO.auth.current();
     var activity = SASO.model.activityById(activityId);
     if (!SASO.model.canModifyProposal(actor, activity)) { return null; }
+    /* Record retention: a conducted activity is an accomplishment record. */
+    if (SASO.model.isProtectedRecord(activity)) { return null; }
 
     var data = db();
     var now = new Date();
@@ -974,8 +976,101 @@ SASO.events = (function () {
     return { ok: true, org: org, user: user };
   }
 
+  /* ---- several accounts per organization (panel RSC) ------------------------
+     Each account is one named person (the adviser or an officer) with its own
+     username and password, so every action is traced to that person. The
+     number of accounts is capped by SASO's policy (Settings). */
+
+  var ACCOUNT_FIELDS = ['name', 'position', 'email', 'contact', 'username'];
+
+  function usernameInUse(username, exceptUser) {
+    var key = String(username || '').trim().toLowerCase();
+    return db().users.some(function (u) { return u !== exceptUser && u.username.toLowerCase() === key; }) ||
+      SASO.model.pendingAccountRequests().some(function (r) { return r.username.toLowerCase() === key; });
+  }
+
+  function addOrgAccount(orgId, form) {
+    var actor = SASO.auth.current();
+    if (!SASO.model.canManageAccounts(actor)) { return { ok: false, message: 'Not permitted.' }; }
+    var org = SASO.model.orgById(orgId);
+    if (!org) { return { ok: false, message: 'This organization no longer exists.' }; }
+    var limit = SASO.model.orgAccountLimit();
+    if (SASO.model.accountsForOrg(orgId).length >= limit) {
+      return { ok: false, message: org.acronym + ' already has the maximum of ' + limit +
+        ' accounts. Remove one, or raise the limit in Settings.' };
+    }
+    if (usernameInUse(form.username)) {
+      return { ok: false, message: 'The username "' + form.username + '" is already in use.' };
+    }
+    var user = {
+      id: SASO.storage.nextId('usr'), role: C.ROLE.ORG, organizationId: org.id,
+      username: form.username, password: form.password,
+      name: form.name, position: form.position + ', ' + org.acronym,
+      email: form.email || null, contact: form.contact || null,
+      createdAt: new Date().toISOString(), createdBy: actor.name
+    };
+    db().users.push(user);
+
+    notifyOrg(org.id, null, C.NOTIF.ACCOUNT_CREATED,
+      'SASO (' + actor.name + ') added a sign-in account for ' + user.name + ' (' + form.position + ').');
+    notifyAccountManagers(C.NOTIF.ACCOUNT_CREATED,
+      actor.name + ' added an account for ' + user.name + ' of ' + org.acronym + ' (' + user.username + ').',
+      'You added an account for ' + user.name + ' of ' + org.acronym + ' (' + user.username + ').', actor);
+
+    SASO.storage.save();
+    return { ok: true, org: org, user: user };
+  }
+
+  function updateOrgAccount(userId, form) {
+    var actor = SASO.auth.current();
+    if (!SASO.model.canManageAccounts(actor)) { return { ok: false, message: 'Not permitted.' }; }
+    var user = SASO.model.userById(userId);
+    var org = user && SASO.model.orgById(user.organizationId);
+    if (!user || !org) { return { ok: false, message: 'This account no longer exists.' }; }
+    if (usernameInUse(form.username, user)) {
+      return { ok: false, message: 'The username "' + form.username + '" is already in use.' };
+    }
+    var before = user.username;
+    user.username = form.username;
+    if (form.password) { user.password = form.password; }
+    user.name = form.name;
+    user.position = form.position + ', ' + org.acronym;
+    user.email = form.email || null;
+    user.contact = form.contact || null;
+
+    notifyAccountManagers(C.NOTIF.ACCOUNT_UPDATED,
+      actor.name + ' edited the account of ' + user.name + ' of ' + org.acronym + ' (' + user.username + ')' +
+        (before !== user.username ? ', formerly "' + before + '".' : '.'),
+      'You edited the account of ' + user.name + ' of ' + org.acronym + ' (' + user.username + ').', actor);
+
+    SASO.storage.save();
+    return { ok: true, org: org, user: user };
+  }
+
+  function removeOrgAccount(userId) {
+    var actor = SASO.auth.current();
+    if (!SASO.model.canManageAccounts(actor)) { return { ok: false, message: 'Not permitted.' }; }
+    var user = SASO.model.userById(userId);
+    var org = user && SASO.model.orgById(user.organizationId);
+    if (!user || !org) { return { ok: false, message: 'This account no longer exists.' }; }
+    var users = db().users;
+    users.splice(users.indexOf(user), 1);
+
+    notifyOrg(org.id, null, C.NOTIF.ACCOUNT_DELETED,
+      'SASO (' + actor.name + ') removed the sign-in account of ' + user.name + '.');
+    notifyAccountManagers(C.NOTIF.ACCOUNT_DELETED,
+      actor.name + ' removed the account of ' + user.name + ' of ' + org.acronym + ' (' + user.username + ').',
+      'You removed the account of ' + user.name + ' of ' + org.acronym + ' (' + user.username + ').', actor);
+
+    SASO.storage.save();
+    return { ok: true, org: org, user: user };
+  }
+
   return {
     /* organization accounts */
+    addOrgAccount: addOrgAccount,
+    updateOrgAccount: updateOrgAccount,
+    removeOrgAccount: removeOrgAccount,
     submitAccountRequest: submitAccountRequest,
     approveAccountRequest: approveAccountRequest,
     declineAccountRequest: declineAccountRequest,

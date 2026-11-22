@@ -390,6 +390,13 @@
                 (activity.fundSource ? ' <span class="cell-sub">' +
                   M.escapeHtml(activity.fundSource) + '</span>' : '')
               : null) +
+        field('Academic year', (function () {
+              var ay = M.academicYearOf(activity.dateStart);
+              return 'AY ' + M.escapeHtml(ay) +
+                ' <span class="cell-sub"><i class="fa-solid fa-box-archive mr-1"></i>Record kept until ' +
+                M.formatDate(M.retainUntil(ay)) +
+                (M.isProtectedRecord(activity) ? ' · cannot be deleted' : '') + '</span>';
+            })()) +
         field('Rationale', M.escapeHtml(activity.rationale), true) +
         field('Objectives', (activity.objectives || []).length
               ? '<ol class="mb-0 pl-3">' + activity.objectives.map(function (o) {

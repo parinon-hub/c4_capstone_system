@@ -73,7 +73,16 @@ SASO.buildSeed = function () {
     { id:'usr-4', username:'ccs',  password:'ccs123',  name:'N. Ramos',   position:'Secretary, CCS-SC',           role:C.ROLE.ORG, organizationId:'org-2' },
     { id:'usr-5', username:'chs',  password:'chs123',  name:'B. Alcantara',position:'President, CHS-SC',          role:C.ROLE.ORG, organizationId:'org-3' },
     { id:'usr-6', username:'ssc',  password:'ssc123',  name:'M. Tanaka',  position:'President, CSPC-SSC',         role:C.ROLE.ORG, organizationId:'org-4' },
-    { id:'usr-7', username:'cas',  password:'cas123',  name:'T. Lorenzo', position:'Secretary, CAS-CSC',          role:C.ROLE.ORG, organizationId:'org-5' }
+    { id:'usr-7', username:'cas',  password:'cas123',  name:'T. Lorenzo', position:'Secretary, CAS-CSC',          role:C.ROLE.ORG, organizationId:'org-5' },
+
+    /* Panel RSC: an organization holds up to three accounts (Settings), one per
+       person. JPCS has all three (adviser, president, secretary); CCS-SC two. */
+    { id:'usr-10', username:'jpcs.adviser', password:'jpcs123', name:'Prof. R. Almeda', position:'Adviser, JPCS - CSPC',
+      email:'ralmeda@example.com', role:C.ROLE.ORG, organizationId:'org-1' },
+    { id:'usr-11', username:'jpcs.sec', password:'jpcs123', name:'A. Dimaano', position:'Secretary, JPCS - CSPC',
+      email:'adimaano@example.com', role:C.ROLE.ORG, organizationId:'org-1' },
+    { id:'usr-12', username:'ccs.adviser', password:'ccs123', name:'Prof. M. Bernales', position:'Adviser, CCS-SC',
+      email:'mbernales@example.com', role:C.ROLE.ORG, organizationId:'org-2' }
   ];
 
   var activities = [], requirements = [], comments = [],
@@ -495,6 +504,140 @@ SASO.buildSeed = function () {
   notify(C.ROLE.SASO,null,'act-6',C.NOTIF.TR_SUBMITTED,'CHS-SC submitted Evaluation for Health Awareness Week.',50,false);
   notify(C.ROLE.ORG,'org-3','act-6',C.NOTIF.TR_RETURNED,'Financial Report for Health Awareness Week needs revision: totals do not match the receipts.',20,false);
 
+  /* ---- earlier academic years (panel RSC: three years of records) ------------
+     Completed activities from the previous academic years, with every
+     post-activity document accepted, so the Records Archive and the Annual
+     Accomplishment Report have a three-year history to show. One much older
+     record is past its retention period and is flagged, never deleted. */
+
+  function hoursBefore(dayOffset, h) { return hoursAgo(-dayOffset * 24 + (h || 0)); }
+
+  function pastActivity(o) {
+    var start = o.days, end = o.days + (o.length || 0);
+    activity({ id:o.id, org:o.org, title:o.title, category:o.category,
+      venueType:o.venueType || C.VENUE.ON_CAMPUS, venue:o.venue, dateStart:dateOnly(start), dateEnd:dateOnly(end),
+      participants:o.participants, participantDescription:o.who, budget:o.budget, fundSource:o.fund,
+      rationale:o.rationale, objectives:o.objectives, description:o.description,
+      proposalStatus:C.PROPOSAL.APPROVED, eventStatus:C.EVENT.FINISHED, reportDeadline:dateOnly(end + 5),
+      createdAt:hoursBefore(start, 720), submittedAt:hoursBefore(start, 700),
+      approvedAt:hoursBefore(start, 300), updatedAt:hoursBefore(end, -96) });
+    addRequirements(o.id, o.venueType || C.VENUE.ON_CAMPUS, C.PHASE.PRE_APPROVAL, APPROVED_ALL);
+    addRequirements(o.id, o.venueType || C.VENUE.ON_CAMPUS, C.PHASE.POST_ACTIVITY, APPROVED_ALL);
+    requirements.forEach(function (r) {
+      if (r.activityId !== o.id) { return; }
+      var pre = r.phase === C.PHASE.PRE_APPROVAL;
+      r.submittedAt = pre ? hoursBefore(start, 690) : hoursBefore(end, -72);
+      r.reviewedAt = pre ? hoursBefore(start, 500) : hoursBefore(end, -110);
+      r.reviewedBy = 'M. Delfin';
+      if (!pre) { r.fileName = M_ACR(o.org) + '_' + o.title.replace(/[^A-Za-z0-9]+/g, '-') + '_' + r.fileName; }
+    });
+    route(o.id, C.OFFICE.SASO, -start * 24 + 680, -start * 24 + 520, 'Endorsed');
+    route(o.id, C.OFFICE.VPAA, -start * 24 + 520, -start * 24 + 420, 'Approved');
+    route(o.id, C.OFFICE.PRESIDENT, -start * 24 + 420, -start * 24 + 300, 'Approved');
+    history(o.id, 'proposalStatus', C.PROPOSAL.WITH_PRESIDENT, C.PROPOSAL.APPROVED, 'M. Delfin', C.ROLE.SASO, -start * 24 + 300);
+    history(o.id, 'eventStatus', C.EVENT.ONGOING, C.EVENT.FINISHED, 'M. Delfin', C.ROLE.SASO, -end * 24 - 8);
+    outcome(o.id, o.actual, o.summary, o.issues || null, -end * 24 - 60);
+  }
+  function M_ACR(orgId) {
+    var org = organizations.filter(function (x) { return x.id === orgId; })[0];
+    return org ? org.acronym.replace(/[^A-Za-z0-9]+/g, '') : 'ORG';
+  }
+
+  /* Previous academic year */
+  pastActivity({ id:'act-h1', org:'org-1', days:-410, title:'JPCS Web Development Workshop', category:'Life Skills',
+    venue:'CCS Computer Laboratory 2', participants:70, actual:66, who:'CCS students', budget:'5,600', fund:'JPCS - CSPC Chapter Fund',
+    rationale:'Members asked for hands-on training in current web technologies.',
+    objectives:['Train members in responsive web design','Produce a sample project per team'],
+    description:'Two-day workshop with guided exercises and a team project.', length:1,
+    summary:'Sixty-six members completed the workshop and presented eleven team projects.' });
+  pastActivity({ id:'act-h2', org:'org-1', days:-300, title:'JPCS Outreach: Computer Literacy for Barangay Youth', category:'Volunteer',
+    venueType:C.VENUE.OFF_CAMPUS, venue:'Barangay San Antonio Hall, Nabua', participants:40, actual:38, who:'JPCS volunteers and barangay youth',
+    budget:'9,200', fund:'JPCS Fund, barangay counterpart',
+    rationale:'The chapter extends basic computer literacy to youth in a partner barangay.',
+    objectives:['Teach basic office productivity skills to barangay youth'],
+    description:'One-day hands-on session using borrowed laptops.',
+    summary:'Thirty-eight youth completed the basic productivity module; the barangay requested a second run.' });
+  pastActivity({ id:'act-h3', org:'org-2', days:-380, title:'CCS Week Celebration', category:'Socio-Civic',
+    venue:'CSPC Covered Court', participants:600, actual:574, who:'CCS students and faculty', budget:'42,000', fund:'CCS-SC Fund', length:4,
+    rationale:'The college marks its founding week with academic and cultural events.',
+    objectives:['Celebrate the college founding week','Showcase student projects'],
+    description:'Five-day celebration with contests, an exhibit and a closing program.',
+    summary:'Five days of contests and an exhibit of 24 student projects; 574 participants recorded.' });
+  pastActivity({ id:'act-h4', org:'org-3', days:-350, title:'Bloodletting Drive', category:'Volunteer',
+    venue:'CSPC Gymnasium', participants:150, actual:131, who:'Students, faculty and staff', budget:'7,500', fund:'CHS-SC Fund, partner blood bank',
+    rationale:'The council supports the provincial blood bank with an annual donation drive.',
+    objectives:['Collect blood donations for the provincial blood bank'],
+    description:'One-day donation drive with screening by partner medical staff.',
+    summary:'One hundred thirty-one donors screened; 104 units collected for the provincial blood bank.' });
+  pastActivity({ id:'act-h5', org:'org-4', days:-430, title:'Leadership Training for Class Officers', category:'Leadership',
+    venue:'CSPC Auditorium', participants:250, actual:236, who:'Class officers, all colleges', budget:'16,000', fund:'CSPC-SSC Fund', length:1,
+    rationale:'Newly elected class officers need orientation on their roles and on SASO processes.',
+    objectives:['Orient class officers on their duties','Introduce SASO reporting requirements'],
+    description:'Two-day training with lectures and workshops.',
+    summary:'Two hundred thirty-six class officers trained across two days.' });
+  pastActivity({ id:'act-h6', org:'org-5', days:-330, title:'Tree Planting Activity', category:'Environmental',
+    venueType:C.VENUE.OFF_CAMPUS, venue:'Mt. Iriga foothills, Nabua', participants:120, actual:112, who:'CAS students and volunteers',
+    budget:'6,800', fund:'CAS-CSC Fund',
+    rationale:'The council joins the municipal greening program each year.',
+    objectives:['Plant 500 seedlings in the municipal reforestation site'],
+    description:'Half-day tree planting with the municipal environment office.',
+    summary:'One hundred twelve volunteers planted 520 seedlings with the municipal environment office.' });
+
+  /* Two academic years ago */
+  pastActivity({ id:'act-h7', org:'org-1', days:-760, title:'JPCS Hackathon', category:'Life Skills',
+    venue:'CCS Computer Laboratories 1 and 2', participants:90, actual:84, who:'CCS students', budget:'12,500', fund:'JPCS - CSPC Chapter Fund', length:1,
+    rationale:'The chapter holds a yearly hackathon to build problem-solving and teamwork.',
+    objectives:['Build working prototypes for campus problems in 24 hours'],
+    description:'Twenty-four hour hackathon with mentors and judging.',
+    summary:'Eighty-four participants in 18 teams; three prototypes adopted by the college.' });
+  pastActivity({ id:'act-h8', org:'org-2', days:-790, title:'CCS Freshmen Orientation', category:'Leadership',
+    venue:'CSPC AVR 1', participants:300, actual:288, who:'First-year CCS students', budget:'4,000', fund:'CCS-SC Fund',
+    rationale:'First-year students need an orientation on college policies and organizations.',
+    objectives:['Orient first-year students on college policies'],
+    description:'Half-day orientation program.',
+    summary:'Two hundred eighty-eight first-year students oriented.' });
+  pastActivity({ id:'act-h9', org:'org-3', days:-720, title:'Community Health Caravan', category:'Volunteer',
+    venueType:C.VENUE.OFF_CAMPUS, venue:'Barangay Sta. Cruz, Nabua', participants:300, actual:322, who:'CHS students and barangay residents',
+    budget:'35,000', fund:'CHS-SC Fund, external partners',
+    rationale:'The college conducts community health outreach as part of its extension program.',
+    objectives:['Provide free health screening to barangay residents'],
+    description:'One-day caravan with screening and health talks.',
+    summary:'Three hundred twenty-two residents screened; 41 referred to the rural health unit.' });
+  pastActivity({ id:'act-h10', org:'org-4', days:-745, title:'SSC Intramural Sportsfest', category:'Sports',
+    venue:'CSPC Sports Complex', participants:1100, actual:1065, who:'All colleges', budget:'130,000', fund:'CSPC-SSC Fund', length:4,
+    rationale:'The annual intramurals are a mandated institutional activity promoting student wellness.',
+    objectives:['Promote physical wellness and sportsmanship'],
+    description:'Five-day institution-wide meet.',
+    summary:'One thousand sixty-five athletes and officials across nine sporting events.' });
+  pastActivity({ id:'act-h11', org:'org-5', days:-700, title:'CAS Literary Folio Launch', category:'Student Publication',
+    venue:'CSPC AVR 2', participants:160, actual:149, who:'CAS students', budget:'8,000', fund:'CAS-CSC Fund',
+    rationale:'The council publishes an annual folio of student writing.',
+    objectives:['Launch the annual student literary folio'],
+    description:'Evening launch with readings by contributors.',
+    summary:'Folio of 46 works launched; 149 attendees.' });
+
+  /* Three academic years ago */
+  pastActivity({ id:'act-h12', org:'org-1', days:-1110, title:'JPCS Tech Talk Series', category:'Life Skills',
+    venue:'CSPC AVR 1', participants:150, actual:141, who:'CCS students', budget:'3,000', fund:'JPCS - CSPC Chapter Fund',
+    rationale:'Members asked for talks from alumni working in the industry.',
+    objectives:['Connect members with alumni practitioners'],
+    description:'Afternoon series of three talks by alumni.',
+    summary:'Three alumni talks attended by 141 members.' });
+  pastActivity({ id:'act-h13', org:'org-4', days:-1080, title:'General Student Assembly', category:'Leadership',
+    venue:'CSPC Gymnasium', participants:1500, actual:1410, who:'All students', budget:'10,000', fund:'CSPC-SSC Fund',
+    rationale:'The council reports to the student body once a year.',
+    objectives:['Present the council accomplishment report to the student body'],
+    description:'Morning assembly with an open forum.',
+    summary:'One thousand four hundred ten students attended; the accomplishment report was presented.' });
+
+  /* Past its retention period: kept and flagged, never deleted automatically. */
+  pastActivity({ id:'act-h14', org:'org-2', days:-1650, title:'CCS IT Quiz Bee', category:'Life Skills',
+    venue:'CSPC AVR 2', participants:60, actual:57, who:'CCS students', budget:'2,500', fund:'CCS-SC Fund',
+    rationale:'The council holds an annual quiz bee to encourage academic excellence in computing.',
+    objectives:['Recognize outstanding students in computing'],
+    description:'Half-day elimination and final rounds.',
+    summary:'Fifty-seven contestants; winners represented the college at the regional quiz bee.' });
+
   /* ---- assorted notifications --------------------------------------------- */
   notify(C.ROLE.SASO,null,'act-6',C.NOTIF.TR_DUE_SOON,'CHS-SC post-activity reports are due today.',12,false);
   notify(C.ROLE.SASO,null,'act-4',C.NOTIF.ENDORSED,'You endorsed CCS Acquaintance Party 2026 to the VPAA.',100,true);
@@ -624,7 +767,7 @@ SASO.buildSeed = function () {
   /* Declined: the chapter already has an account. */
   var dup = accountRequest({ n:'0001', status:C.ACCOUNT_REQUEST.DECLINED, hrs:240, reviewedHrs:220,
     reviewedBy:'C. Bermudo',
-    remarks:'JPCS - CSPC already has an account (username jpcs). Please ask your president for access instead of opening a second one.',
+    remarks:'JPCS - CSPC is already registered (username jpcs). Officer accounts are added by SASO under the existing organization, up to three per organization. Please ask SASO to add yours instead of filing a new organization request.',
     name:'Junior Philippine Computer Society - CSPC Chapter', acronym:'JPCS-CSPC2', college:'College of Computer Studies',
     adviser:'Prof. R. Almeda', officer:'L. Fajardo', position:'Vice President', email:'lfajardo@example.com',
     username:'jpcs.vp', password:'request123', proof:'JPCS_Recognition_2025.pdf' });
@@ -644,13 +787,15 @@ SASO.buildSeed = function () {
   notifyManagers(C.NOTIF.ACCOUNT_REQUESTED, 'JTPS (Junior Tourism Professionals Society) requested an organization account: ' + tour.ref + '.', 5, tour.id, null);
 
   return {
-    meta:{ seededAt:new Date().toISOString(), version:4 },
+    meta:{ seededAt:new Date().toISOString(), version:6 },
     /* Office policy values. Seeded from what SASO stated; adjustable in
        Settings so the prototype can be shown against a different policy. */
     settings:{
       reportDeadlineDays: C.TERMINAL_REPORT_DEADLINE_DAYS,
       proposalAlertDays: C.PROPOSAL_WAITING_ALERT_DAYS,
-      accreditationAlertDays: 60
+      accreditationAlertDays: 60,
+      orgAccountLimit: C.ORG_ACCOUNT_LIMIT,
+      retentionYears: C.RECORD_RETENTION_YEARS
     },
     organizations:organizations, users:users, activities:activities,
     requirements:requirements, comments:comments, notifications:notifications,

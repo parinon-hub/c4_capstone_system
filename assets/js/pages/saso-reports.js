@@ -31,6 +31,7 @@
     type: 'consolidated',
     period: 'custom',
     from: '', to: '',
+    ay: M.currentAcademicYear(),
     org: '', category: '', stage: '',
     generated: null
   };
@@ -76,6 +77,27 @@
      -------------------------------------------------------------------------------- */
 
   var REPORTS = {
+
+    /* Panel RSC: reports in the formats CHED requires (core/ched-reports.js).
+       Both cover one academic year and carry Prepared by, Noted by and
+       Approved by. */
+    ched_annual: {
+      label: 'Annual Accomplishment Report (CHED format)',
+      hint: 'One organization\u2019s activities for an academic year, with objectives, participants, ' +
+            'budget, outcome and post-activity reports, as kept for accreditation under ' +
+            C.CHED_REFERENCE.SAS + '. Choose an organization and an academic year.',
+      ched: true, needsOrg: true,
+      build: function () { return SASO.ched.annual(state.org, state.ay); }
+    },
+
+    ched_institutional: {
+      label: 'Report on Student Organizations and Activities (CHED format)',
+      hint: 'Institution-wide: recognized and accredited organizations, activities by category ' +
+            '(on, off campus and online) and the list of activities conducted, per ' +
+            C.CHED_REFERENCE.SAS + ' and ' + C.CHED_REFERENCE.OFF_CAMPUS + '.',
+      ched: true,
+      build: function () { return SASO.ched.institutional(state.ay); }
+    },
 
     /* Mirrors SASO's consolidated LIST OF STUDENT ACTIVITIES workbook. */
     consolidated: {
@@ -320,17 +342,30 @@
 
           '<div class="form-group">' +
             '<label class="text-sm">Period</label>' +
-            '<div class="btn-group btn-group-sm d-flex" id="periodBtns">' +
-              ['month', 'quarter', 'year', 'custom'].map(function (p) {
+            '<div class="btn-group btn-group-sm d-flex flex-wrap" id="periodBtns">' +
+              ['month', 'quarter', 'year', 'ay', 'custom'].map(function (p) {
                 return '<button type="button" class="btn btn-outline-primary' +
-                  (state.period === p ? ' active' : '') + '" data-period="' + p + '">' +
-                  ({ month: 'Month', quarter: 'Quarter', year: 'Year', custom: 'Custom' })[p] +
+                  (state.period === p ? ' active' : '') + '" data-period="' + p + '"' +
+                  (isChed() && p !== 'ay' ? ' disabled title="CHED-format reports cover one academic year"' : '') + '>' +
+                  ({ month: 'Month', quarter: 'Quarter', year: 'Year', ay: 'Academic Year', custom: 'Custom' })[p] +
                   '</button>';
               }).join('') +
             '</div>' +
           '</div>' +
 
-          '<div class="form-row">' +
+          '<div class="form-group' + (state.period === 'ay' ? '' : ' d-none') + '" id="ayGroup">' +
+            '<label for="fAY" class="text-sm">Academic year</label>' +
+            '<select class="form-control form-control-sm" id="fAY">' +
+              M.academicYears().map(function (ay) {
+                return '<option value="' + ay + '"' + (state.ay === ay ? ' selected' : '') + '>AY ' + ay +
+                  (ay === M.currentAcademicYear() ? ' (current)' : '') + '</option>';
+              }).join('') +
+            '</select>' +
+            '<small class="form-text text-muted">' + M.formatDate(M.academicYearRange(state.ay).from) +
+              ' to ' + M.formatDate(M.academicYearRange(state.ay).to) + '</small>' +
+          '</div>' +
+
+          '<div class="form-row' + (isChed() ? ' d-none' : '') + '">' +
             '<div class="form-group col-6">' +
               '<label for="fFrom" class="text-sm">From</label>' +
               '<input type="date" class="form-control form-control-sm" id="fFrom" value="' +
@@ -374,10 +409,15 @@
     bindControls();
   }
 
+  function isChed() { return !!REPORTS[state.type].ched; }
+
   function applyPeriod(p) {
     var now = new Date();
     var y = now.getFullYear();
-    if (p === 'month') {
+    if (p === 'ay') {
+      var r = M.academicYearRange(state.ay);
+      state.from = r.from; state.to = r.to;
+    } else if (p === 'month') {
       state.from = new Date(y, now.getMonth(), 1).toISOString().slice(0, 10);
       state.to = new Date(y, now.getMonth() + 1, 0).toISOString().slice(0, 10);
     } else if (p === 'quarter') {
@@ -396,7 +436,14 @@
   function bindControls() {
     document.getElementById('fType').addEventListener('change', function () {
       state.type = this.value;
-      document.getElementById('typeHint').textContent = REPORTS[state.type].hint;
+      if (isChed() && state.period !== 'ay') { applyPeriod('ay'); }
+      renderControls();
+    });
+
+    document.getElementById('fAY').addEventListener('change', function () {
+      state.ay = this.value;
+      applyPeriod('ay');
+      renderControls();
     });
 
     document.querySelectorAll('#periodBtns button').forEach(function (b) {
@@ -415,6 +462,10 @@
     });
 
     document.getElementById('btnGenerate').addEventListener('click', function () {
+      if (REPORTS[state.type].needsOrg && !state.org) {
+        SASO.layout.toast('Choose an organization for the Annual Accomplishment Report.', 'warning');
+        return;
+      }
       state.generated = { type: state.type, at: new Date().toISOString() };
       renderPreview();
     });
@@ -452,6 +503,7 @@
     }
 
     var def = REPORTS[state.generated.type];
+    if (def.ched) { renderChed(host, def.build()); return; }
     var data = def.build();
     var head = M.db().users.filter(function (u) { return u.username === 'head'; })[0];
 
@@ -541,6 +593,30 @@
     });
     document.getElementById('btnExport').addEventListener('click', function () {
       exportCsv(def, data);
+    });
+  }
+
+  /* CHED-format reports: same letterhead and print layout, with the three
+     signatories (Prepared by, Noted by, Approved by). */
+  function renderChed(host, rep) {
+    host.innerHTML =
+      '<div class="card">' +
+        '<div class="card-header no-print">' +
+          '<h3 class="card-title">Preview</h3>' +
+          '<div class="card-tools">' +
+            '<button type="button" class="btn btn-sm btn-outline-primary mr-1" id="btnExport">' +
+              '<i class="fa-solid fa-file-csv mr-1"></i>Export CSV</button>' +
+            '<button type="button" class="btn btn-sm btn-primary" id="btnPrint">' +
+              '<i class="fa-solid fa-print mr-1"></i>Print</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="card-body"><div class="report-doc" id="reportDoc">' + SASO.ched.render(rep) + '</div></div>' +
+      '</div>';
+    if (SASO.layout.enhanceTopScroll) { SASO.layout.enhanceTopScroll(host); }
+    document.getElementById('btnPrint').addEventListener('click', function () { window.print(); });
+    document.getElementById('btnExport').addEventListener('click', function () {
+      SASO.ched.downloadCsv(rep);
+      SASO.layout.toast('CSV exported.');
     });
   }
 

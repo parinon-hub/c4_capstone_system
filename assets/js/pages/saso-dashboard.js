@@ -117,7 +117,7 @@
     var orgs = M.db().organizations;
 
     function countWhere(orgId, predicate) {
-      return M.activitiesFor(orgId).filter(predicate).length;
+      return M.dashboardActivities(orgId).filter(predicate).length;
     }
 
     new Chart(document.getElementById('orgChart'), {
@@ -297,7 +297,7 @@
         '<td class="text-nowrap' + (due ? ' text-danger' : '') + '">' +
           M.formatDate(o.accreditationExpires) +
           (due ? '<span class="cell-sub text-danger">' + left + ' days left</span>' : '') + '</td>' +
-        '<td class="text-center">' + M.activitiesFor(o.id).length + '</td>' +
+        '<td class="text-center">' + M.dashboardActivities(o.id).length + '</td>' +
       '</tr>';
     }).join('');
 

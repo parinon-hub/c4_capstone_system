@@ -58,6 +58,22 @@
                 '<input type="number" min="7" max="365" class="form-control form-control-sm" ' +
                   'id="sAccred" value="' + st.accreditationAlertDays + '">' +
               '</div>' +
+              '<div class="form-group">' +
+                '<label for="sAccounts" class="text-sm">Accounts allowed per organization</label>' +
+                '<input type="number" min="1" max="' + C.ORG_ACCOUNT_LIMIT_MAX + '" class="form-control form-control-sm" ' +
+                  'id="sAccounts" value="' + st.orgAccountLimit + '">' +
+                '<small class="form-text text-muted">One account per person, each with its own ' +
+                  'username and password: normally the adviser and two officers. Lowering the ' +
+                  'number keeps existing accounts but stops new ones being added.</small>' +
+              '</div>' +
+              '<div class="form-group">' +
+                '<label for="sRetention" class="text-sm">Keep activity and accomplishment records for (academic years)</label>' +
+                '<input type="number" min="' + C.RECORD_RETENTION_YEARS + '" max="10" class="form-control form-control-sm" ' +
+                  'id="sRetention" value="' + st.retentionYears + '">' +
+                '<small class="form-text text-muted">At least ' + C.RECORD_RETENTION_YEARS + ' academic ' +
+                  'years after the year an activity belongs to, for accreditation. Records are never ' +
+                  'deleted automatically; see Records Archive.</small>' +
+              '</div>' +
               '<button type="button" class="btn btn-primary btn-sm" id="btnSave">Save policy</button>' +
             '</div>' +
           '</div>' +
@@ -227,16 +243,30 @@
       var deadline = Number(document.getElementById('sDeadline').value);
       var alertDays = Number(document.getElementById('sAlert').value);
       var accred = Number(document.getElementById('sAccred').value);
+      var accounts = Number(document.getElementById('sAccounts').value);
+      var retention = Number(document.getElementById('sRetention').value);
 
       if (!(deadline > 0) || !(alertDays > 0) || !(accred > 0)) {
         SASO.layout.toast('Enter a number greater than zero for each value.', 'danger');
+        return;
+      }
+      if (!(accounts >= 1 && accounts <= C.ORG_ACCOUNT_LIMIT_MAX) || Math.floor(accounts) !== accounts) {
+        SASO.layout.toast('Accounts per organization must be a whole number from 1 to ' +
+          C.ORG_ACCOUNT_LIMIT_MAX + '.', 'danger');
+        return;
+      }
+      if (!(retention >= C.RECORD_RETENTION_YEARS && retention <= 10) || Math.floor(retention) !== retention) {
+        SASO.layout.toast('Records must be kept for at least ' + C.RECORD_RETENTION_YEARS +
+          ' academic years.', 'danger');
         return;
       }
 
       M.saveSettings({
         reportDeadlineDays: deadline,
         proposalAlertDays: alertDays,
-        accreditationAlertDays: accred
+        accreditationAlertDays: accred,
+        orgAccountLimit: accounts,
+        retentionYears: retention
       });
       SASO.layout.toast('Policy saved.');
       render();

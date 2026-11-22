@@ -28,6 +28,7 @@ SASO.layout = (function () {
       { key: 'requirements', label: 'Requirements',       icon: 'fa-list-check',        href: 'pages/saso/requirements.html', badge: 'requirements' },
       { key: 'terminal',     label: 'Terminal Reports',   icon: 'fa-file-circle-check', href: 'pages/saso/terminal-reports.html', badge: 'terminal' },
       { key: 'reports',      label: 'Reports',            icon: 'fa-chart-column',      href: 'pages/saso/reports.html' },
+      { key: 'records',      label: 'Records Archive',    icon: 'fa-box-archive',       href: 'pages/saso/records.html' },
       { key: 'notifications',label: 'Notifications',      icon: 'fa-bell',              href: 'pages/saso/notifications.html', badge: 'notifications' },
       { key: 'settings',     label: 'Settings',           icon: 'fa-gear',              href: 'pages/saso/settings.html' }
     ],
@@ -37,6 +38,7 @@ SASO.layout = (function () {
       { key: 'submit',       label: 'Submit Activity',  icon: 'fa-circle-plus',       href: 'pages/org/submit-activity.html' },
       { key: 'requirements', label: 'Requirements',     icon: 'fa-list-check',        href: 'pages/org/requirements.html', badge: 'requirements' },
       { key: 'terminal',     label: 'Terminal Reports', icon: 'fa-file-circle-check', href: 'pages/org/terminal-reports.html', badge: 'terminal' },
+      { key: 'records',      label: 'Records Archive',  icon: 'fa-box-archive',       href: 'pages/org/records.html' },
       { key: 'notifications',label: 'Notifications',    icon: 'fa-bell',              href: 'pages/org/notifications.html', badge: 'notifications' },
       { key: 'profile',      label: 'Profile',          icon: 'fa-id-badge',          href: 'pages/org/profile.html' }
     ]
@@ -74,6 +76,8 @@ SASO.layout = (function () {
     'pages/documents/print.html': 0,
     'pages/saso/settings.html': 0,
     'pages/org/profile.html': 0,
+    'pages/saso/records.html': 0,
+    'pages/org/records.html': 0,
     'pages/saso/trash.html': 0,
     'pages/org/trash.html': 0,
     'pages/saso/account-requests.html': 0,
