@@ -2,7 +2,7 @@
    layout.js  —  Shared chrome for every signed-in page.
 
    Pages declare window.SASO_BASE (path back to the project root) and call
-   SASO.layout.init({ role, page, title, breadcrumb }). Everything else —
+   SASO.layout.init({ role, page, title }). Everything else —
    navbar, notification bell, sidebar, badge counts, logout, toasts — is
    rendered from here so no page reimplements navigation.
    ========================================================================= */
@@ -258,21 +258,13 @@ SASO.layout = (function () {
     return session.role === C.ROLE.SASO ? 'pages/saso/my-profile.html' : 'pages/org/my-profile.html';
   }
 
-  function renderHeader(title, breadcrumb) {
-    var crumbs = (breadcrumb || []).map(function (b, i, arr) {
-      return i === arr.length - 1
-        ? '<li class="breadcrumb-item active">' + b.label + '</li>'
-        : '<li class="breadcrumb-item"><a href="' + base + b.href + '">' + b.label + '</a></li>';
-    }).join('');
-
+  /* The page title only. Pages may still pass a breadcrumb; it is not shown. */
+  function renderHeader(title) {
     return '' +
       '<div class="content-header">' +
         '<div class="container-fluid">' +
           '<div class="row mb-2 align-items-center">' +
-            '<div class="col-sm-6"><h1 class="page-title">' + title + '</h1></div>' +
-            '<div class="col-sm-6">' +
-              '<ol class="breadcrumb float-sm-right">' + crumbs + '</ol>' +
-            '</div>' +
+            '<div class="col-12"><h1 class="page-title">' + title + '</h1></div>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -466,7 +458,7 @@ SASO.layout = (function () {
 
     var header = document.getElementById('pageHeader');
     if (header) {
-      header.innerHTML = renderHeader(opts.title || '', opts.breadcrumb || []);
+      header.innerHTML = renderHeader(opts.title || '');
     }
 
     var logout = document.getElementById('btnLogout');
