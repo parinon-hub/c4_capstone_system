@@ -75,8 +75,8 @@ SASO.buildSeed = function () {
 
     /* Personal accounts (panel RSC). The old shared logins (jpcs, ccs, chs,
        ssc, cas) became the personal account of the officer who used them.
-       Every organization has a president, who with the adviser manages the
-       organization's members. There is no limit on the number of accounts
+       Every organization has a president and an adviser. SASO manages the
+       accounts. There is no limit on the number of accounts
        unless SASO sets one in Settings. All people are fictional. */
 
     /* JPCS - CSPC (College of Computer Studies) */
@@ -131,6 +131,18 @@ SASO.buildSeed = function () {
       program:'Bachelor of Arts in English Language Studies', college:'College of Arts and Sciences',
       email:'tlorenzo@example.com', contact:'0917 100 0007', role:C.ROLE.ORG, organizationId:'org-5' }
   ];
+
+  /* One account can belong to several organizations (memberships). The
+     organizationId and position above are the one each person is acting for.
+     J. Santos is also the JPCS representative to the Supreme Student
+     Council, so the "Acting for" switch can be shown. */
+  users.forEach(function (u) {
+    if (u.role !== C.ROLE.ORG) { return; }
+    var acr = organizations.filter(function (o) { return o.id === u.organizationId; })[0].acronym;
+    u.memberships = [{ organizationId:u.organizationId, position:u.position.slice(0, -(', ' + acr).length) }];
+  });
+  users.filter(function (u) { return u.username === 'jsantos'; })[0]
+    .memberships.push({ organizationId:'org-4', position:'Representative' });
 
   var activities = [], requirements = [], comments = [],
       notifications = [], statusHistory = [], routing = [];
@@ -853,8 +865,27 @@ SASO.buildSeed = function () {
     username:'jtps', password:'jtps123', proof:'JTPS_Recognition_AY2025-2026.pdf' });
   notifyManagers(C.NOTIF.ACCOUNT_REQUESTED, 'JTPS (Junior Tourism Professionals Society) requested an organization account: ' + tour.ref + '.', 5, tour.id, null);
 
+  /* ---- student sign-ups and requests to join --------------------------------
+     A student signs up for their own account, then asks to join each
+     organization; SASO approves both on Manage Accounts. */
+  var memberRequests = [
+    { id:nextId('mreq'), kind:'SIGNUP', ref:'SU-' + year + '-0001', status:C.ACCOUNT_REQUEST.PENDING,
+      submittedAt:hoursAgo(20), name:'M. Villanueva', program:'Bachelor of Science in Information Systems',
+      college:'College of Computer Studies', email:'mvillanueva@example.com', contact:'',
+      username:'mvillanueva', password:'student123', reviewedAt:null, reviewedBy:null, remarks:null, createdUserId:null },
+    { id:nextId('mreq'), kind:'JOIN', ref:'JR-' + year + '-0001', status:C.ACCOUNT_REQUEST.PENDING,
+      submittedAt:hoursAgo(9), userId:'usr-11', name:'A. Dimaano', username:'adimaano',
+      organizationId:'org-2', position:'Member', notes:'Also a member of the CCS Student Council this year.',
+      reviewedAt:null, reviewedBy:null, remarks:null }
+  ];
+  memberRequests.forEach(function (r) {
+    notifyManagers(C.NOTIF.ACCOUNT_REQUESTED, r.kind === 'SIGNUP'
+      ? r.name + ' signed up for an account (' + r.username + '): ' + r.ref + '.'
+      : r.name + ' asked to join CCS-SC as ' + r.position + ': ' + r.ref + '.', r.kind === 'SIGNUP' ? 20 : 9, r.id, null);
+  });
+
   return {
-    meta:{ seededAt:new Date().toISOString(), version:9 },
+    meta:{ seededAt:new Date().toISOString(), version:10 },
     /* Office policy values. Seeded from what SASO stated; adjustable in
        Settings so the prototype can be shown against a different policy. */
     settings:{
@@ -865,7 +896,7 @@ SASO.buildSeed = function () {
       retentionYears: C.RECORD_RETENTION_YEARS,
       signatories: JSON.parse(JSON.stringify(C.SIGNATORIES))
     },
-    organizations:organizations, users:users, activities:activities,
+    organizations:organizations, users:users, activities:activities, memberRequests:memberRequests,
     requirements:requirements, comments:comments, notifications:notifications,
     routing:routing, statusHistory:statusHistory, trash:trash, accountRequests:accountRequests
   };

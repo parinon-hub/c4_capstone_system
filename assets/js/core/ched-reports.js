@@ -383,8 +383,8 @@ SASO.ched = (function () {
     });
     var cats = {};
     acts.forEach(function (a) { cats[a.category] = (cats[a.category] || 0) + 1; });
-    var adviserAcc = accounts.filter(function (u) { return /^Adviser/i.test(M.positionTitle(u)); });
-    var officers = accounts.filter(function (u) { return !/^(Member|Adviser)$/i.test(M.positionTitle(u)); });
+    var adviserAcc = accounts.filter(function (u) { return /^Adviser/i.test(M.positionTitle(u, orgId)); });
+    var officers = accounts.filter(function (u) { return !/^(Member|Adviser)$/i.test(M.positionTitle(u, orgId)); });
     var pct = acts.length ? Math.round(complete / acts.length * 100) : 0;
     var h = head(), prep = preparer(orgId);
 
@@ -424,7 +424,7 @@ SASO.ched = (function () {
         heading: 'II. Officers and Members',
         columns: ['No.', 'Name', 'Position', 'Program', 'College', 'Email address'],
         rows: accounts.map(function (u, i) {
-          return [i + 1, u.name, M.positionTitle(u), u.program || '', u.college || '', u.email || ''];
+          return [i + 1, u.name, M.positionTitle(u, orgId), u.program || '', u.college || '', u.email || ''];
         }),
         empty: 'No member accounts yet.'
       }, {
@@ -463,7 +463,7 @@ SASO.ched = (function () {
         note: 'SASO assigns the level from these indicators and the documents in Section I.'
       }],
       signatories: [
-        { caption: 'Prepared by:', name: prep ? prep.name : '', role: prep ? M.positionTitle(prep) : 'Organization Officer' },
+        { caption: 'Prepared by:', name: prep ? prep.name : '', role: prep ? M.positionTitle(prep, orgId) : 'Organization Officer' },
         { caption: 'Noted by:', name: org.adviser, role: 'Organization Adviser' },
         { caption: 'Evaluated by:', name: h ? h.name : '', role: 'Head, Student Affairs and Services Office' }
       ]

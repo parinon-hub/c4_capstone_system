@@ -40,7 +40,7 @@ SASO.layout = (function () {
       { key: 'terminal',     label: 'Terminal Reports', icon: 'fa-file-circle-check', href: 'pages/org/terminal-reports.html', badge: 'terminal' },
       { key: 'records',      label: 'Records Archive',  icon: 'fa-box-archive',       href: 'pages/org/records.html' },
       { key: 'notifications',label: 'Notifications',    icon: 'fa-bell',              href: 'pages/org/notifications.html', badge: 'notifications' },
-      { key: 'members',      label: 'Members',          icon: 'fa-users',             href: 'pages/org/members.html' },
+      { key: 'my-organizations', label: 'My Organizations', icon: 'fa-people-group', href: 'pages/org/my-organizations.html' },
       { key: 'profile',      label: 'Organization Profile', icon: 'fa-id-badge',      href: 'pages/org/profile.html' }
     ]
   };
@@ -77,7 +77,7 @@ SASO.layout = (function () {
     'pages/documents/print.html': 0,
     'pages/saso/settings.html': 0,
     'pages/org/profile.html': 0,
-    'pages/org/members.html': 0,
+    'pages/org/my-organizations.html': 0,
     'pages/org/my-profile.html': 0,
     'pages/saso/my-profile.html': 0,
     'pages/saso/records.html': 0,
@@ -110,7 +110,7 @@ SASO.layout = (function () {
     counts.notifications = M.unreadCount(session);
 
     if (session.role === C.ROLE.SASO) {
-      counts.accounts = M.pendingAccountRequests().length;
+      counts.accounts = M.pendingAccountRequests().length + M.pendingMemberRequests().length;
       counts.proposals = M.allActivities().filter(function (a) {
         return a.proposalStatus === C.PROPOSAL.SUBMITTED ||
                a.proposalStatus === C.PROPOSAL.FOR_REVIEW;
@@ -136,10 +136,33 @@ SASO.layout = (function () {
 
   /* ---- rendering ---------------------------------------------------------- */
 
+  var NO_ORG_PAGES = ['my-organizations', 'my-profile', 'notifications'];
+
+  /* Under the person's name: their organization, or the "Acting for" switch
+     when they belong to more than one. */
+  function actingFor(org) {
+    var M = SASO.model;
+    if (session.role === C.ROLE.SASO) { return '<small>SASO</small>'; }
+    var orgs = M.organizationsOfUser(M.userById(session.userId));
+    if (orgs.length < 2) { return '<small>' + M.escapeHtml(org ? org.acronym : 'No organization yet') + '</small>'; }
+    return '<label class="acting-for" for="actingFor"><small>Acting for</small>' +
+      '<select id="actingFor" class="acting-for-select" title="Switch the organization you are acting for">' +
+        orgs.map(function (o) {
+          return '<option value="' + o.id + '"' + (org && o.id === org.id ? ' selected' : '') + '>' +
+            M.escapeHtml(o.acronym) + '</option>';
+        }).join('') +
+      '</select></label>';
+  }
+
   function renderSidebar(activeKey) {
     var counts = badgeCounts();
     var org = SASO.auth.organization();
-    var items = MENUS[session.role].map(function (m) {
+    /* Someone not yet in any organization sees only My Organizations and
+       Notifications until SASO approves a request to join. */
+    var noOrg = session.role === C.ROLE.ORG && !session.organizationId;
+    var items = MENUS[session.role].filter(function (m) {
+      return !noOrg || NO_ORG_PAGES.indexOf(m.key) !== -1;
+    }).map(function (m) {
       var count = m.badge ? counts[m.badge] : 0;
       var badgeHtml = count > 0
         ? ' <span class="badge badge-' + (m.badge === 'terminal' || m.badge === 'accounts' ? 'warning' : 'info') +
@@ -179,7 +202,7 @@ SASO.layout = (function () {
             '<div class="info">' +
               '<a href="' + base + myProfilePath() + '" class="d-block" title="My Profile">' +
                 SASO.model.escapeHtml(session.name) + '</a>' +
-              '<small>' + SASO.model.escapeHtml(org ? org.acronym : 'SASO') + '</small>' +
+              actingFor(org) +
             '</div>' +
           '</div>' +
           '<nav class="mt-2">' +
@@ -448,6 +471,21 @@ SASO.layout = (function () {
     session = SASO.auth.guard(opts.role, base);
     if (!session) { return null; }
 
+    /* The account may have changed since sign-in (SASO approved a request
+       to join, or removed the person from an organization). */
+    if (session.role === C.ROLE.ORG) {
+      var me = SASO.model.userById(session.userId);
+      if (me && (session.organizationId || null) !== (me.organizationId || null)) {
+        session.organizationId = me.organizationId || null;
+        session.position = me.position;
+        SASO.auth.store(session);
+      }
+      if (!session.organizationId && NO_ORG_PAGES.indexOf(opts.page) === -1) {
+        window.location.replace(base + 'pages/org/my-organizations.html');
+        return null;
+      }
+    }
+
     SASO.model.refreshOverdue();
     /* Anything left in the trash bin past the retention period is removed
        for good before the page is drawn. */
@@ -482,6 +520,20 @@ SASO.layout = (function () {
           SASO.storage.reset();
           window.location.reload();
         });
+      });
+    }
+
+    var acting = document.getElementById('actingFor');
+    if (acting) {
+      acting.addEventListener('change', function () {
+        var result = SASO.events.switchOrganization(this.value);
+        if (!result.ok) { toast(result.message, 'danger'); return; }
+        /* A page about one activity belongs to the old organization. */
+        if (/activity-details|documents\/print/.test(window.location.pathname)) {
+          window.location.href = base + 'pages/org/dashboard.html';
+        } else {
+          window.location.reload();
+        }
       });
     }
 

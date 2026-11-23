@@ -103,17 +103,15 @@
             accounts.map(function (u) {
               return '<tr><td><span class="cell-primary">' + M.escapeHtml(u.name) +
                 (u.id === session.userId ? ' <span class="badge badge-info status-badge">You</span>' : '') +
-                '</span><span class="cell-sub">' + M.escapeHtml(M.positionTitle(u)) + '</span></td>' +
+                '</span><span class="cell-sub">' + M.escapeHtml(M.positionTitle(u, org.id)) + '</span></td>' +
                 '<td class="text-right"><code>' + M.escapeHtml(u.username) + '</code></td></tr>';
             }).join('') +
           '</tbody></table></div>' +
           '<div class="card-footer text-muted text-sm">' +
             'Each person has their own sign-in, so what they submit is recorded under their name. ' +
             (M.hasAccountLimit()
-              ? 'The president, the adviser or SASO adds accounts, up to ' + limit + ' per organization.'
-              : 'The president, the adviser or SASO adds accounts; there is no limit per organization.') +
-            (M.canManageMembers(session, org.id)
-              ? ' Manage them on <a href="' + SASO.layout.href('pages/org/members.html') + '">Members</a>.' : '') +
+              ? 'SASO adds accounts, up to ' + limit + ' per organization.'
+              : 'SASO adds accounts; there is no limit per organization.') +
           '</div>' +
         '</div>' +
 
