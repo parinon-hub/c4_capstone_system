@@ -4,8 +4,7 @@
    Panel RSC: personal accounts. Shows the person's own account: name,
    position, organization, program, college, email, contact number and
    username. A person edits their own email, contact number and password
-   here. Name, position, program and college are changed by SASO, or by the
-   president or adviser of the organization on the Members page, so an
+   here. Name, position, program and college are changed by SASO, so an
    officer cannot quietly change the position a submission was made under.
    ========================================================================= */
 
@@ -38,12 +37,11 @@
     if (!user) {
       document.getElementById('pageRoot').innerHTML = '<div class="card"><div class="card-body"><div class="empty-state">' +
         '<i class="fa-solid fa-user-slash"></i><h6>Your account was removed</h6>' +
-        '<p>Sign out and ask SASO or your president for a new account.</p></div></div></div>';
+        '<p>Sign out and ask SASO for a new account.</p></div></div></div>';
       return;
     }
     var org = user.organizationId ? M.orgById(user.organizationId) : null;
-    var manager = !isSaso && M.canManageMembers(session, org && org.id);
-    var who = isSaso ? 'SASO' : 'your president, adviser or SASO';
+    var who = 'SASO';
 
     document.getElementById('pageRoot').innerHTML =
       '<div class="row">' +
@@ -54,28 +52,34 @@
               '<div class="profile-head d-flex align-items-center mb-3">' +
                 '<div class="user-avatar user-avatar-lg mr-3">' + SASO.layout.initials(user.name) + '</div>' +
                 '<div><div class="h5 mb-0">' + esc(user.name) + '</div>' +
-                  '<div class="text-muted">' + esc(M.positionTitle(user)) +
-                    (org ? ', ' + esc(org.acronym) : ', Student Affairs and Services Office') + '</div></div>' +
+                  '<div class="text-muted">' + (isSaso || org
+                    ? esc(M.positionTitle(user)) + (org ? ', ' + esc(org.acronym) : ', Student Affairs and Services Office')
+                    : 'Not in an organization yet') + '</div></div>' +
               '</div>' +
               '<table class="table table-sm detail-table mb-0"><tbody>' +
                 row('Full name', user.name) +
-                row('Position', M.positionTitle(user)) +
+                (isSaso || org ? row('Position', M.positionTitle(user)) : '') +
                 (isSaso
                   ? row('Office', 'Student Affairs and Services Office')
-                  : row('Organization', org ? org.name + ' (' + org.acronym + ')' : '') +
+                  : row(M.membershipsOf(user).length > 1 ? 'Acting for' : 'Organization',
+                        org ? org.name + ' (' + org.acronym + ')' : 'Not in an organization yet') +
+                    (M.membershipsOf(user).length > 1
+                      ? row('All organizations', M.membershipsOf(user).map(function (m) {
+                          var o = M.orgById(m.organizationId);
+                          return (o ? o.acronym : '') + ' (' + m.position + ')';
+                        }).join(', ')) : '') +
                     row('Program', user.program || (M.positionTitle(user) === 'Adviser' ? 'Faculty adviser' : '')) +
                     row('College', user.college)) +
                 row('Username', user.username) +
                 row('Email address', user.email) +
                 row('Contact number', user.contact) +
-                (isSaso ? '' : row('Can manage members', manager ? 'Yes (president or adviser)' : 'No')) +
               '</tbody></table>' +
             '</div>' +
             '<div class="card-footer text-muted text-sm">' +
               '<i class="fa-solid fa-circle-info mr-1"></i>Your name, position' + (isSaso ? '' : ', program and college') +
               ' are changed by ' + who + ', so the position your submissions were made under stays on record.' +
-              (manager ? ' You can manage your organization’s accounts on <a href="' +
-                SASO.layout.href('pages/org/members.html') + '">Members</a>.' : '') +
+              (isSaso ? '' : ' See every organization you belong to on <a href="' +
+                SASO.layout.href('pages/org/my-organizations.html') + '">My Organizations</a>.') +
             '</div>' +
           '</div>' +
         '</div>' +

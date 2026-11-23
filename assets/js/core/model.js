@@ -556,7 +556,11 @@ SASO.model = (function () {
           return n.recipientRole === C.ROLE.SASO &&
                  (!n.recipientUserId || n.recipientUserId === session.userId);
         }
-        return n.recipientRole === C.ROLE.ORG && n.recipientOrgId === session.organizationId;
+        /* Personal ones (recipientUserId) follow the person; the rest go to
+           the organization they are acting for. */
+        if (n.recipientRole !== C.ROLE.ORG) { return false; }
+        if (n.recipientUserId) { return n.recipientUserId === session.userId; }
+        return !!session.organizationId && n.recipientOrgId === session.organizationId;
       })
       .sort(function (a, b) { return new Date(b.timestamp) - new Date(a.timestamp); });
   }
@@ -675,9 +679,33 @@ SASO.model = (function () {
 
   /* The most recent request filed under a username — used at sign-in to tell
      a requester their request is still pending, or was declined. */
+  /* Student and adviser sign-ups (kind SIGNUP) and requests to join an
+     organization (kind JOIN). SASO approves both on Manage Accounts. */
+  function memberRequests() {
+    var data = db();
+    if (!data.memberRequests) { data.memberRequests = []; }  /* older stores */
+    return data.memberRequests;
+  }
+
+  function pendingMemberRequests(kind) {
+    return memberRequests().filter(function (r) {
+      return r.status === C.ACCOUNT_REQUEST.PENDING && (!kind || r.kind === kind);
+    });
+  }
+
+  function memberRequestById(id) {
+    return memberRequests().filter(function (r) { return r.id === id; })[0] || null;
+  }
+
+  /* The person's own join requests, newest first. */
+  function joinRequestsOf(userId) {
+    return memberRequests().filter(function (r) { return r.kind === 'JOIN' && r.userId === userId; })
+      .sort(function (a, b) { return new Date(b.submittedAt) - new Date(a.submittedAt); });
+  }
+
   function latestRequestForUsername(username) {
     var key = String(username || '').trim().toLowerCase();
-    return accountRequests()
+    return accountRequests().concat(memberRequests().filter(function (r) { return r.kind === 'SIGNUP'; }))
       .filter(function (r) { return r.username.toLowerCase() === key; })
       .sort(function (a, b) { return new Date(b.submittedAt) - new Date(a.submittedAt); })[0] || null;
   }
@@ -687,7 +715,7 @@ SASO.model = (function () {
     var key = String(username || '').trim().toLowerCase();
     if (!key) { return false; }
     if (db().users.some(function (u) { return u.username.toLowerCase() === key; })) { return true; }
-    return pendingAccountRequests().some(function (r) {
+    return pendingAccountRequests().concat(pendingMemberRequests('SIGNUP')).some(function (r) {
       return r.id !== ignoreRequestId && r.username.toLowerCase() === key;
     });
   }
@@ -719,7 +747,7 @@ SASO.model = (function () {
 
   function accountsForOrg(orgId) {
     return db().users.filter(function (u) {
-      return u.role === C.ROLE.ORG && u.organizationId === orgId;
+      return u.role === C.ROLE.ORG && isMemberOf(u, orgId);
     });
   }
 
@@ -742,9 +770,29 @@ SASO.model = (function () {
     return hasAccountLimit() ? n + ' of ' + orgAccountLimit() : String(n);
   }
 
-  /* "President, JPCS - CSPC" -> "President". */
-  function positionTitle(user) {
+  /* A person's organizations and their position in each. One account can
+     belong to several organizations: user.memberships = [{ organizationId,
+     position }]. user.organizationId and user.position are the organization
+     the person is acting for right now (the "Acting for" switch). Older
+     accounts without memberships have the one organization. */
+  function membershipsOf(user) {
+    if (!user || user.role === C.ROLE.SASO) { return []; }
+    if (user.memberships) { return user.memberships; }
+    return user.organizationId ? [{ organizationId: user.organizationId, position: positionTitle(user) }] : [];
+  }
+
+  function isMemberOf(user, orgId) {
+    return membershipsOf(user).some(function (m) { return m.organizationId === orgId; });
+  }
+
+  /* "President, JPCS - CSPC" -> "President". With orgId, the person's
+     position in that organization. */
+  function positionTitle(user, orgId) {
     if (!user) { return ''; }
+    if (orgId && orgId !== user.organizationId && user.memberships) {
+      var m = user.memberships.filter(function (x) { return x.organizationId === orgId; })[0];
+      return m ? m.position : '';
+    }
     var p = user.position || '';
     var org = user.organizationId ? orgById(user.organizationId) : null;
     var suffix = org ? ', ' + org.acronym : '';
@@ -752,15 +800,15 @@ SASO.model = (function () {
   }
 
   /* Whether the signed-in account may add, edit and remove the accounts of
-     an organization: SASO's account managers for every organization, and the
-     president or adviser of that organization for their own. */
-  function canManageMembers(session, orgId) {
-    if (!session) { return false; }
-    if (session.role === C.ROLE.SASO) { return canManageAccounts(session); }
-    if (session.organizationId !== orgId) { return false; }
-    var me = userById(session.userId);
-    var title = positionTitle(me).toLowerCase();
-    return C.ORG_MEMBER_MANAGERS.some(function (p) { return title === p.toLowerCase(); });
+     an organization. Only SASO's account managers do; presidents and advisers
+     no longer manage their members' accounts. */
+  function canManageMembers(session) {
+    return !!session && session.role === C.ROLE.SASO && canManageAccounts(session);
+  }
+
+  /* Every organization a person belongs to. */
+  function organizationsOfUser(user) {
+    return membershipsOf(user).map(function (m) { return orgById(m.organizationId); }).filter(Boolean);
   }
 
   /* ---- who submitted (panel RSC) -------------------------------------------
@@ -958,6 +1006,9 @@ SASO.model = (function () {
     accountCountLabel: accountCountLabel,
     positionTitle: positionTitle,
     canManageMembers: canManageMembers,
+    organizationsOfUser: organizationsOfUser,
+    membershipsOf: membershipsOf,
+    isMemberOf: isMemberOf,
     submittedByLine: submittedByLine,
     submittedByHtml: submittedByHtml,
     collegeNames: collegeNames,
@@ -1026,6 +1077,10 @@ SASO.model = (function () {
     accountRequestById: accountRequestById,
     accountRequestByRef: accountRequestByRef,
     latestRequestForUsername: latestRequestForUsername,
+    memberRequests: memberRequests,
+    pendingMemberRequests: pendingMemberRequests,
+    memberRequestById: memberRequestById,
+    joinRequestsOf: joinRequestsOf,
     usernameTaken: usernameTaken,
     acronymTaken: acronymTaken,
     currentAY: currentAY,

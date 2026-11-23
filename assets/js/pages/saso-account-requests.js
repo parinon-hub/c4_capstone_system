@@ -7,8 +7,9 @@
    organization's details and account, or delete its account (the
    organization and its records stay; Edit can give it a new account).
 
-   There is no open sign-up. Organizations request an account from the
-   sign-in screen; it waits here until SASO's Head, Administrative Aide or
+   Students and advisers sign up for their own accounts and ask to join
+   organizations; those wait in the last card for approval. New
+   organizations request an account from the sign-in screen; it waits here until SASO's Head, Administrative Aide or
    Coordinator approves it (creating the organization and its account) or
    declines it with a reason. The same three can also add an organization
    directly. The Records Officer sees the queue read-only.
@@ -77,6 +78,13 @@
       '</div>' +
       '<div class="card-body p-0" id="tableHost"></div>' +
       '<div class="card-footer d-flex align-items-center py-2" id="pager"></div>' +
+    '</div>' +
+    '<div class="card" id="memberCard">' +
+      '<div class="card-header">' +
+        '<h3 class="card-title">Student sign-ups and requests to join</h3>' +
+        '<div class="card-tools"><div class="btn-group btn-group-sm" id="memberTabs"></div></div>' +
+      '</div>' +
+      '<div class="card-body p-0" id="memberHost"></div>' +
     '</div>';
 
   /* ---- tiles and tabs ------------------------------------------------------------- */
@@ -90,7 +98,8 @@
   function renderTiles() {
     var c = counts();
     var tiles = [
-      { value: c.PENDING, label: 'Awaiting approval', icon: 'fa-hourglass-half', mod: c.PENDING ? 'is-attention' : '' },
+      { value: c.PENDING + M.pendingMemberRequests().length, label: 'Awaiting approval', icon: 'fa-hourglass-half',
+        mod: c.PENDING + M.pendingMemberRequests().length ? 'is-attention' : '' },
       { value: c.APPROVED, label: 'Approved', icon: 'fa-user-check', mod: 'is-complete' },
       { value: c.DECLINED, label: 'Declined', icon: 'fa-user-xmark' },
       { value: M.organizations().filter(function (o) { return M.accountForOrg(o.id); }).length,
@@ -171,7 +180,7 @@
           (us.length
             ? '<td class="text-sm">' + us.map(function (u) {
                   return '<div class="mb-1">' + M.escapeHtml(u.name) +
-                    '<span class="cell-sub">' + M.escapeHtml(M.positionTitle(u)) + '</span></div>';
+                    '<span class="cell-sub">' + M.escapeHtml(M.positionTitle(u, o.id)) + '</span></div>';
                 }).join('') + '</td>' +
               '<td class="text-sm">' + us.map(function (u) {
                   return '<div class="mb-1"><code>' + M.escapeHtml(u.username) + '</code>' +
@@ -212,7 +221,7 @@
 
   function openAccountsDialog(orgId) { SASO.orgMembers.openDialog(orgId, renderAll); }
 
-  function renderAll() { renderAccounts(); render(); }
+  function renderAll() { renderAccounts(); render(); renderMemberRequests(); }
 
   /* ---- account requests ------------------------------------------------------------------- */
 
@@ -435,6 +444,91 @@
       $m.modal('hide');
       SASO.layout.toast('Request ' + r.ref + ' declined.', 'warning');
       render();
+    });
+  }
+
+  /* ---- student sign-ups and requests to join -------------------------------------------------
+     A student or adviser signs up for their own account, then asks to join
+     each organization they belong to. SASO approves or declines both here. */
+
+  var memberState = { status: R.PENDING };
+
+  function renderMemberRequests() {
+    var all = M.memberRequests().slice().sort(function (a, b) { return new Date(b.submittedAt) - new Date(a.submittedAt); });
+    var pending = all.filter(function (r) { return r.status === R.PENDING; }).length;
+    document.getElementById('memberTabs').innerHTML =
+      [{ k: R.PENDING, l: 'Pending' + (pending ? ' <span class="badge badge-light ml-1">' + pending + '</span>' : '') },
+       { k: '', l: 'All' }].map(function (t) {
+        return '<button type="button" class="btn btn-outline-primary' + (memberState.status === t.k ? ' active' : '') +
+          '" data-mstatus="' + t.k + '">' + t.l + '</button>';
+      }).join('');
+    var list = all.filter(function (r) { return !memberState.status || r.status === memberState.status; });
+    var host = document.getElementById('memberHost');
+    if (!list.length) {
+      host.innerHTML = '<div class="empty-state py-4"><i class="fa-solid fa-inbox"></i><h6>Nothing ' +
+        (memberState.status ? 'waiting' : 'yet') + '</h6><p>Sign-ups from the sign-in page and requests to join ' +
+        'from My Organizations appear here.</p></div>';
+    } else {
+      host.innerHTML = '<div class="table-responsive"><table class="table table-sm mb-0"><thead><tr>' +
+        '<th>Reference</th><th>Request</th><th>Person</th><th>Details</th><th>Status</th><th></th></tr></thead><tbody>' +
+        list.map(function (r) {
+          var org = r.kind === 'JOIN' ? M.orgById(r.organizationId) : null;
+          var person = r.kind === 'JOIN' ? M.userById(r.userId) : null;
+          var details = r.kind === 'SIGNUP'
+            ? M.escapeHtml(r.program || 'None (adviser or faculty member)') +
+              (r.college ? '<span class="cell-sub">' + M.escapeHtml(r.college) + '</span>' : '') +
+              '<span class="cell-sub">' + M.escapeHtml(r.email || '') + '</span>'
+            : M.escapeHtml((org ? org.acronym : '-') + ', as ' + r.position) +
+              (person && person.program ? '<span class="cell-sub">' + M.escapeHtml(person.program) + '</span>' : '') +
+              (r.notes ? '<span class="cell-sub">“' + M.escapeHtml(r.notes) + '”</span>' : '');
+          return '<tr><td class="text-sm"><code>' + M.escapeHtml(r.ref) + '</code><span class="cell-sub">' +
+              M.formatDate(r.submittedAt) + '</span></td>' +
+            '<td class="text-sm">' + (r.kind === 'SIGNUP' ? 'New account' : 'Join an organization') + '</td>' +
+            '<td class="text-sm"><span class="cell-primary">' + M.escapeHtml(r.name) + '</span><span class="cell-sub"><code>' +
+              M.escapeHtml(r.username) + '</code></span></td>' +
+            '<td class="text-sm">' + details + '</td>' +
+            '<td class="text-sm">' + M.badge(r.status) +
+              (r.reviewedBy ? '<span class="cell-sub">' + M.escapeHtml(r.reviewedBy) + '</span>' : '') +
+              (r.remarks ? '<span class="cell-sub">' + M.escapeHtml(r.remarks) + '</span>' : '') + '</td>' +
+            '<td class="text-right text-nowrap">' + (canAct && r.status === R.PENDING
+              ? '<button type="button" class="btn btn-xs btn-success" data-m-approve="' + r.id + '">' +
+                  '<i class="fa-solid fa-check mr-1"></i>Approve</button>' +
+                '<button type="button" class="btn btn-xs btn-outline-danger ml-1" data-m-decline="' + r.id + '">Decline</button>'
+              : '') + '</td></tr>';
+        }).join('') + '</tbody></table></div>';
+    }
+
+    document.querySelectorAll('[data-mstatus]').forEach(function (b) {
+      b.addEventListener('click', function () { memberState.status = this.getAttribute('data-mstatus'); renderMemberRequests(); });
+    });
+    host.querySelectorAll('[data-m-approve]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var result = E.approveMemberRequest(this.getAttribute('data-m-approve'));
+        if (!result.ok) { SASO.layout.toast(result.message, 'danger'); return; }
+        SASO.layout.toast(result.request.kind === 'SIGNUP'
+          ? 'Account for ' + result.user.name + ' approved. They can sign in as "' + result.user.username + '".'
+          : result.user.name + ' added to ' + result.org.acronym + ' as ' + result.request.position + '.');
+        renderAll(); renderTiles();
+      });
+    });
+    host.querySelectorAll('[data-m-decline]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var id = this.getAttribute('data-m-decline');
+        var cell = this.parentNode;
+        cell.innerHTML = '<div class="d-flex"><input type="text" class="form-control form-control-sm mr-1" ' +
+          'placeholder="Reason (required)" data-m-reason>' +
+          '<button type="button" class="btn btn-xs btn-danger" data-m-yes>Decline</button>' +
+          '<button type="button" class="btn btn-xs btn-light ml-1" data-m-no>Cancel</button></div>';
+        var reason = cell.querySelector('[data-m-reason]');
+        reason.focus();
+        cell.querySelector('[data-m-no]').addEventListener('click', renderMemberRequests);
+        cell.querySelector('[data-m-yes]').addEventListener('click', function () {
+          if (!reason.value.trim()) { reason.classList.add('is-invalid'); reason.focus(); return; }
+          var r = E.declineMemberRequest(id, reason.value.trim());
+          if (r) { SASO.layout.toast(r.ref + ' declined.', 'warning'); }
+          renderMemberRequests(); renderTiles();
+        });
+      });
     });
   }
 

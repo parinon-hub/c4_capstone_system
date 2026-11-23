@@ -52,7 +52,7 @@ SASO.auth = (function () {
       name: user.name,
       position: user.position,
       role: user.role,
-      organizationId: user.organizationId,
+      organizationId: user.organizationId || null,
       loginAt: new Date().toISOString()
     };
 
@@ -78,9 +78,8 @@ SASO.auth = (function () {
   function homeFor(session, base) {
     base = base || './';
     if (!session) { return base + 'index.html'; }
-    return session.role === C.ROLE.SASO
-      ? base + 'pages/saso/dashboard.html'
-      : base + 'pages/org/dashboard.html';
+    if (session.role === C.ROLE.SASO) { return base + 'pages/saso/dashboard.html'; }
+    return session.organizationId ? base + 'pages/org/dashboard.html' : base + 'pages/org/my-organizations.html';
   }
 
   /* Sends the visitor back to the login screen if they are not signed in, or

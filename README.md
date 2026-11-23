@@ -36,7 +36,7 @@ below on the login screen.
 | `ralmeda` | `jpcs123` | Adviser (personal account) | JPCS - CSPC |
 | `adimaano` | `jpcs123` | Secretary (personal account) | JPCS - CSPC |
 | `lfajardo` | `jpcs123` | Vice President (personal account) | JPCS - CSPC |
-| `jsantos` | `jpcs123` | Member (personal account) | JPCS - CSPC |
+| `jsantos` | `jpcs123` | Member, and Representative in CSPC-SSC (shows the "Acting for" switch) | JPCS - CSPC, CSPC-SSC |
 | `jbautista` | `ccs123` | President (personal account) | CCS-SC |
 | `nramos` | `ccs123` | Secretary (personal account) | CCS-SC |
 | `mbernales` | `ccs123` | Adviser (personal account) | CCS-SC |
@@ -47,9 +47,17 @@ below on the login screen.
 | `rcastillo` | `cas123` | President (personal account) | CAS-CSC |
 | `tlorenzo` | `cas123` | Secretary (personal account) | CAS-CSC |
 
-Organizations sign in with **personal accounts**, one per member. The
-president and the adviser manage their organization's members on **Members**;
-every account edits its own email, contact number and password on **My Profile**.
+Organizations sign in with **personal accounts**, one per person. A student or
+adviser **signs up** from the sign-in page and SASO approves the account; they
+then ask to **join** each organization from **My Organizations**, and SASO
+approves that too. Someone in more than one organization picks the one they
+are acting for with the **Acting for** switch under their name in the sidebar;
+the dashboard, submissions and requirements follow it, and each submission
+records the organization and the person's position in it. SASO also adds
+and manages accounts directly. Pending demo requests: sign-up `SU-…-0001`
+and A. Dimaano's request to join CCS-SC. Each student or adviser sees every organization they
+belong to on **My Organizations**, and edits their own email, contact number
+and password on **My Profile**.
 
 **Reset demo data** lives in the user menu, top right. Use it before each fresh
 walkthrough.
@@ -354,16 +362,18 @@ personal account, so every submission is recorded under that person's name
 and position ("Submitted by: name, position" on the activity lists and the
 activity page, frozen at the time of submission).
 
-- SASO creates the first account (the president's). After that the
-  **president or the adviser** adds, edits and removes the organization's
-  members on **Members**, with position, program and college (CSPC's
-  colleges and programs, `CSPC_COLLEGES` in `config.js`). SASO can do the
-  same from **Manage Accounts**.
+- SASO adds, edits and removes every account from **Manage Accounts**, with
+  position, program and college (CSPC's colleges and programs,
+  `CSPC_COLLEGES` in `config.js`). Presidents and advisers do not manage
+  accounts.
+- **My Organizations** (organization portal, for students and advisers)
+  lists every organization the person belongs to: their position, the
+  organization's standing, its activities this academic year and its officers
+  and members.
 - SASO can set a limit in **Settings** (*No limit* switch, or *Up to N
   accounts*). Lowering it keeps existing accounts but stops new ones being
   added.
-- Name, position, program and college are changed only by SASO, the
-  president or the adviser. A member edits their own email, contact number
+- Name, position, program and college are changed only by SASO. A member edits their own email, contact number
   and password on **My Profile**.
 
 ### Official SASO forms (PDF)

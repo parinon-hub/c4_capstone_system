@@ -8,8 +8,8 @@
    Used in two places:
      SASO   Manage Accounts, "Manage accounts" on an organization's row
             (dialog). SASO's account managers act on every organization.
-     ORG    Members page. The president and the adviser add, edit and remove
-            the members of their own organization; everyone else sees the list.
+     Only SASO's account managers add, edit and remove accounts. The
+     organization portal shows members read-only on My Organizations.
 
    There is no limit on the number of accounts unless SASO sets one in
    Settings (model.orgAccountLimit, 0 = no limit).
@@ -62,7 +62,7 @@ SASO.orgMembers = (function () {
         return '<tr' + (editingId === u.id ? ' class="table-active"' : '') + '>' +
           '<td class="text-sm"><span class="cell-primary">' + esc(u.name) + '</span>' +
             (self ? '<span class="cell-sub">You</span>' : '') + '</td>' +
-          '<td class="text-sm">' + esc(M.positionTitle(u)) + '</td>' +
+          '<td class="text-sm">' + esc(M.positionTitle(u, org.id)) + '</td>' +
           '<td class="text-sm">' + (u.program ? esc(u.program) : '<span class="text-muted">-</span>') +
             (u.college ? '<span class="cell-sub">' + esc(u.college) + '</span>' : '') + '</td>' +
           '<td><code>' + esc(u.username) + '</code></td>' +
@@ -89,7 +89,7 @@ SASO.orgMembers = (function () {
         (editing ? 'Edit the account of ' + esc(editing.name) : 'Add a member account') + '</h6>' +
       '<div class="form-row">' +
         f('accName', 'Full name', inp('accName', 'text', 'e.g. Juan A. Dela Cruz', editing && editing.name), 6, true) +
-        f('accPosition', 'Position', inp('accPosition', 'text', 'e.g. Member', editing ? M.positionTitle(editing) : '',
+        f('accPosition', 'Position', inp('accPosition', 'text', 'e.g. Member', editing ? M.positionTitle(editing, org.id) : '',
             ' list="accPositions"') +
           '<datalist id="accPositions">' + C.ORG_ACCOUNT_POSITIONS.map(function (p) {
             return '<option value="' + esc(p) + '">'; }).join('') + '</datalist>', 6, true,
@@ -141,7 +141,7 @@ SASO.orgMembers = (function () {
       'recorded under that person’s name. ' +
       (limit ? 'SASO allows up to <strong>' + limit + ' accounts</strong> per organization.'
              : 'There is <strong>no limit</strong> on the number of accounts.') +
-      ' The president or the adviser adds and removes the organization’s members; SASO can manage every account.' +
+      ' SASO adds, edits and removes every account.' +
     '</div>';
   }
 
@@ -182,15 +182,17 @@ SASO.orgMembers = (function () {
         if (!u) { return; }
         /* Confirmed in place: a second dialog over a dialog would hide it. */
         var cell = this.parentNode;
+        var elsewhere = M.membershipsOf(u).length > 1;
         cell.innerHTML = '<span class="text-sm text-danger mr-1">Remove? ' + esc(u.username) +
-          ' will no longer sign in.</span>' +
+          (elsewhere ? ' leaves ' + esc(org.acronym) + ' but keeps their other organizations.</span>'
+                     : ' will no longer sign in.</span>') +
           '<button type="button" class="btn btn-xs btn-danger" data-acc-yes>Remove</button>' +
           '<button type="button" class="btn btn-xs btn-light ml-1" data-acc-no>Keep</button>';
         cell.querySelector('[data-acc-no]').addEventListener('click', function () { again(opts.editingId); });
         cell.querySelector('[data-acc-yes]').addEventListener('click', function () {
-          var result = SASO.events.removeOrgAccount(u.id);
+          var result = SASO.events.removeOrgAccount(u.id, orgId);
           if (!result.ok) { SASO.layout.toast(result.message, 'danger'); return; }
-          SASO.layout.toast('The account of ' + u.name + ' was removed. ' + org.acronym +
+          SASO.layout.toast(u.name + ' was removed from ' + org.acronym + '. ' + org.acronym +
             ' keeps all its records.', 'warning');
           again(null);
         });
@@ -233,7 +235,7 @@ SASO.orgMembers = (function () {
       if (!SASO.orgAccountForm.showErrors(form, e)) {
         box.textContent = 'Please correct the highlighted fields.'; box.classList.remove('d-none'); return;
       }
-      var result = editing ? SASO.events.updateOrgAccount(editing.id, data) : SASO.events.addOrgAccount(orgId, data);
+      var result = editing ? SASO.events.updateOrgAccount(editing.id, data, orgId) : SASO.events.addOrgAccount(orgId, data);
       if (!result.ok) { box.textContent = result.message; box.classList.remove('d-none'); return; }
       SASO.layout.toast(editing ? 'Account of ' + result.user.name + ' saved.'
         : 'Account added. ' + result.user.name + ' can sign in as "' + result.user.username + '" now.');

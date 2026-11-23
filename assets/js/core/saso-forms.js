@@ -84,7 +84,7 @@ SASO.sasoForms = (function () {
     }
     var me = SASO.auth.current();
     if (me && me.role === C.ROLE.ORG && me.organizationId === activity.organizationId) {
-      return { name: me.name, position: M.positionTitle(me) };
+      return { name: me.name, position: M.positionTitle(M.userById(me.userId) || me, activity.organizationId) };
     }
     return { name: '', position: '' };
   }
@@ -285,7 +285,7 @@ SASO.sasoForms = (function () {
   /* ---- CSPC-F-SASO-14 Responsibility Acceptance Slip -------------------------------- */
 
   function president(orgId) {
-    return M.accountsForOrg(orgId).filter(function (u) { return /^President/i.test(M.positionTitle(u)); })[0] || null;
+    return M.accountsForOrg(orgId).filter(function (u) { return /^President/i.test(M.positionTitle(u, orgId)); })[0] || null;
   }
 
   function slip(activity) {
@@ -293,7 +293,7 @@ SASO.sasoForms = (function () {
     var who = responsible(activity);
     var pres = /^(President|Adviser)/i.test(who.position || '') ? who : president(activity.organizationId);
     var name = pres ? pres.name : '';
-    var role = pres && /^Adviser/i.test(pres.position || (pres.organizationId ? M.positionTitle(pres) : '')) ? 'Adviser' : 'President';
+    var role = pres && /^Adviser/i.test(pres.position || (pres.organizationId ? M.positionTitle(pres, activity.organizationId) : '')) ? 'Adviser' : 'President';
     return '<div class="sf-page sf-slip">' + header('CSPC-F-SASO-14') +
       '<div class="sf-title sf-u">RESPONSIBILITY ACCEPTANCE SLIP</div>' +
       '<div class="sf-slip-date"><span class="sf-fill">' + prepared(activity) + '</span><div>Date</div></div>' +

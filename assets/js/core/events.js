@@ -329,7 +329,7 @@ SASO.events = (function () {
     var me = actor ? SASO.model.userById(actor.userId) : null;
     if (actor) {
       activity.submittedBy = { userId: actor.userId, name: actor.name,
-        position: me ? SASO.model.positionTitle(me) : SASO.model.positionTitle(actor) };
+        position: me ? SASO.model.positionTitle(me, activity.organizationId) : SASO.model.positionTitle(actor) };
     }
 
     /* Open the SASO leg of the approval route. */
@@ -830,6 +830,7 @@ SASO.events = (function () {
       username: src.username, password: src.password,
       name: src.officerName,
       position: src.officerPosition + ', ' + src.acronym,
+      memberships: [{ organizationId: org.id, position: src.officerPosition }],
       program: src.officerProgram || null,
       college: src.officerCollege || (src.college !== 'Institution-wide' ? src.college : null) || null,
       email: src.email || null, contact: src.contact || null,
@@ -953,7 +954,7 @@ SASO.events = (function () {
     user.username = form.username;
     if (form.password) { user.password = form.password; }
     user.name = form.officerName;
-    user.position = form.officerPosition + ', ' + org.acronym;
+    setMembership(user, org.id, form.officerPosition);
     user.program = form.officerProgram || null;
     user.college = form.officerCollege || user.college || null;
     user.email = form.email || null;
@@ -996,9 +997,8 @@ SASO.events = (function () {
 
   /* ---- personal accounts (panel RSC) ----------------------------------------
      Every member who works in the system has a personal account, tied to one
-     organization and a position. SASO's account managers manage every
-     organization's accounts; the president or adviser manages their own
-     organization's (model.canManageMembers). There is no limit unless SASO
+     organization and a position. Only SASO's account managers manage the
+     accounts (model.canManageMembers). There is no limit unless SASO
      sets one in Settings. */
 
   var ACCOUNT_FIELDS = ['name', 'position', 'program', 'college', 'email', 'contact', 'username'];
@@ -1030,6 +1030,7 @@ SASO.events = (function () {
       id: SASO.storage.nextId('usr'), role: C.ROLE.ORG, organizationId: org.id,
       username: form.username, password: form.password,
       name: form.name, position: form.position + ', ' + org.acronym,
+      memberships: [{ organizationId: org.id, position: form.position }],
       program: form.program || null, college: form.college || null,
       email: form.email || null, contact: form.contact || null,
       createdAt: new Date().toISOString(), createdBy: actor.name
@@ -1046,10 +1047,10 @@ SASO.events = (function () {
     return { ok: true, org: org, user: user };
   }
 
-  function updateOrgAccount(userId, form) {
+  function updateOrgAccount(userId, form, orgId) {
     var actor = SASO.auth.current();
     var user = SASO.model.userById(userId);
-    var org = user && SASO.model.orgById(user.organizationId);
+    var org = user && SASO.model.orgById(orgId || user.organizationId);
     if (!user || !org) { return { ok: false, message: 'This account no longer exists.' }; }
     if (!SASO.model.canManageMembers(actor, org.id)) { return { ok: false, message: 'Not permitted.' }; }
     if (usernameInUse(form.username, user)) {
@@ -1059,7 +1060,7 @@ SASO.events = (function () {
     user.username = form.username;
     if (form.password) { user.password = form.password; }
     user.name = form.name;
-    user.position = form.position + ', ' + org.acronym;
+    setMembership(user, org.id, form.position);
     user.program = form.program || null;
     user.college = form.college || null;
     user.email = form.email || null;
@@ -1075,20 +1076,28 @@ SASO.events = (function () {
     return { ok: true, org: org, user: user };
   }
 
-  function removeOrgAccount(userId) {
+  /* Takes the person out of orgId. Someone in other organizations keeps
+     their account; someone in none is removed. */
+  function removeOrgAccount(userId, orgId) {
     var actor = SASO.auth.current();
     var user = SASO.model.userById(userId);
-    var org = user && SASO.model.orgById(user.organizationId);
+    var org = user && SASO.model.orgById(orgId || user.organizationId);
     if (!user || !org) { return { ok: false, message: 'This account no longer exists.' }; }
     if (!SASO.model.canManageMembers(actor, org.id)) { return { ok: false, message: 'Not permitted.' }; }
     if (actor.userId === user.id) {
       return { ok: false, message: 'You cannot remove your own account. Ask SASO or another officer.' };
     }
-    var users = db().users;
-    users.splice(users.indexOf(user), 1);
+    var others = SASO.model.membershipsOf(user).filter(function (m) { return m.organizationId !== org.id; });
+    if (others.length) {
+      user.memberships = others;
+      if (user.organizationId === org.id) { setActiveOrganization(user, others[0].organizationId); }
+    } else {
+      var users = db().users;
+      users.splice(users.indexOf(user), 1);
+    }
 
     notifyOrg(org.id, null, C.NOTIF.ACCOUNT_DELETED,
-      byWhom(actor) + ' removed the account of ' + user.name + '.');
+      byWhom(actor) + ' removed ' + user.name + ' from ' + org.acronym + '.');
     notifyAccountManagers(C.NOTIF.ACCOUNT_DELETED,
       byWhom(actor) + ' removed the account of ' + user.name + ' of ' + org.acronym + ' (' + user.username + ').',
       'You removed the account of ' + user.name + ' of ' + org.acronym + ' (' + user.username + ').', actor);
@@ -1097,14 +1106,167 @@ SASO.events = (function () {
     return { ok: true, org: org, user: user };
   }
 
-  /* Keeps the signed-in session's name and position in step with the account. */
+  /* Keeps the signed-in session's name, position and organization in step
+     with the account. */
   function refreshSession(user) {
     var s = SASO.auth.current();
     if (!s || s.userId !== user.id) { return; }
     s.name = user.name;
     s.position = user.position;
     s.username = user.username;
+    s.organizationId = user.organizationId || null;
     SASO.auth.store(s);
+  }
+
+  /* ---- memberships ---------------------------------------------------------
+     One account can belong to several organizations (user.memberships).
+     user.organizationId and user.position are the one being acted for. */
+
+  function setActiveOrganization(user, orgId) {
+    var org = SASO.model.orgById(orgId);
+    var m = SASO.model.membershipsOf(user).filter(function (x) { return x.organizationId === orgId; })[0];
+    if (!org || !m) { user.organizationId = null; user.position = ''; return; }
+    user.organizationId = org.id;
+    user.position = m.position + ', ' + org.acronym;
+  }
+
+  /* Adds the person to orgId with that position, or changes their position. */
+  function setMembership(user, orgId, position) {
+    var list = SASO.model.membershipsOf(user).slice();
+    var m = list.filter(function (x) { return x.organizationId === orgId; })[0];
+    if (m) { m.position = position; } else { list.push({ organizationId: orgId, position: position }); }
+    user.memberships = list.map(function (x) { return { organizationId: x.organizationId, position: x.position }; });
+    if (!user.organizationId || user.organizationId === orgId) { setActiveOrganization(user, orgId); }
+  }
+
+  /* The "Acting for" switch. */
+  function switchOrganization(orgId) {
+    var actor = SASO.auth.current();
+    var user = actor && SASO.model.userById(actor.userId);
+    if (!user || !SASO.model.isMemberOf(user, orgId)) { return { ok: false, message: 'You are not a member of that organization.' }; }
+    setActiveOrganization(user, orgId);
+    refreshSession(user);
+    SASO.storage.save();
+    return { ok: true, org: SASO.model.orgById(orgId) };
+  }
+
+  function notifyUser(userId, type, message) {
+    db().notifications.push({
+      id: SASO.storage.nextId('ntf'), recipientRole: C.ROLE.ORG, recipientOrgId: null,
+      recipientUserId: userId, activityId: null, type: type, message: message,
+      timestamp: new Date().toISOString(), read: false
+    });
+  }
+
+  function nextMemberRef(kind) {
+    var prefix = (kind === 'JOIN' ? 'JR-' : 'SU-') + new Date().getFullYear() + '-';
+    var max = 0;
+    SASO.model.memberRequests().forEach(function (r) {
+      if (r.ref.indexOf(prefix) === 0) { max = Math.max(max, parseInt(r.ref.slice(prefix.length), 10) || 0); }
+    });
+    return prefix + ('000' + (max + 1)).slice(-4);
+  }
+
+  /* Public: a student or adviser asks for their own account (Sign up). */
+  function submitSignup(form) {
+    if (SASO.model.usernameTaken(form.username)) { return null; }
+    var req = {
+      id: SASO.storage.nextId('mreq'), kind: 'SIGNUP', ref: nextMemberRef('SIGNUP'),
+      status: C.ACCOUNT_REQUEST.PENDING, submittedAt: new Date().toISOString(),
+      name: form.name, program: form.program || null, college: form.college || null,
+      email: form.email, contact: form.contact || null,
+      username: form.username, password: form.password,  /* prototype only */
+      reviewedAt: null, reviewedBy: null, remarks: null, createdUserId: null
+    };
+    SASO.model.memberRequests().push(req);
+    notifyAccountManagers(C.NOTIF.ACCOUNT_REQUESTED,
+      req.name + ' signed up for an account (' + req.username + '): ' + req.ref + '.', null, null, req.id);
+    SASO.storage.save();
+    return req;
+  }
+
+  /* A signed-in person asks to join an organization (My Organizations). */
+  function requestToJoin(orgId, position, note) {
+    var actor = SASO.auth.current();
+    var user = actor && SASO.model.userById(actor.userId);
+    var org = SASO.model.orgById(orgId);
+    if (!user || !org) { return { ok: false, message: 'Choose an organization.' }; }
+    if (SASO.model.isMemberOf(user, orgId)) { return { ok: false, message: 'You are already a member of ' + org.acronym + '.' }; }
+    if (SASO.model.joinRequestsOf(user.id).some(function (r) { return r.organizationId === orgId && r.status === C.ACCOUNT_REQUEST.PENDING; })) {
+      return { ok: false, message: 'You already asked to join ' + org.acronym + '. SASO has not decided yet.' };
+    }
+    var req = {
+      id: SASO.storage.nextId('mreq'), kind: 'JOIN', ref: nextMemberRef('JOIN'),
+      status: C.ACCOUNT_REQUEST.PENDING, submittedAt: new Date().toISOString(),
+      userId: user.id, name: user.name, username: user.username,
+      organizationId: org.id, position: position, notes: note || null,
+      reviewedAt: null, reviewedBy: null, remarks: null
+    };
+    SASO.model.memberRequests().push(req);
+    notifyAccountManagers(C.NOTIF.ACCOUNT_REQUESTED,
+      user.name + ' asked to join ' + org.acronym + ' as ' + position + ': ' + req.ref + '.', null, null, req.id);
+    SASO.storage.save();
+    return { ok: true, request: req };
+  }
+
+  function approveMemberRequest(requestId, remarks) {
+    var actor = SASO.auth.current();
+    var req = SASO.model.memberRequestById(requestId);
+    if (!req || req.status !== C.ACCOUNT_REQUEST.PENDING || !SASO.model.canManageAccounts(actor)) {
+      return { ok: false, message: 'This request can no longer be approved.' };
+    }
+    var user, org;
+    if (req.kind === 'SIGNUP') {
+      if (db().users.some(function (u) { return u.username.toLowerCase() === req.username.toLowerCase(); })) {
+        return { ok: false, message: 'The username "' + req.username + '" is already in use. Decline the request instead.' };
+      }
+      user = {
+        id: SASO.storage.nextId('usr'), role: C.ROLE.ORG, organizationId: null, position: '', memberships: [],
+        username: req.username, password: req.password, name: req.name,
+        program: req.program, college: req.college, email: req.email, contact: req.contact,
+        createdAt: new Date().toISOString(), createdBy: actor.name
+      };
+      db().users.push(user);
+      req.createdUserId = user.id;
+      notifyUser(user.id, C.NOTIF.ACCOUNT_APPROVED, 'Welcome. SASO (' + actor.name + ') approved your account. ' +
+        'Join your organization from My Organizations.' + (remarks ? ' Note from SASO: ' + remarks : ''));
+    } else {
+      user = SASO.model.userById(req.userId);
+      org = SASO.model.orgById(req.organizationId);
+      if (!user || !org) { return { ok: false, message: 'The person or the organization no longer exists.' }; }
+      setMembership(user, org.id, req.position);
+      notifyUser(user.id, C.NOTIF.ACCOUNT_APPROVED, 'SASO (' + actor.name + ') approved your request to join ' +
+        org.acronym + ' as ' + req.position + '.' + (remarks ? ' Note from SASO: ' + remarks : ''));
+      notifyOrg(org.id, null, C.NOTIF.ACCOUNT_CREATED, user.name + ' joined ' + org.acronym + ' as ' + req.position + '.');
+    }
+    req.status = C.ACCOUNT_REQUEST.APPROVED;
+    req.reviewedAt = new Date().toISOString();
+    req.reviewedBy = actor.name;
+    req.remarks = remarks || null;
+    var what = req.kind === 'SIGNUP' ? 'the account of ' + req.name : req.name + ' joining ' + org.acronym;
+    notifyAccountManagers(C.NOTIF.ACCOUNT_APPROVED, actor.name + ' approved ' + what + ' (' + req.ref + ').',
+      'You approved ' + what + ' (' + req.ref + ').', actor, req.id);
+    SASO.storage.save();
+    return { ok: true, request: req, user: user, org: org };
+  }
+
+  function declineMemberRequest(requestId, remarks) {
+    var actor = SASO.auth.current();
+    var req = SASO.model.memberRequestById(requestId);
+    if (!req || req.status !== C.ACCOUNT_REQUEST.PENDING || !SASO.model.canManageAccounts(actor)) { return null; }
+    req.status = C.ACCOUNT_REQUEST.DECLINED;
+    req.reviewedAt = new Date().toISOString();
+    req.reviewedBy = actor.name;
+    req.remarks = remarks || null;
+    if (req.kind === 'JOIN') {
+      var org = SASO.model.orgById(req.organizationId);
+      notifyUser(req.userId, C.NOTIF.ACCOUNT_DECLINED, 'SASO declined your request to join ' +
+        (org ? org.acronym : 'the organization') + (remarks ? ': ' + remarks : '.'));
+    }
+    notifyAccountManagers(C.NOTIF.ACCOUNT_DECLINED, actor.name + ' declined ' + req.ref + (remarks ? ': ' + remarks : '.'),
+      'You declined ' + req.ref + '.', actor, req.id);
+    SASO.storage.save();
+    return req;
   }
 
   /* ---- My Profile -------------------------------------------------------------
@@ -1133,6 +1295,11 @@ SASO.events = (function () {
     addOrgAccount: addOrgAccount,
     updateOrgAccount: updateOrgAccount,
     removeOrgAccount: removeOrgAccount,
+    switchOrganization: switchOrganization,
+    submitSignup: submitSignup,
+    requestToJoin: requestToJoin,
+    approveMemberRequest: approveMemberRequest,
+    declineMemberRequest: declineMemberRequest,
     updateOwnProfile: updateOwnProfile,
     submitAccountRequest: submitAccountRequest,
     approveAccountRequest: approveAccountRequest,

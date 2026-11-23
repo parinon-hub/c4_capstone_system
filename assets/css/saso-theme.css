@@ -120,6 +120,20 @@ a:hover { color: var(--cspc-navy); }
   font-size: 0.75rem;
 }
 
+/* "Acting for" switch, for someone in more than one organization. */
+.sidebar .acting-for { display: block; margin: 0.15rem 0 0; font-weight: normal; }
+.sidebar .acting-for small { display: block; line-height: 1.2; }
+.sidebar .acting-for-select {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 4px;
+  color: #fff;
+  font-size: 0.8125rem;
+  padding: 0.1rem 0.3rem;
+  max-width: 100%;
+}
+.sidebar .acting-for-select option { color: #212529; }
+
 .nav-sidebar .nav-link {
   border-radius: 4px;
   color: rgba(255, 255, 255, 0.78);

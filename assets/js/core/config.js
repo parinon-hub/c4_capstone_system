@@ -455,17 +455,14 @@ SASO.config = (function () {
      Answer: as many as SASO allows. There is NO limit by default (0 means no
      limit); SASO can set a maximum per organization in Settings.
 
-     SASO creates the organization's first account (normally the president).
-     From then on the president or the adviser adds and removes the members
-     of their own organization (ORG_MEMBER_MANAGERS); SASO can still manage
-     every account.
+     SASO creates and manages every account. Presidents and advisers no
+     longer add or remove their members' accounts (panel revision).
      ---------------------------------------------------------------------------- */
   var ORG_ACCOUNT_LIMIT = 0;          /* 0 = no limit */
   var ORG_ACCOUNT_LIMIT_MAX = 500;
   var ORG_ACCOUNT_POSITIONS = ['President', 'Vice President', 'Secretary', 'Treasurer', 'Auditor',
                                'Public Information Officer', 'Business Manager', 'Representative',
                                'Committee Head', 'Member', 'Adviser'];
-  var ORG_MEMBER_MANAGERS = ['President', 'Adviser'];
 
   /* ---- CSPC colleges and programs ---------------------------------------------
      As published by Camarines Sur Polytechnic Colleges (cspc.edu.ph, college
@@ -594,7 +591,7 @@ SASO.config = (function () {
   /* v6: several accounts per organization and three academic years of records. */
   /* v7: personal accounts with no default limit, profiles, SASO form fields
      and two past school years from SASO's lists of student activities. */
-  var STORAGE_KEY = 'cspc_saso_prototype_v9';
+  var STORAGE_KEY = 'cspc_saso_prototype_v10';
   var SESSION_KEY = 'cspc_saso_session_v3';
 
   return {
@@ -619,7 +616,6 @@ SASO.config = (function () {
     ORG_ACCOUNT_LIMIT: ORG_ACCOUNT_LIMIT,
     ORG_ACCOUNT_LIMIT_MAX: ORG_ACCOUNT_LIMIT_MAX,
     ORG_ACCOUNT_POSITIONS: ORG_ACCOUNT_POSITIONS,
-    ORG_MEMBER_MANAGERS: ORG_MEMBER_MANAGERS,
     CSPC_COLLEGES: CSPC_COLLEGES,
     ACTIVITY_NATURE: ACTIVITY_NATURE,
     CATEGORY_NATURE: CATEGORY_NATURE,

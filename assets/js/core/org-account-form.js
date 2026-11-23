@@ -488,5 +488,7 @@ SASO.orgAccountForm = (function () {
   }
 
   return { html: html, read: read, validate: validate, showErrors: showErrors,
+           selectWithOther: selectWithOther, otherValue: otherValue, programGroups: programGroups,
+           officerCollege: officerCollege, OTHER: OTHER,
            openAddDialog: openAddDialog, openEditDialog: openEditDialog, bindLiveClear: bindLiveClear };
 })();
