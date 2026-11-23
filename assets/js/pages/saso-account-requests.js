@@ -346,7 +346,7 @@
               item('Full name', M.escapeHtml(r.name)) +
               item('Acronym', M.escapeHtml(r.acronym)) +
               item('Type', M.label(r.entityType)) +
-              item('College / unit', M.escapeHtml(r.college)) +
+              item('College', M.escapeHtml(r.college)) +
               item('Adviser', M.escapeHtml(r.adviser)) +
               item('Proof of recognition', r.proofFileName
                 ? '<span class="file-chip"><i class="fa-solid fa-paperclip mr-1"></i>' + M.escapeHtml(r.proofFileName) + '</span>'
@@ -356,6 +356,9 @@
             '<div class="review-grid">' +
               item('Name', M.escapeHtml(r.officerName)) +
               item('Position', M.escapeHtml(r.officerPosition)) +
+              item('Program', r.officerProgram ? M.escapeHtml(r.officerProgram)
+                : (r.officerProgram === '' ? 'None (adviser or faculty member)' : null)) +
+              item('College', r.officerCollege ? M.escapeHtml(r.officerCollege) : null) +
               item('Email', M.escapeHtml(r.email)) +
               item('Contact', M.escapeHtml(r.contact)) +
               item('Requested username', '<code>' + M.escapeHtml(r.username) + '</code>') +

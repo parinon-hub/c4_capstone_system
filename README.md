@@ -267,7 +267,9 @@ An organization gets an account in one of two ways, and SASO controls both:
 1. **Request an account.** From the sign-in screen, a newly recognized
    organization fills in its details (organization, adviser, requesting
    officer, chosen username and password) and attaches its certificate of
-   recognition. It receives a reference number (`AR-2026-0004`) and can check
+   recognition. College and the officer's program are chosen from CSPC's list,
+   with "Others (please specify)" for anything not listed; on approval the
+   program and college go to the officer's profile. It receives a reference number (`AR-2026-0004`) and can check
    the request's status on the same page. Signing in before approval says the
    request is still pending; after a decline, it shows SASO's reason.
 2. **Add organization.** SASO creates the organization and its account

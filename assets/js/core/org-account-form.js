@@ -47,6 +47,73 @@ SASO.orgAccountForm = (function () {
       }).join('') + '</select>';
   }
 
+  /* A dropdown whose last choice is "Others (please specify)", which opens a
+     text box for anything not on the list. groups: [{label, items:[...]}];
+     a group without a label is listed without a heading. */
+  var OTHER = '__other';
+  var NONE = '__none';
+
+  function selectWithOther(id, groups, placeholder, otherPlaceholder) {
+    function opts(items) {
+      return items.map(function (o) {
+        var v = typeof o === 'string' ? o : o.value;
+        var l = typeof o === 'string' ? o : o.label;
+        return '<option value="' + esc(v) + '">' + esc(l) + '</option>';
+      }).join('');
+    }
+    return '<select class="form-control form-control-sm" id="' + id + '" data-other-select>' +
+        '<option value="">' + esc(placeholder) + '</option>' +
+        groups.map(function (g) {
+          return g.label ? '<optgroup label="' + esc(g.label) + '">' + opts(g.items) + '</optgroup>' : opts(g.items);
+        }).join('') +
+        '<option value="' + OTHER + '">Others (please specify)</option>' +
+      '</select>' +
+      '<input type="text" class="form-control form-control-sm mt-2 d-none" id="' + id + 'Other" ' +
+        'placeholder="' + esc(otherPlaceholder) + '">';
+  }
+
+  /* The typed value when "Others" is chosen, otherwise the chosen one. */
+  function otherValue(root, id) {
+    var sel = root.querySelector('#' + id);
+    if (!sel) { return ''; }
+    if (sel.value === OTHER) { return String(root.querySelector('#' + id + 'Other').value || '').trim(); }
+    return sel.value === NONE ? '' : sel.value;
+  }
+
+  /* Selects value, or "Others" with value typed in when it is not listed. */
+  function setOtherValue(root, id, value) {
+    var sel = root.querySelector('#' + id);
+    if (!sel || value == null || value === '') { return; }
+    var listed = Array.prototype.some.call(sel.options, function (o) { return o.value === value; });
+    sel.value = listed ? value : OTHER;
+    if (!listed) { root.querySelector('#' + id + 'Other').value = value; }
+    syncOther(root, sel);
+  }
+
+  function syncOther(root, sel) {
+    var box = root.querySelector('#' + sel.id + 'Other');
+    if (!box) { return; }
+    var on = sel.value === OTHER;
+    box.classList.toggle('d-none', !on);
+    if (!on) { box.classList.remove('is-invalid'); }
+  }
+
+  var INSTITUTION_WIDE = 'Institution-wide';
+
+  function collegeGroups() {
+    return [{ items: M.collegeNames().concat([{ value: INSTITUTION_WIDE, label: 'Institution-wide (all colleges)' }]) }];
+  }
+
+  function programGroups() {
+    return C.CSPC_COLLEGES.map(function (c) { return { label: c.name, items: c.programs }; })
+      .concat([{ items: [{ value: NONE, label: 'None (adviser or faculty member)' }] }]);
+  }
+
+  /* The officer's college: the program's college, else the organization's. */
+  function officerCollege(program, orgCollege) {
+    return M.collegeOfProgram(program) || (orgCollege && orgCollege !== INSTITUTION_WIDE ? orgCollege : '');
+  }
+
   function section(title, icon) {
     return '<h6 class="oa-section"><i class="fa-solid ' + icon + ' mr-2"></i>' + title + '</h6>';
   }
@@ -62,10 +129,6 @@ SASO.orgAccountForm = (function () {
   function html(mode, opts) {
     var isRequest = mode === 'request';
     var keepPassword = mode === 'edit' && !(opts && opts.newAccount);
-    var colleges = [];
-    M.organizations().forEach(function (o) {
-      if (o.college && colleges.indexOf(o.college) === -1) { colleges.push(o.college); }
-    });
 
     var entities = Object.keys(C.ENTITY).map(function (k) {
       return { value: C.ENTITY[k], label: C.LABEL[C.ENTITY[k]] };
@@ -83,12 +146,11 @@ SASO.orgAccountForm = (function () {
       '<div class="form-row">' +
         group('oaName', 'Full name of the organization',
           input('oaName', 'text', 'e.g. Society of Hospitality Management Students'), 12, true) +
-        group('oaAcronym', 'Acronym', input('oaAcronym', 'text', 'e.g. SHMS'), 4, true) +
+        group('oaAcronym', 'Organization acronym', input('oaAcronym', 'text', 'e.g. SHMS'), 4, true,
+          'The organization’s short name.') +
         group('oaEntity', 'Type', select('oaEntity', entities, C.ENTITY.STUDENT_ORG), 4, true) +
-        group('oaCollege', 'College / unit',
-          input('oaCollege', 'text', 'e.g. College of Arts and Sciences', ' list="oaCollegeList"') +
-          '<datalist id="oaCollegeList">' + colleges.map(function (c) {
-            return '<option value="' + esc(c) + '">'; }).join('') + '</datalist>', 4, true) +
+        group('oaCollege', 'College',
+          selectWithOther('oaCollege', collegeGroups(), 'Select the college', 'Type the college or unit'), 4, true) +
         group('oaAdviser', 'Organization adviser', input('oaAdviser', 'text', 'e.g. Prof. A. Reyes'), 12, true) +
       '</div>' +
 
@@ -104,7 +166,12 @@ SASO.orgAccountForm = (function () {
       section(isRequest ? 'Officer requesting the account' : 'Officer who will hold the account', 'fa-user') +
       '<div class="form-row">' +
         group('oaOfficer', 'Full name', input('oaOfficer', 'text', 'e.g. J. Dela Cruz'), 6, true) +
-        group('oaPosition', 'Position', input('oaPosition', 'text', 'e.g. President'), 6, true) +
+        group('oaPosition', 'Position', input('oaPosition', 'text', 'e.g. President', ' list="oaPositions"') +
+          '<datalist id="oaPositions">' + C.ORG_ACCOUNT_POSITIONS.map(function (p) {
+            return '<option value="' + esc(p) + '">'; }).join('') + '</datalist>', 6, true) +
+        group('oaProgram', 'Program',
+          selectWithOther('oaProgram', programGroups(), 'Select your program', 'Type the full name of the program'),
+          12, mode !== 'edit', 'Your college is filled in from the program you choose.') +
         group('oaEmail', 'Email address', input('oaEmail', 'email', 'name@example.com'), 6, mode !== 'edit') +
         group('oaContact', 'Contact number', input('oaContact', 'tel', 'e.g. 0917 000 0000'), 6, false) +
       '</div>' +
@@ -153,16 +220,20 @@ SASO.orgAccountForm = (function () {
       name: val(root, 'oaName'),
       acronym: val(root, 'oaAcronym'),
       entityType: val(root, 'oaEntity'),
-      college: val(root, 'oaCollege'),
+      college: otherValue(root, 'oaCollege'),
       adviser: val(root, 'oaAdviser'),
       officerName: val(root, 'oaOfficer'),
       officerPosition: val(root, 'oaPosition'),
+      officerProgram: otherValue(root, 'oaProgram'),
       email: val(root, 'oaEmail'),
       contact: val(root, 'oaContact'),
       username: val(root, 'oaUsername'),
       password: root.querySelector('#oaPassword').value,
       password2: root.querySelector('#oaPassword2').value
     };
+    v.officerCollege = officerCollege(v.officerProgram, v.college);
+    v.collegeChoice = (root.querySelector('#oaCollege') || {}).value || '';
+    v.programChoice = (root.querySelector('#oaProgram') || {}).value || '';
     if (mode === 'request') {
       v.proofFileName = proof && proof.files && proof.files[0] ? proof.files[0].name : '';
       v.notes = val(root, 'oaNotes');
@@ -187,10 +258,15 @@ SASO.orgAccountForm = (function () {
     if (!v.name) { e.oaName = 'Enter the organization’s full name.'; }
     if (!v.acronym) { e.oaAcronym = 'Enter the acronym.'; }
     else if (!(org && same(v.acronym, org.acronym)) && M.acronymTaken(v.acronym)) { e.oaAcronym = 'An organization with this acronym already exists or has a pending request.'; }
-    if (!v.college) { e.oaCollege = 'Enter the college or unit.'; }
+    if (!v.college) {
+      if (v.collegeChoice === OTHER) { e.oaCollegeOther = 'Type the college or unit.'; }
+      else { e.oaCollege = 'Choose the college.'; }
+    }
     if (!v.adviser) { e.oaAdviser = 'Enter the adviser’s name.'; }
     if (!v.officerName) { e.oaOfficer = 'Enter the officer’s name.'; }
     if (!v.officerPosition) { e.oaPosition = 'Enter the officer’s position.'; }
+    if (v.programChoice === OTHER && !v.officerProgram) { e.oaProgramOther = 'Type the full name of the program.'; }
+    else if (!v.programChoice && mode !== 'edit') { e.oaProgram = 'Choose your program, or None if you are the adviser.'; }
     /* Some older accounts have no email on file, so editing them does not demand one. */
     if (!v.email) { if (mode !== 'edit') { e.oaEmail = 'Enter an email address.'; } }
     else if (!EMAIL_RE.test(v.email)) { e.oaEmail = 'Enter a valid email address.'; }
@@ -211,6 +287,12 @@ SASO.orgAccountForm = (function () {
     return e;
   }
 
+  /* An "Others" text box shares its dropdown's message line. */
+  function errorSlot(root, id) {
+    return root.querySelector('[data-error-for="' + id + '"]') ||
+      root.querySelector('[data-error-for="' + id.replace(/Other$/, '') + '"]');
+  }
+
   /* Marks fields; returns true when there are no errors. */
   function showErrors(root, errors) {
     root.querySelectorAll('.is-invalid').forEach(function (el) { el.classList.remove('is-invalid'); });
@@ -218,7 +300,7 @@ SASO.orgAccountForm = (function () {
     var first = null;
     Object.keys(errors).forEach(function (id) {
       var el = root.querySelector('#' + id);
-      var msg = root.querySelector('[data-error-for="' + id + '"]');
+      var msg = errorSlot(root, id);
       if (el) { el.classList.add('is-invalid'); if (!first) { first = el; } }
       if (msg) { msg.textContent = errors[id]; msg.style.display = 'block'; }
     });
@@ -232,9 +314,16 @@ SASO.orgAccountForm = (function () {
       var el = e.target;
       if (!el.classList || !el.classList.contains('is-invalid')) { return; }
       el.classList.remove('is-invalid');
-      var msg = root.querySelector('[data-error-for="' + el.id + '"]');
+      var msg = errorSlot(root, el.id);
       if (msg) { msg.textContent = ''; msg.style.display = ''; }
     }
+    /* Show or hide the "Others" text box as the choice changes. */
+    root.addEventListener('change', function (e) {
+      if (e.target.hasAttribute && e.target.hasAttribute('data-other-select')) {
+        syncOther(root, e.target);
+        if (e.target.value === OTHER) { root.querySelector('#' + e.target.id + 'Other').focus(); }
+      }
+    });
     root.addEventListener('input', clear);
     root.addEventListener('change', clear);
   }
@@ -354,7 +443,7 @@ SASO.orgAccountForm = (function () {
     fill(root, 'oaName', org.name);
     fill(root, 'oaAcronym', org.acronym);
     fill(root, 'oaEntity', org.entityType);
-    fill(root, 'oaCollege', org.college);
+    setOtherValue(root, 'oaCollege', org.college);
     fill(root, 'oaAdviser', org.adviser);
     fill(root, 'oaLevel', org.accreditationLevel);
     if (org.accreditationType !== C.ACCREDITATION_TYPE.NOT_APPLICABLE) { fill(root, 'oaType', org.accreditationType); }
@@ -362,6 +451,8 @@ SASO.orgAccountForm = (function () {
     if (user) {
       fill(root, 'oaOfficer', user.name);
       fill(root, 'oaPosition', officerPosition(user, org));
+      if (user.program) { setOtherValue(root, 'oaProgram', user.program); }
+      else if (M.positionTitle(user) === 'Adviser') { setOtherValue(root, 'oaProgram', NONE); }
       fill(root, 'oaEmail', user.email);
       fill(root, 'oaContact', user.contact);
       fill(root, 'oaUsername', user.username);

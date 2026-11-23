@@ -594,7 +594,7 @@ SASO.config = (function () {
   /* v6: several accounts per organization and three academic years of records. */
   /* v7: personal accounts with no default limit, profiles, SASO form fields
      and two past school years from SASO's lists of student activities. */
-  var STORAGE_KEY = 'cspc_saso_prototype_v8';
+  var STORAGE_KEY = 'cspc_saso_prototype_v9';
   var SESSION_KEY = 'cspc_saso_session_v3';
 
   return {
