@@ -598,7 +598,7 @@
         '<div class="card-body">' +
           '<div class="report-doc" id="reportDoc">' +
             '<div class="report-letterhead">' +
-              '<img src="../../assets/img/cspc-seal-form.png" class="letterhead-logo" alt="CSPC seal">' +
+              '<img src="../../assets/img/cspc-seal.png" class="letterhead-logo" alt="CSPC seal">' +
               '<div class="letterhead-text">' +
                 '<div class="report-institution">Republic of the Philippines</div>' +
                 '<div class="report-college">CAMARINES SUR POLYTECHNIC COLLEGES</div>' +
