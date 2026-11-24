@@ -61,11 +61,14 @@
 
   function letterhead(title, subtitle) {
     return '<div class="report-letterhead">' +
-        '<img src="../../assets/img/saso-logo-print.jpg" class="letterhead-seal" alt="">' +
-        '<div class="report-institution">Republic of the Philippines</div>' +
-        '<div class="report-college">CAMARINES SUR POLYTECHNIC COLLEGES</div>' +
-        '<div class="report-institution">Nabua, Camarines Sur</div>' +
-        '<div class="report-office">STUDENT AFFAIRS AND SERVICES OFFICE</div>' +
+        '<img src="../../assets/img/cspc-seal-form.png" class="letterhead-logo" alt="CSPC seal">' +
+        '<div class="letterhead-text">' +
+          '<div class="report-institution">Republic of the Philippines</div>' +
+          '<div class="report-college">CAMARINES SUR POLYTECHNIC COLLEGES</div>' +
+          '<div class="report-institution">Nabua, Camarines Sur</div>' +
+          '<div class="report-office">STUDENT AFFAIRS AND SERVICES OFFICE</div>' +
+        '</div>' +
+        '<img src="../../assets/img/saso-logo-print.jpg" class="letterhead-logo" alt="SASO logo">' +
       '</div>' +
       '<h2 class="report-title">' + title + '</h2>' +
       (subtitle ? '<div class="report-period">' + subtitle + '</div>' : '');

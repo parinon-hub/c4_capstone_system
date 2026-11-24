@@ -507,6 +507,10 @@
   /* ---- preview ---------------------------------------------------------------------- */
 
   function periodLabel() {
+    /* A whole academic year reads "AY 2023 - 2024", as on the printed forms. */
+    if (state.period === 'ay' && state.ay) {
+      return 'AY ' + String(state.ay).replace('-', ' - ');
+    }
     if (state.from && state.to) {
       return M.formatDate(state.from) + ' to ' + M.formatDate(state.to);
     }
@@ -594,19 +598,23 @@
         '<div class="card-body">' +
           '<div class="report-doc" id="reportDoc">' +
             '<div class="report-letterhead">' +
-        '<img src="../../assets/img/saso-logo-print.jpg" class="letterhead-seal" alt="">' +
-              '<div class="report-institution">Republic of the Philippines</div>' +
-              '<div class="report-college">CAMARINES SUR POLYTECHNIC COLLEGES</div>' +
-              '<div class="report-institution">Nabua, Camarines Sur</div>' +
-              '<div class="report-office">STUDENT AFFAIRS AND SERVICES OFFICE</div>' +
+              '<img src="../../assets/img/cspc-seal-form.png" class="letterhead-logo" alt="CSPC seal">' +
+              '<div class="letterhead-text">' +
+                '<div class="report-institution">Republic of the Philippines</div>' +
+                '<div class="report-college">CAMARINES SUR POLYTECHNIC COLLEGES</div>' +
+                '<div class="report-institution">Nabua, Camarines Sur</div>' +
+                '<div class="report-office">STUDENT AFFAIRS AND SERVICES OFFICE</div>' +
+              '</div>' +
+              '<img src="../../assets/img/saso-logo-print.jpg" class="letterhead-logo" alt="SASO logo">' +
             '</div>' +
             '<h2 class="report-title">' + def.label.toUpperCase() + '</h2>' +
             '<div class="report-period">' + periodLabel() + '</div>' +
-            '<div class="report-scope">' + M.escapeHtml(scopeLine()) + ' · ' +
-              data.rows.length + ' record' + (data.rows.length === 1 ? '' : 's') + '</div>' +
+            '<div class="report-scope">' + M.escapeHtml(scopeLine()) + '</div>' +
             /* Wide reports scroll sideways on small screens, with the
                scrollbar on top (layout.js); print is unaffected. */
             '<div class="report-scroll top-scroll">' + body + '</div>' +
+            '<div class="report-count">' + data.rows.length + ' record' +
+              (data.rows.length === 1 ? '' : 's') + '</div>' +
             '<div class="report-signatures">' +
               '<div><span class="cell-sub">Prepared by</span>' +
                 '<div class="sig-name">' + M.escapeHtml(session.name) + '</div>' +

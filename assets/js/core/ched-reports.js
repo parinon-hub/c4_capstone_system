@@ -523,11 +523,14 @@ SASO.ched = (function () {
   function render(rep, idx) {
     if (rep.kind === 'sheets') { return renderSheet(rep, idx); }
     return '<div class="report-letterhead">' +
-        '<img src="' + (window.SASO_BASE || '../../') + 'assets/img/saso-logo-print.jpg" class="letterhead-seal" alt="">' +
-        '<div class="report-institution">Republic of the Philippines</div>' +
-        '<div class="report-college">CAMARINES SUR POLYTECHNIC COLLEGES</div>' +
-        '<div class="report-institution">Nabua, Camarines Sur</div>' +
-        '<div class="report-office">STUDENT AFFAIRS AND SERVICES OFFICE</div>' +
+        '<img src="' + (window.SASO_BASE || '../../') + 'assets/img/cspc-seal-form.png" class="letterhead-logo" alt="CSPC seal">' +
+        '<div class="letterhead-text">' +
+          '<div class="report-institution">Republic of the Philippines</div>' +
+          '<div class="report-college">CAMARINES SUR POLYTECHNIC COLLEGES</div>' +
+          '<div class="report-institution">Nabua, Camarines Sur</div>' +
+          '<div class="report-office">STUDENT AFFAIRS AND SERVICES OFFICE</div>' +
+        '</div>' +
+        '<img src="' + (window.SASO_BASE || '../../') + 'assets/img/saso-logo-print.jpg" class="letterhead-logo" alt="SASO logo">' +
       '</div>' +
       '<h2 class="report-title">' + esc(rep.title) + '</h2>' +
       '<div class="report-period">' + esc(rep.subtitle) + '</div>' +
