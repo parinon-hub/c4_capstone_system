@@ -97,7 +97,7 @@ SASO.sasoDocx = (function () {
 
   function sealRun(w) {
     if (!SASO.CSPC_SEAL) { return R(''); }
-    return new (D().ImageRun)({ data: b64ToBytes(SASO.CSPC_SEAL), transformation: { width: w || 56, height: Math.round((w || 56) * 0.885) } });
+    return new (D().ImageRun)({ data: b64ToBytes(SASO.CSPC_SEAL), transformation: { width: w || 56, height: w || 56 } });
   }
 
   /* CSPC letterhead with the form code on the right of the blue rule. */
