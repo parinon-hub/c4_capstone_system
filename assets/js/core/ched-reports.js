@@ -134,7 +134,7 @@ SASO.ched = (function () {
     return {
       key: 'annual',
       title: 'ANNUAL ACCOMPLISHMENT REPORT',
-      subtitle: 'Academic Year ' + ay,
+      subtitle: ayText(ay),
       reference: C.CHED_REFERENCE.SAS + ' (accreditation, monitoring and evaluation of student ' +
         'organizations); ' + C.CHED_REFERENCE.OFF_CAMPUS + ' for off-campus activities',
       fileName: 'Annual_Accomplishment_Report_' + org.acronym + '_AY' + ay,
@@ -207,7 +207,7 @@ SASO.ched = (function () {
     return {
       key: 'institutional',
       title: 'REPORT ON STUDENT ORGANIZATIONS AND ACTIVITIES',
-      subtitle: 'Academic Year ' + ay,
+      subtitle: ayText(ay),
       reference: C.CHED_REFERENCE.SAS + ', Student Development Services: Student Organizations ' +
         'and Activities; ' + C.CHED_REFERENCE.OFF_CAMPUS + ' for off-campus activities',
       fileName: 'Report_on_Student_Organizations_and_Activities_AY' + ay,
@@ -302,6 +302,9 @@ SASO.ched = (function () {
       participants(a) || ''].concat(reportMarks(a)).concat([budget, liquidationCell(a)]);
   }
 
+  /* '2023-2024' -> 'AY 2023 - 2024', as on the printed SASO reports. */
+  function ayText(ay) { return 'AY ' + String(ay).replace('-', ' - '); }
+
   function halfRange(ay, half) {
     var r = M.academicYearRange(ay);
     var startYear = Number(String(ay).slice(0, 4));
@@ -341,8 +344,8 @@ SASO.ched = (function () {
     return {
       key: 'list',
       kind: 'sheets',
-      title: 'LIST OF STUDENT ACTIVITIES ' + range.year,
-      subtitle: range.label,
+      title: 'LIST OF STUDENT ACTIVITIES',
+      subtitle: ayText(ay) + (half === 'first' || half === 'second' ? ' ' + range.label : ''),
       lines: ['Republic of the Philippines', 'CAMARINES SUR POLYTECHNIC COLLEGES', 'Nabua, Camarines Sur',
         'STUDENT AFFAIRS AND SERVICES OFFICE', 'Tel no.: (054) 288-4421 to 23 (loc.122)'],
       scope: org ? org.name + ' (' + org.acronym + ')' : 'All student organizations',
@@ -393,7 +396,7 @@ SASO.ched = (function () {
     return {
       key: 'accreditation',
       title: 'ACCREDITATION AND LEVELING RECORD',
-      subtitle: 'Academic Year ' + ay,
+      subtitle: ayText(ay),
       reference: C.CHED_REFERENCE.SAS + ', accreditation, monitoring and evaluation of student organizations ' +
         '(documentary requirements for accreditation and leveling); ' + C.CHED_REFERENCE.OFF_CAMPUS,
       fileName: 'Accreditation_and_Leveling_' + org.acronym + '_AY' + ay,
@@ -489,6 +492,21 @@ SASO.ched = (function () {
       '</tbody></table>';
   }
 
+  /* CSPC seal, institution lines and SASO logo, shared by every report. */
+  function letterhead() {
+    var img = (window.SASO_BASE || '../../') + 'assets/img/';
+    return '<div class="report-letterhead">' +
+        '<img src="' + img + 'cspc-seal.png" class="letterhead-logo" alt="CSPC seal">' +
+        '<div class="letterhead-text">' +
+          '<div class="report-institution">Republic of the Philippines</div>' +
+          '<div class="report-college">CAMARINES SUR POLYTECHNIC COLLEGES</div>' +
+          '<div class="report-institution">Nabua, Camarines Sur</div>' +
+          '<div class="report-office">STUDENT AFFAIRS AND SERVICES OFFICE</div>' +
+        '</div>' +
+        '<img src="' + img + 'saso-logo-print.jpg" class="letterhead-logo" alt="SASO logo">' +
+      '</div>';
+  }
+
   function renderSheet(rep, idx) {
     var sh = rep.sheets[idx || 0];
     var body = !sh.count
@@ -504,9 +522,7 @@ SASO.ched = (function () {
                 }).join('') + '</tr>';
               }).join('');
           }).join('') + '</tbody></table>';
-    return '<div class="sal-head">' + rep.lines.map(function (l, i) {
-        return '<div class="' + (i === 1 || i === 3 ? 'sal-strong' : '') + '">' + esc(l) + '</div>';
-      }).join('') + '</div>' +
+    return letterhead() +
       '<h2 class="report-title">' + esc(rep.title) + '</h2>' +
       '<div class="report-period">' + esc(rep.subtitle) + '</div>' +
       '<div class="report-scope">' + esc(rep.scope) + ' · Sheet: ' + esc(sh.name) + ' · ' + sh.count +
@@ -522,16 +538,7 @@ SASO.ched = (function () {
 
   function render(rep, idx) {
     if (rep.kind === 'sheets') { return renderSheet(rep, idx); }
-    return '<div class="report-letterhead">' +
-        '<img src="' + (window.SASO_BASE || '../../') + 'assets/img/cspc-seal.png" class="letterhead-logo" alt="CSPC seal">' +
-        '<div class="letterhead-text">' +
-          '<div class="report-institution">Republic of the Philippines</div>' +
-          '<div class="report-college">CAMARINES SUR POLYTECHNIC COLLEGES</div>' +
-          '<div class="report-institution">Nabua, Camarines Sur</div>' +
-          '<div class="report-office">STUDENT AFFAIRS AND SERVICES OFFICE</div>' +
-        '</div>' +
-        '<img src="' + (window.SASO_BASE || '../../') + 'assets/img/saso-logo-print.jpg" class="letterhead-logo" alt="SASO logo">' +
-      '</div>' +
+    return letterhead() +
       '<h2 class="report-title">' + esc(rep.title) + '</h2>' +
       '<div class="report-period">' + esc(rep.subtitle) + '</div>' +
       '<div class="report-scope">Format basis: ' + esc(rep.reference) + '</div>' +

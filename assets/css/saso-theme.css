@@ -1772,8 +1772,6 @@ a.notif-message:hover { color: var(--cspc-navy); text-decoration: underline; }
 
 /* List of Student Activities: SASO's workbook header and wide table. */
 .report-doc.doc-sheet.is-wide { max-width: none; }
-.sal-head { text-align: center; font-size: 0.8125rem; line-height: 1.35; margin-bottom: 0.5rem; }
-.sal-head .sal-strong { font-weight: 700; }
 .sal-table th { white-space: normal; vertical-align: middle; text-align: center; }
 .sal-table td { font-size: 0.75rem; }
 .cell-sub.cell-submitter { white-space: nowrap; }

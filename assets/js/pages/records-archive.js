@@ -228,7 +228,7 @@
       : state.report === 'list' ? SASO.ched.studentActivities(state.ay, 'all', state.org || null)
       : SASO.ched.institutional(state.ay);
     var title = rep.title.charAt(0) + rep.title.slice(1).toLowerCase();
-    SASO.ched.mount(host, rep, { title: title });
+    SASO.ched.mount(host, rep, { title: title + ' (' + rep.subtitle + ')' });
     if (scroll) { host.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   }
 
