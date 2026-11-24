@@ -1213,39 +1213,54 @@ a.notif-message:hover { color: var(--cspc-navy); text-decoration: underline; }
   padding: 0.5rem;
 }
 
-.report-letterhead { text-align: center; line-height: 1.35; margin-bottom: 1.25rem; }
+.report-letterhead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
 
-.letterhead-seal {
-  width: 4.5rem;
-  height: 4.5rem;
+/* CSPC seal on the left, SASO logo on the right. */
+.letterhead-logo {
+  width: 5.5rem;
+  height: 5.5rem;
   object-fit: contain;
-  margin-bottom: 0.35rem;
-}
-.report-institution { font-size: 0.8125rem; }
-.report-college { font-size: 1rem; font-weight: 700; letter-spacing: 0.02em; }
-
-.report-office {
-  font-size: 0.875rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  margin-top: 0.4rem;
-  padding-top: 0.4rem;
-  border-top: 1px solid #000;
-  display: inline-block;
-  padding-left: 2rem;
-  padding-right: 2rem;
+  flex: 0 0 auto;
 }
 
+/* The institution lines with the rule underneath, as on the SASO forms. */
+.letterhead-text {
+  text-align: center;
+  line-height: 1.3;
+  padding: 0 1.75rem 0.85rem;
+  border-bottom: 1px solid #000;
+}
+.report-institution { font-size: 0.9375rem; }
+.report-college { font-size: 1.125rem; font-weight: 700; letter-spacing: 0.02em; }
+.report-office { font-size: 1rem; font-weight: 700; letter-spacing: 0.01em; }
+
+/* The title is the one sans-serif line, like the sample report. */
 .report-title {
   text-align: center;
-  font-size: 1.0625rem;
+  font-family: "Source Sans Pro", "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 1.375rem;
   font-weight: 700;
-  letter-spacing: 0.02em;
-  margin: 0 0 0.2rem;
+  color: #212529;
+  letter-spacing: 0.01em;
+  margin: 0 0 0.15rem;
 }
 
-.report-period { text-align: center; font-size: 0.875rem; margin-bottom: 0.15rem; }
-.report-scope { text-align: center; font-size: 0.75rem; color: #444; margin-bottom: 1rem; }
+.report-period { text-align: center; font-size: 1rem; margin-bottom: 0.15rem; }
+.report-scope { text-align: center; font-size: 0.875rem; color: #333; margin-bottom: 1rem; }
+.report-count { text-align: right; font-size: 0.75rem; color: #444; margin-top: 0.35rem; }
+
+@media (max-width: 575.98px) {
+  .letterhead-logo { width: 3.25rem; height: 3.25rem; }
+  .letterhead-text { padding: 0 0.25rem 0.6rem; }
+  .report-college { font-size: 0.9375rem; }
+  .report-title { font-size: 1.125rem; }
+}
 
 .report-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
 
@@ -1513,7 +1528,7 @@ a.notif-message:hover { color: var(--cspc-navy); text-decoration: underline; }
   .report-table tr { page-break-inside: avoid; }
   .doc-table tr, .sig-grid { page-break-inside: avoid; }
   .doc-sheet { max-width: none; }
-  .letterhead-seal { width: 22mm; height: 22mm; }
+  .letterhead-logo { width: 24mm; height: 24mm; }
   @page { margin: 12mm; }
 }
 
